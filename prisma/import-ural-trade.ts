@@ -3,7 +3,8 @@
  *
  * npm run db:import
  * npm run db:import -- --dry-run          # только парсинг, без записи в БД
- * npm run db:import -- --clear-demo       # удалить демо-данные перед импортом
+ * npm run db:import -- --reset            # очистить каталог и импортировать заново
+ * npm run db:import -- --clear-demo       # то же, что --reset
  * npm run db:import -- --limit-categories 3 --limit-products 20
  */
 
@@ -11,12 +12,13 @@ import { PrismaClient, FieldType } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
+const IMPORT_VERSION = "3";
 const BASE_URL = "https://ural-trade96.ru";
 const DELAY_MS = 350;
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const clearDemo = args.includes("--clear-demo");
+const resetCatalog = args.includes("--reset") || args.includes("--clear-demo");
 const limitCategories = readFlagNumber("--limit-categories");
 const limitProducts = readFlagNumber("--limit-products");
 
@@ -163,10 +165,27 @@ function registerProductLink(href: string, productUrls: Set<string>) {
 }
 
 function buildProductSlug(storePath: string, sku: string, name: string) {
-  const base = isProductStorePath(storePath)
-    ? pathToSlug(storePath)
-    : slugify(name) || "product";
-  return `${base}-${sku}`;
+  if (isProductStorePath(storePath)) {
+    return `${pathToSlug(storePath)}-${sku}`;
+  }
+  const nameSlug = slugify(name);
+  return nameSlug ? `${nameSlug}-${sku}` : `p-${sku}`;
+}
+
+async function resolveUniqueProductSlug(
+  storePath: string,
+  sku: string,
+  name: string,
+  excludeProductId?: string,
+) {
+  const preferred = buildProductSlug(storePath, sku, name);
+  const conflict = await prisma.product.findFirst({
+    where: {
+      slug: preferred,
+      ...(excludeProductId ? { NOT: { id: excludeProductId } } : {}),
+    },
+  });
+  return conflict ? `p-${sku}` : preferred;
 }
 
 function pathToSlug(path: string) {
@@ -400,15 +419,26 @@ async function ensureHydraulicsTemplate() {
   return { template, specsField };
 }
 
-async function clearDemoCatalog() {
+async function resetCatalogData() {
+  console.log("Очистка каталога (товары, категории, бренды, редиректы)...");
   await prisma.productRelation.deleteMany();
   await prisma.productFieldValue.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.filterGroup.deleteMany({ where: { categoryId: { not: null } } });
   await prisma.category.deleteMany();
   await prisma.brand.deleteMany();
-  await prisma.redirect.deleteMany({ where: { fromPath: { startsWith: "/store/" } } });
+  await prisma.redirect.deleteMany({
+    where: {
+      OR: [
+        { fromPath: { startsWith: "/store/" } },
+        { toPath: { startsWith: "/catalog/" } },
+        { toPath: { startsWith: "/product/" } },
+      ],
+    },
+  });
+  console.log("Каталог очищен.");
 }
 
 async function importCategories(categories: CategoryNode[], templateId: string) {
@@ -506,78 +536,33 @@ async function importProduct(
   }
 
   const urlPath = normalizeStorePath(product.url) ?? "";
-  const slug = buildProductSlug(urlPath, product.sku, product.name);
-
   const brandId = product.brand ? await getOrCreateBrand(product.brand, brandCache) : null;
 
   if (dryRun) {
-    console.log(`[product] ${product.sku} ${product.name}`);
+    console.log(`[product] ${product.sku} ${buildProductSlug(urlPath, product.sku, product.name)}`);
     return;
   }
 
-  const record = await prisma.product.upsert({
-    where: { sku: product.sku },
-    update: {
-      name: product.name,
-      slug,
-      price: product.price,
-      shortDescription: product.shortDescription,
-      fullDescription: product.fullDescription,
-      categoryId,
-      brandId,
-      templateId,
-      metaTitle: product.metaTitle ?? undefined,
-      metaDescription: product.metaDescription ?? undefined,
-      h1: product.name,
-    },
-    create: {
-      name: product.name,
-      slug,
-      sku: product.sku,
-      price: product.price,
-      shortDescription: product.shortDescription,
-      fullDescription: product.fullDescription,
-      categoryId,
-      brandId,
-      templateId,
-      metaTitle: product.metaTitle ?? `${product.name} купить — UralTrade`,
-      metaDescription: product.metaDescription ?? `${product.name}: характеристики, фото, цена.`,
-      h1: product.name,
-    },
-  }).catch(async (error: { code?: string }) => {
-    if (error.code !== "P2002") throw error;
-    const fallbackSlug = `p-${product.sku}`;
-    return prisma.product.upsert({
-      where: { sku: product.sku },
-      update: {
-        name: product.name,
-        slug: fallbackSlug,
-        price: product.price,
-        shortDescription: product.shortDescription,
-        fullDescription: product.fullDescription,
-        categoryId,
-        brandId,
-        templateId,
-        metaTitle: product.metaTitle ?? undefined,
-        metaDescription: product.metaDescription ?? undefined,
-        h1: product.name,
-      },
-      create: {
-        name: product.name,
-        slug: fallbackSlug,
-        sku: product.sku,
-        price: product.price,
-        shortDescription: product.shortDescription,
-        fullDescription: product.fullDescription,
-        categoryId,
-        brandId,
-        templateId,
-        metaTitle: product.metaTitle ?? `${product.name} купить — UralTrade`,
-        metaDescription: product.metaDescription ?? `${product.name}: характеристики, фото, цена.`,
-        h1: product.name,
-      },
-    });
-  });
+  const existing = await prisma.product.findUnique({ where: { sku: product.sku } });
+  const slug = await resolveUniqueProductSlug(urlPath, product.sku, product.name, existing?.id);
+
+  const data = {
+    name: product.name,
+    slug,
+    price: product.price,
+    shortDescription: product.shortDescription,
+    fullDescription: product.fullDescription,
+    categoryId,
+    brandId,
+    templateId,
+    metaTitle: product.metaTitle ?? `${product.name} купить — UralTrade`,
+    metaDescription: product.metaDescription ?? `${product.name}: характеристики, фото, цена.`,
+    h1: product.name,
+  };
+
+  const record = existing
+    ? await prisma.product.update({ where: { sku: product.sku }, data })
+    : await prisma.product.create({ data: { ...data, sku: product.sku } });
 
   await prisma.productImage.deleteMany({ where: { productId: record.id } });
   if (product.images.length > 0) {
@@ -666,12 +651,11 @@ async function discoverCatalog(initialCategories: CategoryNode[]) {
 }
 
 async function main() {
-  console.log("Импорт каталога с ural-trade96.ru");
-  console.log(`dryRun=${dryRun}, clearDemo=${clearDemo}`);
+  console.log(`Импорт каталога с ural-trade96.ru (v${IMPORT_VERSION})`);
+  console.log(`dryRun=${dryRun}, resetCatalog=${resetCatalog}`);
 
-  if (clearDemo && !dryRun) {
-    console.log("Очистка демо-каталога...");
-    await clearDemoCatalog();
+  if (resetCatalog && !dryRun) {
+    await resetCatalogData();
   }
 
   console.log("Загрузка sitemap...");
@@ -694,7 +678,9 @@ async function main() {
 
   const categoryPathToId = await importCategories(discovered.categories, templateId);
 
-  const productList = limitProducts ? discovered.productUrls.slice(0, limitProducts) : discovered.productUrls;
+  const productList = (limitProducts ? discovered.productUrls.slice(0, limitProducts) : discovered.productUrls).sort(
+    (a, b) => Number(a.includes("?pos=")) - Number(b.includes("?pos=")),
+  );
   console.log(`Импорт ${productList.length} товаров...`);
 
   const brandCache = new Map<string, string>();

@@ -12,6 +12,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:import": "tsx prisma/import-ural-trade.ts",
+    "db:import:reset": "tsx prisma/import-ural-trade.ts --reset",
     "db:studio": "prisma studio",
     "compose:prod": "docker compose -f docker-compose.prod.yml",
     "deploy:up": "docker compose -f docker-compose.prod.yml up -d --build",

@@ -59,8 +59,11 @@ docker compose -f docker-compose.prod.yml exec app npm run db:seed
 Скрипт загружает категории, подкатегории, товары, фото, характеристики и создаёт редиректы со старых URL.
 
 ```bash
-# Полный импорт (≈80 категорий, ≈700 товаров, ~15–25 мин)
-docker compose -f docker-compose.prod.yml exec app npm run db:import -- --clear-demo
+# Полный сброс каталога и импорт (≈80 категорий, ≈700 товаров, ~15–25 мин)
+docker compose -f docker-compose.prod.yml exec app npm run db:import:reset
+
+# или явно
+docker compose -f docker-compose.prod.yml exec app npm run db:import -- --reset
 
 # Тестовый прогон без записи в БД
 docker compose -f docker-compose.prod.yml exec app npm run db:import -- --dry-run --limit-products 5
@@ -68,7 +71,7 @@ docker compose -f docker-compose.prod.yml exec app npm run db:import -- --dry-ru
 
 Флаги:
 
-- `--clear-demo` — удалить демо-каталог (насосы Grundfos/Wilo) перед импортом
+- `--reset` / `--clear-demo` — полностью очистить каталог перед импортом
 - `--dry-run` — только парсинг, без записи
 - `--limit-categories N` / `--limit-products N` — ограничение для отладки
 
