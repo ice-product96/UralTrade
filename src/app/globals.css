@@ -11,6 +11,8 @@
   --border: #dce8ea;
   --surface: #ffffff;
   --muted: #63737a;
+  --font-sans-custom: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --font-mono-custom: "Cascadia Mono", "Consolas", "Liberation Mono", monospace;
 }
 
 @theme inline {
