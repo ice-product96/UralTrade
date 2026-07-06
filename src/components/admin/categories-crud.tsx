@@ -13,6 +13,7 @@ type CategoryRow = {
   name: string;
   slug: string;
   description: string | null;
+  imageUrl: string | null;
   parentId: string | null;
   templateId: string | null;
   h1: string | null;
@@ -71,6 +72,7 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
           <table className="w-full text-left text-sm">
             <thead className="bg-background text-muted">
               <tr>
+                <th className="p-4">Фото</th>
                 <th className="p-4">Название</th>
                 <th className="p-4">Slug</th>
                 <th className="p-4">Родитель</th>
@@ -81,6 +83,14 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
             <tbody>
               {categories.map((category) => (
                 <tr key={category.id} className="border-t border-border hover:bg-background/60">
+                  <td className="p-4">
+                    {category.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={category.imageUrl} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
+                  </td>
                   <td className="p-4 font-semibold text-graphite">{category.name}</td>
                   <td className="p-4 text-muted">{category.slug}</td>
                   <td className="p-4 text-muted">{category.parent?.name ?? "Корень"}</td>
@@ -102,6 +112,7 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
           {current ? <input type="hidden" name="id" value={current.id} /> : null}
           <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
           <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
+          <input name="imageUrl" defaultValue={current?.imageUrl ?? ""} placeholder="URL изображения категории" className="admin-input" />
           <select name="parentId" defaultValue={current?.parentId ?? ""} className="admin-input">
             <option value="">Без родителя</option>
             {categories.filter((c) => c.id !== current?.id).map((category) => (

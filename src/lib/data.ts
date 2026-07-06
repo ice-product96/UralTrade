@@ -48,6 +48,15 @@ export async function getNavigationCategories() {
   });
 }
 
+async function getCategoryTreeIds(categoryId: string): Promise<string[]> {
+  const children = await prisma.category.findMany({
+    where: { parentId: categoryId },
+    select: { id: true },
+  });
+  const nested = await Promise.all(children.map((child) => getCategoryTreeIds(child.id)));
+  return [categoryId, ...nested.flat()];
+}
+
 export async function getHomeData() {
   const [banners, categories, products] = await Promise.all([
     prisma.homeBanner.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
@@ -66,18 +75,32 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
   const category = slug
     ? await prisma.category.findUnique({
         where: { slug },
-        include: { children: true, parent: true, template: true },
+        include: { children: { orderBy: { sortOrder: "asc" } }, parent: true, template: true },
       })
     : null;
+
+  const rootCategories = !slug
+    ? await prisma.category.findMany({
+        where: { parentId: null },
+        include: { children: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { sortOrder: "asc" },
+      })
+    : [];
 
   const page = Math.max(1, asNumber(searchParams?.page, 1));
   const take = 12;
   const skip = (page - 1) * take;
   const q = singleParam(searchParams?.q);
   const brandSlug = singleParam(searchParams?.brand);
+  const showAllProducts = singleParam(searchParams?.all) === "1";
+  const hasFilters =
+    showAllProducts ||
+    Boolean(q || brandSlug || Object.keys(searchParams ?? {}).some((key) => key.startsWith("f_") || (key === "page" && Number(searchParams?.page) > 1)));
+
+  const categoryIds = category ? await getCategoryTreeIds(category.id) : undefined;
 
   const where: Prisma.ProductWhereInput = {
-    ...(category ? { categoryId: category.id } : {}),
+    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
     ...(q
       ? {
           OR: [
@@ -110,6 +133,8 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
 
   return {
     category,
+    rootCategories,
+    hasFilters,
     products,
     total,
     page,

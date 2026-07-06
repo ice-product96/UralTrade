@@ -5,7 +5,18 @@ export const currencyFormatter = new Intl.NumberFormat("ru-RU", {
 });
 
 export function formatPrice(value: number | string | { toString(): string }) {
-  return currencyFormatter.format(Number(value));
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "—";
+  return currencyFormatter.format(amount);
+}
+
+export function hasDiscount(
+  oldPrice: number | string | { toString(): string } | null | undefined,
+  price: number | string | { toString(): string },
+) {
+  const old = Number(oldPrice);
+  const current = Number(price);
+  return Number.isFinite(old) && old > 0 && Number.isFinite(current) && old > current;
 }
 
 export function getSiteUrl() {

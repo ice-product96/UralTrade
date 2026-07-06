@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { SiteLogo } from "@/components/site-logo";
+import { getNavigationCategories } from "@/lib/data";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const categories = await getNavigationCategories();
+
   return (
     <footer className="mt-24 border-t border-border bg-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div>
           <SiteLogo href="/" height={52} />
           <p className="mt-4 max-w-md text-sm leading-6 text-muted">
-            Интернет-магазин инженерного оборудования с точным подбором по артикулам, характеристикам и брендам.
+            Интернет-магазин гидравлического оборудования и комплектующих с подбором по артикулам, характеристикам и брендам.
           </p>
         </div>
         <div className="space-y-3 text-sm">
@@ -16,12 +19,11 @@ export function SiteFooter() {
           <Link href="/catalog" className="block text-muted hover:text-petrol">
             Все товары
           </Link>
-          <Link href="/catalog/nasosy" className="block text-muted hover:text-petrol">
-            Насосы
-          </Link>
-          <Link href="/catalog/pogruzhnye-nasosy" className="block text-muted hover:text-petrol">
-            Погружные насосы
-          </Link>
+          {categories.slice(0, 6).map((category) => (
+            <Link key={category.id} href={`/catalog/${category.slug}`} className="block text-muted hover:text-petrol">
+              {category.name}
+            </Link>
+          ))}
         </div>
         <div className="space-y-3 text-sm">
           <div className="font-bold text-graphite">Покупателям</div>

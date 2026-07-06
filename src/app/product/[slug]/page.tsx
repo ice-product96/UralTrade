@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FileText, ShieldCheck } from "lucide-react";
+import { FileText, ShieldCheck, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
-import { formatPrice, getSiteUrl } from "@/lib/format";
+import { formatPrice, hasDiscount } from "@/lib/format";
 import { absolutizeImportedHtml } from "@/lib/image-url";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
 
@@ -76,7 +76,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <div className="text-4xl font-black text-petrol">{formatPrice(product.price)}</div>
-                  {product.oldPrice ? <div className="text-muted line-through">{formatPrice(product.oldPrice)}</div> : null}
+                  {hasDiscount(product.oldPrice, product.price) ? (
+                    <div className="text-muted line-through">{formatPrice(product.oldPrice!)}</div>
+                  ) : null}
                 </div>
                 <span className="rounded-full bg-lime/10 px-4 py-2 text-sm font-bold text-lime">
                   {product.inStock ? "В наличии" : "Под заказ"}
@@ -91,7 +93,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
                   <ShieldCheck className="h-5 w-5 text-lime" />
-                  <span className="text-sm font-semibold text-graphite">Проверенная карточка и SEO-разметка</span>
+                  <span className="text-sm font-semibold text-graphite">Оригинальные карточки и документация</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
+                  <Truck className="h-5 w-5 text-lime" />
+                  <span className="text-sm font-semibold text-graphite">Доставка до транспортной компании</span>
                 </div>
                 {product.brand ? (
                   <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
@@ -124,21 +130,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
           <aside className="space-y-4">
-            <div className="rounded-[30px] border border-border bg-white p-6">
-              <h2 className="text-xl font-black text-graphite">Документы</h2>
-              {product.fieldValues
-                .filter((value) => value.valueFileUrl)
-                .map((value) => (
-                  <Link key={value.id} href={value.valueFileUrl!} className="mt-4 flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol">
-                    <FileText className="h-5 w-5 text-lime" />
-                    {value.field.name}
-                  </Link>
-                ))}
-            </div>
-            <div className="rounded-[30px] border border-border bg-white p-6">
-              <h2 className="text-xl font-black text-graphite">SEO-ссылка</h2>
-              <p className="mt-3 break-all text-sm text-muted">{new URL(`/product/${product.slug}`, getSiteUrl()).toString()}</p>
-            </div>
+            {product.fieldValues.some((value) => value.valueFileUrl) ? (
+              <div className="rounded-[30px] border border-border bg-white p-6">
+                <h2 className="text-xl font-black text-graphite">Документы</h2>
+                {product.fieldValues
+                  .filter((value) => value.valueFileUrl)
+                  .map((value) => (
+                    <Link key={value.id} href={value.valueFileUrl!} className="mt-4 flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol">
+                      <FileText className="h-5 w-5 text-lime" />
+                      {value.field.name}
+                    </Link>
+                  ))}
+              </div>
+            ) : null}
           </aside>
         </section>
         {related.length ? (

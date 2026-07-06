@@ -1,21 +1,31 @@
 import Link from "next/link";
-import { Menu, ShoppingCart, SlidersHorizontal } from "lucide-react";
+import { Menu, ShoppingCart } from "lucide-react";
+import { CatalogMegaMenu } from "@/components/catalog-mega-menu";
 import { getNavigationCategories } from "@/lib/data";
 import { SearchBox } from "@/components/search-box";
 import { SiteLogo } from "@/components/site-logo";
 
 export async function SiteHeader() {
   const categories = await getNavigationCategories();
+  const navCategories = categories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+    imageUrl: category.imageUrl,
+    children: category.children.map((child) => ({
+      id: child.id,
+      name: child.name,
+      slug: child.slug,
+    })),
+  }));
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 lg:px-8">
         <SiteLogo priority height={46} />
-        <nav className="hidden items-center gap-2 rounded-full bg-white p-1 text-sm font-semibold shadow-sm lg:flex">
-          <Link href="/catalog" className="rounded-full px-4 py-2 text-petrol hover:bg-background">
-            Каталог
-          </Link>
-          {categories.slice(0, 4).map((category) => (
+        <nav className="hidden items-center gap-1 rounded-full bg-white p-1 text-sm font-semibold shadow-sm lg:flex">
+          <CatalogMegaMenu categories={navCategories} />
+          {categories.slice(0, 3).map((category) => (
             <Link key={category.id} href={`/catalog/${category.slug}`} className="rounded-full px-4 py-2 text-muted hover:bg-background hover:text-petrol">
               {category.name}
             </Link>
@@ -27,10 +37,9 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           <Link
             href="/catalog"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-petrol shadow-sm md:hidden"
-            aria-label="Фильтр и каталог"
+            className="inline-flex h-11 items-center rounded-full border border-border bg-white px-4 text-sm font-semibold text-petrol transition hover:bg-background lg:hidden"
           >
-            <SlidersHorizontal className="h-5 w-5" />
+            Каталог
           </Link>
           <Link
             href="/cart"
@@ -38,12 +47,6 @@ export async function SiteHeader() {
           >
             <ShoppingCart className="h-5 w-5" />
             <span className="hidden sm:inline">Корзина</span>
-          </Link>
-          <Link
-            href="/admin"
-            className="hidden h-11 items-center rounded-full border border-border bg-white px-4 text-sm font-semibold text-petrol transition hover:bg-background lg:inline-flex"
-          >
-            Админка
           </Link>
           <button className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-petrol shadow-sm lg:hidden" aria-label="Меню">
             <Menu className="h-5 w-5" />

@@ -16,6 +16,47 @@ function optional(formData: FormData, name: string) {
   return value || undefined;
 }
 
+function parseDecimal(formData: FormData, name: string, requiredField = false) {
+  const raw = String(formData.get(name) ?? "").trim().replace(/\s/g, "").replace(",", ".");
+  if (!raw) {
+    if (requiredField) throw new Error(`Поле ${name} обязательно`);
+    return null;
+  }
+  const amount = Number(raw);
+  if (!Number.isFinite(amount) || amount < 0) {
+    throw new Error(`Некорректное значение поля ${name}`);
+  }
+  return raw;
+}
+
+function parseKeyValueLines(raw: string) {
+  return raw
+    .split("\n")
+    .map((line) => {
+      const separator = line.indexOf(":");
+      if (separator === -1) return null;
+      const key = line.slice(0, separator).trim();
+      const value = line.slice(separator + 1).trim();
+      return key && value ? { key, value } : null;
+    })
+    .filter((item): item is { key: string; value: string } => Boolean(item));
+}
+
+async function resolveProductTemplateId(formData: FormData) {
+  const templateId = optional(formData, "templateId");
+  if (templateId) return templateId;
+
+  const categoryId = optional(formData, "categoryId");
+  if (!categoryId) return null;
+
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+    select: { templateId: true },
+  });
+
+  return category?.templateId ?? null;
+}
+
 async function saveProductFieldValues(productId: string, templateId: string | null | undefined, formData: FormData) {
   if (!templateId) return;
 
@@ -27,21 +68,34 @@ async function saveProductFieldValues(productId: string, templateId: string | nu
     if (!raw) continue;
 
     if (field.type === FieldType.NUMBER || field.type === FieldType.RANGE) {
-      await prisma.productFieldValue.create({ data: { productId, fieldId: field.id, valueNumber: raw } });
+      const amount = Number(raw.replace(",", "."));
+      if (!Number.isFinite(amount)) throw new Error(`Некорректное число в поле «${field.name}»`);
+      await prisma.productFieldValue.create({ data: { productId, fieldId: field.id, valueNumber: raw.replace(",", ".") } });
     } else if (field.type === FieldType.SELECT || field.type === FieldType.MULTISELECT) {
-      const values = raw.split(",").map((item) => item.trim());
+      const values = raw.split(",").map((item) => item.trim()).filter(Boolean);
       const options = field.options.filter((option) => values.includes(option.slug) || values.includes(option.label));
+      if (!options.length) {
+        throw new Error(`Выберите значение из списка для поля «${field.name}»`);
+      }
       for (const option of options) {
         await prisma.productFieldValue.create({ data: { productId, fieldId: field.id, optionId: option.id } });
       }
+    } else if (field.type === FieldType.BOOLEAN) {
+      await prisma.productFieldValue.create({
+        data: { productId, fieldId: field.id, valueBoolean: raw === "true" || raw === "1" || raw === "on" },
+      });
     } else if (field.type === FieldType.FILE) {
       await prisma.productFieldValue.create({ data: { productId, fieldId: field.id, valueFileUrl: raw } });
+    } else if (field.type === FieldType.BRAND_REF) {
+      const brand = await prisma.brand.findFirst({
+        where: { OR: [{ id: raw }, { slug: raw }, { name: { equals: raw, mode: "insensitive" } }] },
+        select: { id: true },
+      });
+      if (!brand) throw new Error(`Бренд не найден для поля «${field.name}»`);
+      await prisma.productFieldValue.create({ data: { productId, fieldId: field.id, brandRefId: brand.id } });
     } else if (field.type === FieldType.KEY_VALUE) {
-      const json = raw
-        .split("\n")
-        .map((line) => line.split(":"))
-        .filter(([key, value]) => key && value)
-        .map(([key, value]) => ({ key: key.trim(), value: value.trim() }));
+      const json = parseKeyValueLines(raw);
+      if (!json.length) continue;
       await prisma.productFieldValue.create({ data: { productId, fieldId: field.id, valueJson: json } });
     } else {
       await prisma.productFieldValue.create({ data: { productId, fieldId: field.id, valueText: raw } });
@@ -78,6 +132,7 @@ export async function createCategory(formData: FormData) {
       name,
       slug: optional(formData, "slug") ?? slugify(name),
       description: optional(formData, "description"),
+      imageUrl: optional(formData, "imageUrl"),
       parentId: optional(formData, "parentId"),
       templateId: optional(formData, "templateId"),
       h1: optional(formData, "h1") ?? name,
@@ -98,6 +153,7 @@ export async function updateCategory(formData: FormData) {
       name,
       slug: optional(formData, "slug") ?? slugify(name),
       description: optional(formData, "description"),
+      imageUrl: optional(formData, "imageUrl") ?? null,
       parentId: optional(formData, "parentId") ?? null,
       templateId: optional(formData, "templateId") ?? null,
       h1: optional(formData, "h1") ?? name,
@@ -286,14 +342,15 @@ export async function deleteBrand(formData: FormData) {
 
 export async function createProduct(formData: FormData) {
   const name = required(formData, "name");
-  const templateId = optional(formData, "templateId");
+  const slug = optional(formData, "slug") ?? slugify(name);
+  const templateId = await resolveProductTemplateId(formData);
   const product = await prisma.product.create({
     data: {
       name,
-      slug: optional(formData, "slug") ?? slugify(name),
+      slug,
       sku: required(formData, "sku"),
-      price: required(formData, "price"),
-      oldPrice: optional(formData, "oldPrice"),
+      price: parseDecimal(formData, "price", true)!,
+      oldPrice: parseDecimal(formData, "oldPrice"),
       inStock: formData.get("inStock") === "on",
       categoryId: required(formData, "categoryId"),
       brandId: optional(formData, "brandId"),
@@ -311,25 +368,27 @@ export async function createProduct(formData: FormData) {
 
   revalidatePath("/admin/products");
   revalidatePath("/catalog");
+  revalidatePath(`/product/${slug}`);
 }
 
 export async function updateProduct(formData: FormData) {
   const id = required(formData, "id");
   const name = required(formData, "name");
-  const templateId = optional(formData, "templateId");
+  const slug = optional(formData, "slug") ?? slugify(name);
+  const templateId = await resolveProductTemplateId(formData);
 
   await prisma.product.update({
     where: { id },
     data: {
       name,
-      slug: optional(formData, "slug") ?? slugify(name),
+      slug,
       sku: required(formData, "sku"),
-      price: required(formData, "price"),
-      oldPrice: optional(formData, "oldPrice") ?? null,
+      price: parseDecimal(formData, "price", true)!,
+      oldPrice: parseDecimal(formData, "oldPrice"),
       inStock: formData.get("inStock") === "on",
       categoryId: required(formData, "categoryId"),
       brandId: optional(formData, "brandId") ?? null,
-      templateId: templateId ?? null,
+      templateId,
       shortDescription: required(formData, "shortDescription"),
       fullDescription: required(formData, "fullDescription"),
       h1: optional(formData, "h1") ?? name,
@@ -343,6 +402,7 @@ export async function updateProduct(formData: FormData) {
 
   revalidatePath("/admin/products");
   revalidatePath("/catalog");
+  revalidatePath(`/product/${slug}`);
 }
 
 export async function deleteProduct(formData: FormData) {

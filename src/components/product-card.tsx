@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
 import type { ProductCardItem } from "@/lib/data";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, hasDiscount } from "@/lib/format";
 import { normalizeImageSrc } from "@/lib/image-url";
 
 export function ProductCard({ product }: { product: ProductCardItem }) {
@@ -35,7 +35,9 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xl font-black text-petrol">{formatPrice(product.price)}</div>
-            {product.oldPrice ? <div className="text-sm text-muted line-through">{formatPrice(product.oldPrice)}</div> : null}
+            {hasDiscount(product.oldPrice, product.price) ? (
+              <div className="text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div>
+            ) : null}
           </div>
           <Link
             href={`/cart?add=${product.id}`}

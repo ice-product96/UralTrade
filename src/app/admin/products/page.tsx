@@ -9,6 +9,7 @@ export default async function AdminProductsPage() {
       name: field.name,
       type: field.type,
       unit: field.unit,
+      templateId: template.id,
       templateName: template.name,
       options: field.options.map((option) => ({ label: option.label, slug: option.slug })),
     })),
@@ -24,6 +25,7 @@ export default async function AdminProductsPage() {
       option: value.option,
       valueText: value.valueText,
       valueNumber: value.valueNumber?.toString() ?? null,
+      valueBoolean: value.valueBoolean,
       valueFileUrl: value.valueFileUrl,
       valueJson: value.valueJson,
     })),
@@ -32,7 +34,12 @@ export default async function AdminProductsPage() {
   return (
     <ProductsCrud
       products={serializedProducts}
-      categories={categories}
+      categories={categories.map((category) => ({
+        id: category.id,
+        name: category.name,
+        templateId: category.templateId,
+        parent: category.parent,
+      }))}
       brands={brands}
       templates={templates.map((template) => ({ id: template.id, name: template.name }))}
       fields={fields}
