@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { SiteLogo } from "@/components/site-logo";
 
 export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-border bg-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div>
-          <div className="text-2xl font-black text-petrol">UralTrade</div>
+          <SiteLogo href="/" width={180} height={60} />
           <p className="mt-4 max-w-md text-sm leading-6 text-muted">
             Интернет-магазин инженерного оборудования с точным подбором по артикулам, характеристикам и брендам.
           </p>

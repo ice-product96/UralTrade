@@ -55,6 +55,6 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: "UralTrade",
     url: siteUrl,
-    logo: new URL("/logo.svg", siteUrl).toString(),
+    logo: new URL("/logo.png", siteUrl).toString(),
   };
 }
