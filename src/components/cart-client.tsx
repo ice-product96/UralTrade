@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { ProductImage } from "@/components/product-image";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
 import { normalizeImageSrc } from "@/lib/image-url";
@@ -72,7 +72,7 @@ export function CartClient() {
             return (
               <div key={product.id} className="grid gap-4 rounded-[28px] border border-border bg-white p-4 shadow-sm sm:grid-cols-[112px_1fr_auto]">
                 <div className="relative aspect-square overflow-hidden rounded-2xl bg-background">
-                  <Image src={normalizeImageSrc(product.image ?? "/demo/pump-1.svg")} alt={product.name} fill className="object-cover" />
+                  <ProductImage src={normalizeImageSrc(product.image ?? "/demo/pump-1.svg")} alt={product.name} fill className="object-cover" />
                 </div>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{product.sku}</div>

@@ -209,6 +209,12 @@ function toAbsoluteUrl(url: string) {
   return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
+function absolutizeHtmlAssetUrls(html: string) {
+  return html
+    .replace(/src=(["'])\/uploadedFiles\//g, `src=$1${BASE_URL}/uploadedFiles/`)
+    .replace(/src=(["'])\/\/ural-trade96\.ru\//g, `src=$1https://ural-trade96.ru/`);
+}
+
 async function fetchHtml(relativePath: string, attempt = 1): Promise<string> {
   const url = relativePath.startsWith("http") ? relativePath : `${BASE_URL}/${relativePath.replace(/^\/+/, "")}`;
   const response = await fetch(url, {
@@ -374,7 +380,7 @@ function parseProductPage(html: string, url: string): ParsedProduct | null {
 
   const fullDescriptionParts = [];
   if (descriptionHtml) fullDescriptionParts.push(`<p>${descriptionHtml}</p>`);
-  if (tab0.trim()) fullDescriptionParts.push(`<div class="product-tab-specs">${tab0}</div>`);
+  if (tab0.trim()) fullDescriptionParts.push(`<div class="product-tab-specs">${absolutizeHtmlAssetUrls(tab0)}</div>`);
   if (applicability) fullDescriptionParts.push(`<h3>Применяемость</h3><p>${applicability}</p>`);
 
   return {

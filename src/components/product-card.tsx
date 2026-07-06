@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
+import { ProductImage } from "@/components/product-image";
 import type { ProductCardItem } from "@/lib/data";
 import { formatPrice } from "@/lib/format";
 import { normalizeImageSrc } from "@/lib/image-url";
@@ -12,7 +12,7 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
     <article className="group overflow-hidden rounded-[28px] border border-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-petrol/10">
       <Link href={`/product/${product.slug}`} className="block bg-background p-4">
         <div className="relative aspect-square overflow-hidden rounded-[22px]">
-          <Image
+          <ProductImage
             src={image}
             alt={product.images[0]?.alt ?? product.name}
             fill

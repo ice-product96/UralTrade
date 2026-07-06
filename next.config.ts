@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "ural-trade96.ru",
-        pathname: "/uploadedFiles/**",
+        pathname: "/**",
       },
     ],
   },

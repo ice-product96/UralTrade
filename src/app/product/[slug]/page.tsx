@@ -10,6 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
 import { formatPrice, getSiteUrl } from "@/lib/format";
+import { absolutizeImportedHtml } from "@/lib/image-url";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -105,7 +106,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="mt-14 grid gap-8 lg:grid-cols-[1fr_380px]">
           <div className="rounded-[30px] border border-border bg-white p-6">
             <h2 className="text-2xl font-black text-graphite">Описание</h2>
-            <div className="rich-text mt-5" dangerouslySetInnerHTML={{ __html: product.fullDescription }} />
+            <div className="rich-text mt-5" dangerouslySetInnerHTML={{ __html: absolutizeImportedHtml(product.fullDescription) }} />
             <div className="mt-8 space-y-6">
               {groups.map((group) => (
                 <div key={group.name}>
