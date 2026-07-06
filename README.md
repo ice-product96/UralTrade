@@ -40,6 +40,7 @@ docker compose -f docker-compose.prod.yml exec app npm run db:seed
 ```
 
 Подробная инструкция: [deploy/DEPLOY.md](deploy/DEPLOY.md)  
+Временный домен: **https://uraltrade.ice-product.ru**  
 Пример nginx: [deploy/nginx/uraltrade.conf](deploy/nginx/uraltrade.conf)
 
 ### Отличия production от local

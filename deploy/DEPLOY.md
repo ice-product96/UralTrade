@@ -29,7 +29,7 @@ nano .env
 
 - `POSTGRES_PASSWORD` — сильный пароль БД
 - `NEXTAUTH_SECRET` — `openssl rand -base64 32`
-- `NEXTAUTH_URL` и `SITE_URL` — ваш домен, например `https://shop.example.com`
+- `NEXTAUTH_URL` и `SITE_URL` — `https://uraltrade.ice-product.ru` (временный домен)
 - `ADMIN_PASSWORD` — пароль администратора после seed
 
 ## 3. Запуск контейнеров
@@ -58,7 +58,7 @@ docker compose -f docker-compose.prod.yml exec app npm run db:seed
 
 ```bash
 sudo cp deploy/nginx/uraltrade.conf /etc/nginx/sites-available/uraltrade
-sudo nano /etc/nginx/sites-available/uraltrade   # заменить uraltrade.example.com
+sudo nano /etc/nginx/sites-available/uraltrade   # домен: uraltrade.ice-product.ru
 sudo ln -sf /etc/nginx/sites-available/uraltrade /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
@@ -66,7 +66,7 @@ sudo nginx -t && sudo systemctl reload nginx
 SSL:
 
 ```bash
-sudo certbot --nginx -d uraltrade.example.com
+sudo certbot --nginx -d uraltrade.ice-product.ru
 ```
 
 ## 6. Обновление
