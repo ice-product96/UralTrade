@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ProductImage } from "@/components/product-image";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
