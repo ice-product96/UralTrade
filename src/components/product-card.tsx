@@ -3,9 +3,10 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import type { ProductCardItem } from "@/lib/data";
 import { formatPrice } from "@/lib/format";
+import { normalizeImageSrc } from "@/lib/image-url";
 
 export function ProductCard({ product }: { product: ProductCardItem }) {
-  const image = product.images[0]?.url ?? "/demo/pump-1.svg";
+  const image = normalizeImageSrc(product.images[0]?.url ?? "/demo/pump-1.svg");
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-petrol/10">

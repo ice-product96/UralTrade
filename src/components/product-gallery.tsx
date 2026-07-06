@@ -4,6 +4,7 @@ import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { normalizeImageSrc } from "@/lib/image-url";
 
 type GalleryImage = {
   id: string;
@@ -28,7 +29,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
         <div className="flex">
           {safeImages.map((image) => (
             <div key={image.id} className="relative aspect-square min-w-0 flex-[0_0_100%] overflow-hidden rounded-[26px] bg-background">
-              <Image src={image.url} alt={image.alt ?? productName} fill priority className="object-cover" sizes="(min-width: 1024px) 50vw, 100vw" />
+              <Image src={normalizeImageSrc(image.url)} alt={image.alt ?? productName} fill priority className="object-cover" sizes="(min-width: 1024px) 50vw, 100vw" />
             </div>
           ))}
         </div>
@@ -59,7 +60,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
               selectedIndex === index ? "border-lime ring-4 ring-lime/20" : "border-border"
             }`}
           >
-            <Image src={image.url} alt={image.alt ?? productName} fill className="object-cover" />
+            <Image src={normalizeImageSrc(image.url)} alt={image.alt ?? productName} fill className="object-cover" />
           </button>
         ))}
       </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { formatPrice } from "@/lib/format";
+import { normalizeImageSrc } from "@/lib/image-url";
 
 type SearchResult = {
   id: string;
@@ -71,7 +72,7 @@ export function SearchBox() {
               className="flex items-center gap-3 border-b border-border/70 p-3 last:border-0 hover:bg-background"
             >
               <div className="relative h-14 w-14 overflow-hidden rounded-2xl bg-background">
-                <Image src={item.image ?? "/demo/pump-1.svg"} alt={item.name} fill className="object-cover" />
+                <Image src={normalizeImageSrc(item.image ?? "/demo/pump-1.svg")} alt={item.name} fill className="object-cover" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-semibold text-graphite">{item.name}</div>
