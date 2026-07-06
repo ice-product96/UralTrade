@@ -54,7 +54,26 @@ docker compose -f docker-compose.prod.yml exec app npm run db:seed
 
 Админка: `https://ваш-домен/admin`
 
-## 5. Nginx
+## 4.1. Импорт каталога с ural-trade96.ru
+
+Скрипт загружает категории, подкатегории, товары, фото, характеристики и создаёт редиректы со старых URL.
+
+```bash
+# Полный импорт (≈80 категорий, ≈700 товаров, ~15–25 мин)
+docker compose -f docker-compose.prod.yml exec app npm run db:import -- --clear-demo
+
+# Тестовый прогон без записи в БД
+docker compose -f docker-compose.prod.yml exec app npm run db:import -- --dry-run --limit-products 5
+```
+
+Флаги:
+
+- `--clear-demo` — удалить демо-каталог (насосы Grundfos/Wilo) перед импортом
+- `--dry-run` — только парсинг, без записи
+- `--limit-categories N` / `--limit-products N` — ограничение для отладки
+
+Изображения сохраняются как внешние URL с `ural-trade96.ru` (без скачивания на диск).
+
 
 ```bash
 sudo cp deploy/nginx/uraltrade.conf /etc/nginx/sites-available/uraltrade
