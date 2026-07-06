@@ -2,44 +2,43 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+const LOGO_INTRINSIC_WIDTH = 2172;
+const LOGO_INTRINSIC_HEIGHT = 724;
+
 type SiteLogoProps = {
   href?: string | null;
-  width?: number;
   height?: number;
   className?: string;
   imageClassName?: string;
   priority?: boolean;
 };
 
-const LOGO_WIDTH = 200;
-const LOGO_HEIGHT = 67;
-
 export function SiteLogo({
   href = "/",
-  width = LOGO_WIDTH,
-  height = LOGO_HEIGHT,
+  height = 44,
   className,
   imageClassName,
   priority = false,
 }: SiteLogoProps) {
   const image = (
-    <span className={cn("inline-flex overflow-hidden rounded-xl bg-black", className)}>
-      <Image
-        src="/logo.png"
-        alt="УралТрейд — запчасти, гидравлика, сервис"
-        width={width}
-        height={height}
-        priority={priority}
-        className={cn("h-auto w-auto object-contain", imageClassName)}
-      />
-    </span>
+    <Image
+      src="/logo.png"
+      alt="УралТрейд — запчасти, гидравлика, сервис"
+      width={LOGO_INTRINSIC_WIDTH}
+      height={LOGO_INTRINSIC_HEIGHT}
+      priority={priority}
+      className={cn("block w-auto max-w-none object-contain object-left", imageClassName)}
+      style={{ height: `${height}px`, width: "auto" }}
+    />
   );
 
-  if (!href) return image;
+  const content = <span className={cn("inline-flex shrink-0 items-center", className)}>{image}</span>;
+
+  if (!href) return content;
 
   return (
-    <Link href={href} className="inline-flex shrink-0" aria-label="УралТрейд">
-      {image}
+    <Link href={href} className="inline-flex shrink-0 items-center" aria-label="УралТрейд">
+      {content}
     </Link>
   );
 }

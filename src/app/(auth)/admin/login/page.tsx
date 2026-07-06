@@ -8,7 +8,7 @@ export default function AdminLoginPage() {
     <main className="grid min-h-screen place-items-center bg-background px-4">
       <div className="w-full max-w-md rounded-[34px] border border-border bg-white p-8 shadow-2xl shadow-petrol/10">
         <div className="flex justify-center">
-          <SiteLogo href="/" width={200} height={67} />
+          <SiteLogo href="/" height={58} />
         </div>
         <Link href="/" className="mt-6 inline-block text-sm font-bold text-lime">
           ← На сайт

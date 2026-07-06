@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-border bg-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div>
-          <SiteLogo href="/" width={180} height={60} />
+          <SiteLogo href="/" height={52} />
           <p className="mt-4 max-w-md text-sm leading-6 text-muted">
             Интернет-магазин инженерного оборудования с точным подбором по артикулам, характеристикам и брендам.
           </p>

@@ -16,7 +16,7 @@ const items = [
 export function AdminNav() {
   return (
     <aside className="hidden w-72 shrink-0 border-r border-border bg-white p-5 lg:block">
-      <SiteLogo href="/" width={168} height={56} />
+      <SiteLogo href="/" height={48} />
       <nav className="mt-8 space-y-1">
         {items.map((item) => (
           <Link key={item.href} href={item.href} className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-muted hover:bg-background hover:text-petrol">
