@@ -118,15 +118,69 @@ function normalizeStorePath(href: string): string | null {
       return null;
     }
   }
+  const queryIndex = path.indexOf("?");
+  if (queryIndex !== -1) path = path.slice(0, queryIndex);
   path = path.replace(/^\/+/, "").replace(/\/+$/, "");
   if (!path.startsWith("store")) return null;
   path = path.replace(/^store\/?/, "");
   return path || "";
 }
 
+function isProductStorePath(path: string) {
+  return path.split("/").filter(Boolean).length >= 3;
+}
+
+function isPosProductUrl(url: string) {
+  try {
+    const parsed = new URL(url, BASE_URL);
+    return parsed.searchParams.has("pos") && normalizeStorePath(parsed.pathname) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function normalizeProductUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url, BASE_URL);
+    parsed.search = "";
+    parsed.hash = "";
+    const storePath = normalizeStorePath(parsed.pathname);
+    if (!storePath || !isProductStorePath(storePath)) return null;
+    parsed.pathname = `/store/${storePath}/`;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function registerProductLink(href: string, productUrls: Set<string>) {
+  if (isPosProductUrl(href)) {
+    productUrls.add(href.split("#")[0]);
+    return;
+  }
+  const normalized = normalizeProductUrl(href);
+  if (normalized) productUrls.add(normalized);
+}
+
+function buildProductSlug(storePath: string, sku: string, name: string) {
+  const base = isProductStorePath(storePath)
+    ? pathToSlug(storePath)
+    : slugify(name) || "product";
+  return `${base}-${sku}`;
+}
+
 function pathToSlug(path: string) {
-  if (!path) return "mobilnaya-gidravlika";
   return path.replace(/\//g, "-").replace(/_/g, "-");
+}
+
+/** Убираем корень «Мобильная гидравлика» (store/), верхний уровень — Гидроцилиндры, Гидронасосы и т.д. */
+function prepareStoreCategories(categories: CategoryNode[]): CategoryNode[] {
+  return categories
+    .filter((category) => category.path !== "")
+    .map((category) => ({
+      ...category,
+      parentPath: !category.parentPath ? null : category.parentPath,
+    }));
 }
 
 function toAbsoluteUrl(url: string) {
@@ -205,17 +259,17 @@ function parseCategoryPage(html: string, currentPath: string) {
     const block = item[0];
     const hrefMatch = block.match(/<a href="([^"]+)"[^>]*title="Подробное описание товара"/);
     if (hrefMatch) {
-      productUrls.add(hrefMatch[1]);
+      registerProductLink(hrefMatch[1], productUrls);
       continue;
     }
     const anyLink = block.match(/<a href="(https?:\/\/ural-trade96\.ru\/store\/[^"]+)"/);
-    if (anyLink) productUrls.add(anyLink[1]);
+    if (anyLink) registerProductLink(anyLink[1], productUrls);
   }
 
   return {
     subcategories,
     productUrls: [...productUrls],
-    isProductPage: html.includes("uss_shop_detail"),
+    isProductPage: html.includes("uss_shop_detail") && !html.includes("uss_shop_blocks_view"),
   };
 }
 
@@ -366,7 +420,7 @@ async function importCategories(categories: CategoryNode[], templateId: string) 
   for (const [index, category] of slice.entries()) {
     const slug = pathToSlug(category.path);
     let parentId: string | null = null;
-    if (category.parentPath !== null && byPath.has(category.parentPath)) {
+    if (category.parentPath && byPath.has(category.parentPath)) {
       parentId = byPath.get(category.parentPath)!;
     }
 
@@ -402,6 +456,14 @@ async function importCategories(categories: CategoryNode[], templateId: string) 
       where: { fromPath: `/store/${category.path}/` },
       update: { toPath: `/catalog/${slug}` },
       create: { fromPath: `/store/${category.path}/`, toPath: `/catalog/${slug}` },
+    });
+  }
+
+  if (!dryRun) {
+    await prisma.redirect.upsert({
+      where: { fromPath: "/store/" },
+      update: { toPath: "/catalog" },
+      create: { fromPath: "/store/", toPath: "/catalog" },
     });
   }
 
@@ -443,8 +505,8 @@ async function importProduct(
     return;
   }
 
-  const urlPath = normalizeStorePath(product.url) ?? slugify(product.name);
-  const slug = pathToSlug(urlPath) || slugify(product.name);
+  const urlPath = normalizeStorePath(product.url) ?? "";
+  const slug = buildProductSlug(urlPath, product.sku, product.name);
 
   const brandId = product.brand ? await getOrCreateBrand(product.brand, brandCache) : null;
 
@@ -482,6 +544,39 @@ async function importProduct(
       metaDescription: product.metaDescription ?? `${product.name}: характеристики, фото, цена.`,
       h1: product.name,
     },
+  }).catch(async (error: { code?: string }) => {
+    if (error.code !== "P2002") throw error;
+    const fallbackSlug = `p-${product.sku}`;
+    return prisma.product.upsert({
+      where: { sku: product.sku },
+      update: {
+        name: product.name,
+        slug: fallbackSlug,
+        price: product.price,
+        shortDescription: product.shortDescription,
+        fullDescription: product.fullDescription,
+        categoryId,
+        brandId,
+        templateId,
+        metaTitle: product.metaTitle ?? undefined,
+        metaDescription: product.metaDescription ?? undefined,
+        h1: product.name,
+      },
+      create: {
+        name: product.name,
+        slug: fallbackSlug,
+        sku: product.sku,
+        price: product.price,
+        shortDescription: product.shortDescription,
+        fullDescription: product.fullDescription,
+        categoryId,
+        brandId,
+        templateId,
+        metaTitle: product.metaTitle ?? `${product.name} купить — UralTrade`,
+        metaDescription: product.metaDescription ?? `${product.name}: характеристики, фото, цена.`,
+        h1: product.name,
+      },
+    });
   });
 
   await prisma.productImage.deleteMany({ where: { productId: record.id } });
@@ -509,21 +604,22 @@ async function importProduct(
     });
   }
 
-  const oldPath = product.url.replace(BASE_URL, "").replace(/\/+$/, "");
+  const parsedUrl = new URL(product.url, BASE_URL);
+  const oldPath = `${parsedUrl.pathname.replace(/\/+$/, "")}${parsedUrl.search}`;
   await prisma.redirect.upsert({
     where: { fromPath: oldPath },
-    update: { toPath: `/product/${slug}` },
-    create: { fromPath: oldPath, toPath: `/product/${slug}` },
+    update: { toPath: `/product/${record.slug}` },
+    create: { fromPath: oldPath, toPath: `/product/${record.slug}` },
   });
 }
 
 async function discoverCatalog(initialCategories: CategoryNode[]) {
   const categories = new Map<string, CategoryNode>();
-  for (const category of initialCategories) {
+  for (const category of prepareStoreCategories(initialCategories)) {
     categories.set(category.path, category);
   }
 
-  const queue = [...initialCategories.map((c) => c.path)];
+  const queue = [...categories.keys()];
   const seen = new Set(queue);
   const productUrls = new Set<string>();
 
@@ -536,18 +632,18 @@ async function discoverCatalog(initialCategories: CategoryNode[]) {
 
     const parsed = parseCategoryPage(html, path);
     if (parsed.isProductPage) {
-      productUrls.add(`${BASE_URL}/store/${path}/`);
+      const normalized = normalizeProductUrl(`${BASE_URL}/store/${path}/`);
+      if (normalized) productUrls.add(normalized);
       continue;
     }
 
     for (const sub of parsed.subcategories) {
       if (!categories.has(sub.path)) {
-        const parentPath = path;
         categories.set(sub.path, {
           path: sub.path,
           name: sub.name,
-          depth: path ? path.split("/").length + 1 : 2,
-          parentPath,
+          depth: path ? path.split("/").length + 1 : 1,
+          parentPath: path || null,
         });
       }
       if (!seen.has(sub.path)) {
@@ -564,7 +660,7 @@ async function discoverCatalog(initialCategories: CategoryNode[]) {
   }
 
   return {
-    categories: [...categories.values()],
+    categories: prepareStoreCategories([...categories.values()]),
     productUrls: [...productUrls],
   };
 }
@@ -580,7 +676,7 @@ async function main() {
 
   console.log("Загрузка sitemap...");
   const sitemapHtml = await fetchHtml("/sitemap/");
-  const sitemapCategories = parseSitemapCategories(sitemapHtml);
+  const sitemapCategories = prepareStoreCategories(parseSitemapCategories(sitemapHtml));
   console.log(`Категорий в sitemap: ${sitemapCategories.length}`);
 
   console.log("Обход категорий...");
@@ -602,35 +698,51 @@ async function main() {
   console.log(`Импорт ${productList.length} товаров...`);
 
   const brandCache = new Map<string, string>();
+  const seenSkus = new Set<string>();
   let imported = 0;
+  let skipped = 0;
 
-  for (const [index, url] of productList.entries()) {
+  for (const [index, rawUrl] of productList.entries()) {
+    const canonical = normalizeProductUrl(rawUrl);
+    const fetchUrl = canonical ?? (isPosProductUrl(rawUrl) ? rawUrl : null);
+    if (!fetchUrl) {
+      skipped += 1;
+      continue;
+    }
+
     try {
-      const html = await fetchHtml(url);
+      const html = await fetchHtml(fetchUrl);
       await sleep(DELAY_MS);
-      const product = parseProductPage(html, url);
+      const product = parseProductPage(html, fetchUrl);
       if (!product) {
-        console.warn(`  skip (not a product): ${url}`);
+        console.warn(`  skip (not a product): ${fetchUrl}`);
+        skipped += 1;
         continue;
       }
+      if (seenSkus.has(product.sku)) {
+        skipped += 1;
+        continue;
+      }
+      seenSkus.add(product.sku);
+
       await importProduct(product, categoryPathToId, templateId, specsFieldId, brandCache);
       imported += 1;
       if ((index + 1) % 25 === 0) {
         console.log(`  ... ${index + 1}/${productList.length}`);
       }
     } catch (error) {
-      console.error(`  error ${url}:`, error);
+      console.error(`  error ${fetchUrl}:`, error);
     }
   }
 
   if (!dryRun) {
     await prisma.homeBanner.updateMany({
       where: { id: "banner-main" },
-      data: { href: "/catalog/mobilnaya-gidravlika" },
+      data: { href: "/catalog" },
     });
   }
 
-  console.log(`Готово. Импортировано товаров: ${imported}`);
+  console.log(`Готово. Импортировано товаров: ${imported}, пропущено: ${skipped}`);
 }
 
 main()
