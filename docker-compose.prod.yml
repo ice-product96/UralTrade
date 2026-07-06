@@ -40,7 +40,6 @@ services:
     env_file: .env
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-uraltrade}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-uraltrade}?schema=public
     depends_on:
       postgres:
         condition: service_healthy
