@@ -216,6 +216,9 @@ export function FieldsCrud({ templates }: { templates: TemplateRow[] }) {
             <input name="isFilterable" type="checkbox" defaultChecked={fieldModal.item?.isFilterable} className="accent-lime" />
             Участвует в фильтре
           </label>
+          <p className="text-xs text-muted">
+            Для фильтра каталога используйте тип SELECT или NUMBER, включите «Участвует в фильтре» и задайте опции. Характеристики из импорта также доступны как динамические фильтры.
+          </p>
           <select name="filterWidget" defaultValue={fieldModal.item?.filterWidget ?? "CHECKBOX"} className="admin-input">
             {FILTER_WIDGETS.map((widget) => (
               <option key={widget} value={widget}>

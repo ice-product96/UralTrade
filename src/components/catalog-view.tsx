@@ -76,8 +76,16 @@ export async function CatalogView({
           </section>
         ) : null}
 
-        <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
-          <CatalogFilter groups={data.filterGroups} brands={data.brands} selected={data.selected} basePath={basePath} />
+        <div className={`grid gap-8 ${data.showFilterPanel ? "lg:grid-cols-[320px_1fr]" : ""}`}>
+          {data.showFilterPanel ? (
+            <CatalogFilter
+              groups={data.filterGroups}
+              brands={data.brands}
+              selected={data.selected}
+              basePath={basePath}
+              total={data.total}
+            />
+          ) : null}
           <section>
             <CatalogToolbar basePath={basePath} selected={data.selected} sort={data.sort} perPage={data.perPage} total={data.total} />
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">

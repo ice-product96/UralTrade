@@ -8,8 +8,14 @@
  * npm run db:import -- --limit-categories 3 --limit-products 20
  */
 
-import { PrismaClient, FieldType } from "../src/generated/prisma/client";
+import { PrismaClient, FieldType, FilterWidget, Prisma } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import {
+  discoverSpecFacets,
+  parseSpecJson,
+  slugifySpecKey,
+  slugifySpecValue,
+} from "../src/lib/catalog-facets";
 import "dotenv/config";
 
 const IMPORT_VERSION = "3";
@@ -425,6 +431,104 @@ async function ensureHydraulicsTemplate() {
   return { template, specsField };
 }
 
+async function buildFilterFieldsFromSpecs(templateId: string, specsFieldId: string) {
+  console.log("Генерация фильтруемых полей из характеристик...");
+
+  const specValues = await prisma.productFieldValue.findMany({
+    where: { fieldId: specsFieldId, valueJson: { not: Prisma.DbNull } },
+    select: { productId: true, valueJson: true },
+  });
+
+  const rows = specValues.map((value) => ({
+    productId: value.productId,
+    specs: parseSpecJson(value.valueJson),
+  }));
+
+  const facets = discoverSpecFacets(rows, { minProducts: 2, maxKeys: 15 });
+  if (!facets.length) {
+    console.log("  Нет подходящих характеристик для фильтров.");
+    return;
+  }
+
+  const filterGroup = await prisma.filterGroup.upsert({
+    where: { id: `filter-specs-${templateId}` },
+    update: { name: "Характеристики" },
+    create: {
+      id: `filter-specs-${templateId}`,
+      name: "Характеристики",
+      sortOrder: 20,
+    },
+  });
+
+  let sortOrder = 100;
+  for (const facet of facets) {
+    const fieldSlug = `spec-${facet.keySlug}`;
+    const field = await prisma.fieldDefinition.upsert({
+      where: { templateId_slug: { templateId, slug: fieldSlug } },
+      update: {
+        name: facet.key,
+        isFilterable: true,
+        filterWidget: FilterWidget.CHECKBOX,
+        groupId: filterGroup.id,
+      },
+      create: {
+        templateId,
+        groupId: filterGroup.id,
+        name: facet.key,
+        slug: fieldSlug,
+        type: FieldType.SELECT,
+        isFilterable: true,
+        filterWidget: FilterWidget.CHECKBOX,
+        sortOrder,
+      },
+    });
+    sortOrder += 10;
+
+    const optionMap = new Map<string, string>();
+    let optionSort = 0;
+    for (const option of facet.options) {
+      const saved = await prisma.fieldOption.upsert({
+        where: { fieldId_slug: { fieldId: field.id, slug: option.slug } },
+        update: { label: option.label, sortOrder: optionSort },
+        create: {
+          fieldId: field.id,
+          label: option.label,
+          slug: option.slug,
+          sortOrder: optionSort,
+        },
+      });
+      optionMap.set(option.slug, saved.id);
+      optionSort += 10;
+    }
+
+    for (const row of rows) {
+      const matchingSpecs = row.specs.filter((spec) => slugifySpecKey(spec.key) === facet.keySlug);
+      for (const spec of matchingSpecs) {
+        const optionId = optionMap.get(slugifySpecValue(spec.value));
+        if (!optionId) continue;
+
+        await prisma.productFieldValue.upsert({
+          where: {
+            productId_fieldId_optionId: {
+              productId: row.productId,
+              fieldId: field.id,
+              optionId,
+            },
+          },
+          update: {},
+          create: {
+            productId: row.productId,
+            fieldId: field.id,
+            optionId,
+          },
+        });
+      }
+    }
+  }
+
+  console.log(`  Создано фильтров: ${facets.length}`);
+}
+
 async function resetCatalogData() {
   console.log("Очистка каталога (товары, категории, бренды, редиректы)...");
   await prisma.productRelation.deleteMany();
@@ -728,6 +832,7 @@ async function main() {
   }
 
   if (!dryRun) {
+    await buildFilterFieldsFromSpecs(templateId, specsFieldId);
     await prisma.homeBanner.updateMany({
       where: { id: "banner-main" },
       data: { href: "/catalog" },

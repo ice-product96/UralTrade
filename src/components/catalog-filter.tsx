@@ -1,128 +1,265 @@
 "use client";
 
 import Link from "next/link";
-import { SlidersHorizontal, X } from "lucide-react";
+import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { buildCatalogQuery, multiParam, singleParam } from "@/lib/catalog-params";
-
-type FilterGroup = {
-  id: string;
-  name: string;
-  collapsed: boolean;
-  fields: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    type: string;
-    unit: string | null;
-    min?: number;
-    max?: number;
-    options: Array<{ id: string; label: string; slug: string }>;
-    optionCounts: Record<string, number>;
-  }>;
-};
+import type { CatalogFilterGroup } from "@/lib/catalog-types";
 
 type BrandOption = { name: string; slug: string; count: number };
+
+type FilterField = CatalogFilterGroup["fields"][number];
+
+function FilterAccordion({
+  title,
+  collapsed,
+  children,
+}: {
+  title: string;
+  collapsed?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(!collapsed);
+
+  return (
+    <section className="border-t border-border pt-4">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="mb-3 flex w-full items-center justify-between gap-2 text-left text-sm font-bold text-petrol"
+      >
+        <span>{title}</span>
+        <ChevronDown className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open ? children : null}
+    </section>
+  );
+}
+
+function FilterRange({
+  field,
+  selected,
+  paramPrefix,
+}: {
+  field: FilterField;
+  selected: Record<string, string | string[] | undefined>;
+  paramPrefix?: string;
+}) {
+  const minName = paramPrefix ? `min_${paramPrefix}` : `min_${field.slug}`;
+  const maxName = paramPrefix ? `max_${paramPrefix}` : `max_${field.slug}`;
+
+  return (
+    <div className="space-y-2">
+      <div className="text-sm font-semibold text-graphite">
+        {field.name}
+        {field.unit ? <span className="text-muted"> ({field.unit})</span> : null}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          type="number"
+          name={minName}
+          defaultValue={singleParam(selected[minName]) ?? ""}
+          placeholder={field.min != null ? String(field.min) : "от"}
+          min={field.min}
+          max={field.max}
+          className="h-10 rounded-2xl border border-border px-3 text-sm outline-none focus:ring-2 focus:ring-lime/30"
+        />
+        <input
+          type="number"
+          name={maxName}
+          defaultValue={singleParam(selected[maxName]) ?? ""}
+          placeholder={field.max != null ? String(field.max) : "до"}
+          min={field.min}
+          max={field.max}
+          className="h-10 rounded-2xl border border-border px-3 text-sm outline-none focus:ring-2 focus:ring-lime/30"
+        />
+      </div>
+    </div>
+  );
+}
+
+function FilterCheckboxList({
+  field,
+  selected,
+}: {
+  field: FilterField;
+  selected: Record<string, string | string[] | undefined>;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [search, setSearch] = useState("");
+  const selectedValues = multiParam(selected[field.slug]);
+  const limit = field.topValuesLimit ?? 8;
+
+  const visibleOptions = field.options.filter((option) => {
+    const count = field.optionCounts[option.slug] ?? 0;
+    const checked = selectedValues.includes(option.slug);
+    if (!count && !checked) return false;
+    if (!search.trim()) return true;
+    return option.label.toLowerCase().includes(search.trim().toLowerCase());
+  });
+
+  const shownOptions = expanded ? visibleOptions : visibleOptions.slice(0, limit);
+  const hiddenCount = Math.max(0, visibleOptions.length - shownOptions.length);
+
+  return (
+    <div className="space-y-2">
+      <div className="text-sm font-semibold text-graphite">{field.name}</div>
+      {field.searchable && field.options.length >= 12 ? (
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Поиск..."
+          className="h-9 w-full rounded-2xl border border-border px-3 text-sm outline-none focus:ring-2 focus:ring-lime/30"
+        />
+      ) : null}
+      <div className="space-y-1">
+        {shownOptions.map((option) => {
+          const count = field.optionCounts[option.slug] ?? 0;
+          const checked = selectedValues.includes(option.slug);
+          return (
+            <label key={option.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-3 py-2 hover:bg-background">
+              <span className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name={field.slug}
+                  value={option.slug}
+                  defaultChecked={checked}
+                  className="accent-lime"
+                />
+                <span className="text-sm">{option.label}</span>
+              </span>
+              <span className="text-xs text-muted">{count}</span>
+            </label>
+          );
+        })}
+      </div>
+      {hiddenCount > 0 ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="text-xs font-semibold text-petrol hover:text-lime"
+        >
+          Показать ещё {hiddenCount}
+        </button>
+      ) : null}
+      {expanded && visibleOptions.length > limit ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(false)}
+          className="text-xs font-semibold text-petrol hover:text-lime"
+        >
+          Свернуть
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function FilterBooleanField({
+  field,
+  selected,
+}: {
+  field: FilterField;
+  selected: Record<string, string | string[] | undefined>;
+}) {
+  const checked = singleParam(selected[field.slug]) === "1";
+  const count = field.optionCounts["1"] ?? 0;
+  if (!count && !checked) return null;
+
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-3 py-2 hover:bg-background">
+      <span className="flex items-center gap-3">
+        <input type="checkbox" name={field.slug} value="1" defaultChecked={checked} className="accent-lime" />
+        <span className="text-sm">{field.name}</span>
+      </span>
+      <span className="text-xs text-muted">{count}</span>
+    </label>
+  );
+}
+
+function FilterFieldBlock({
+  field,
+  selected,
+}: {
+  field: FilterField;
+  selected: Record<string, string | string[] | undefined>;
+}) {
+  if (field.type === "PRICE") {
+    return <FilterRange field={field} selected={selected} paramPrefix="price" />;
+  }
+
+  if (field.type === "NUMBER" || field.type === "RANGE") {
+    return <FilterRange field={field} selected={selected} />;
+  }
+
+  if (field.type === "BOOLEAN") {
+    return <FilterBooleanField field={field} selected={selected} />;
+  }
+
+  return <FilterCheckboxList field={field} selected={selected} />;
+}
 
 function FilterForm({
   groups,
   brands,
   selected,
   basePath,
+  total,
   onDone,
 }: {
-  groups: FilterGroup[];
+  groups: CatalogFilterGroup[];
   brands: BrandOption[];
   selected: Record<string, string | string[] | undefined>;
   basePath: string;
+  total: number;
   onDone?: () => void;
 }) {
   return (
-    <form action={basePath} className="space-y-6" onSubmit={onDone}>
-      <div className="space-y-3">
-        <div className="text-sm font-bold text-petrol">Бренд</div>
-        <label className="flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-2 hover:bg-background">
-          <input type="radio" name="brand" value="" defaultChecked={!singleParam(selected.brand)} className="accent-lime" />
-          <span className="text-sm">Все бренды</span>
-        </label>
-        {brands.map((brand) => (
-          <label key={brand.slug} className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-3 py-2 hover:bg-background">
-            <span className="flex items-center gap-3">
-              <input type="radio" name="brand" value={brand.slug} defaultChecked={singleParam(selected.brand) === brand.slug} className="accent-lime" />
-              <span className="text-sm">{brand.name}</span>
-            </span>
-            <span className="text-xs text-muted">{brand.count}</span>
+    <form action={basePath} className="space-y-2" onSubmit={onDone}>
+      <FilterAccordion title="Бренд">
+        <div className="space-y-1">
+          <label className="flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-2 hover:bg-background">
+            <input type="radio" name="brand" value="" defaultChecked={!singleParam(selected.brand)} className="accent-lime" />
+            <span className="text-sm">Все бренды</span>
           </label>
-        ))}
-      </div>
+          {brands.map((brand) => (
+            <label key={brand.slug} className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-3 py-2 hover:bg-background">
+              <span className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="brand"
+                  value={brand.slug}
+                  defaultChecked={singleParam(selected.brand) === brand.slug}
+                  className="accent-lime"
+                />
+                <span className="text-sm">{brand.name}</span>
+              </span>
+              <span className="text-xs text-muted">{brand.count}</span>
+            </label>
+          ))}
+        </div>
+      </FilterAccordion>
 
       {groups.map((group) => (
-        <section key={group.id} className="border-t border-border pt-5">
-          <div className="mb-3 text-sm font-bold text-petrol">{group.name}</div>
+        <FilterAccordion key={group.id} title={group.name} collapsed={group.collapsed}>
           <div className="space-y-5">
-            {group.fields.map((field) => {
-              const selectedValues = multiParam(selected[field.slug]);
-              if (field.type === "NUMBER" || field.type === "RANGE") {
-                return (
-                  <div key={field.id} className="space-y-2">
-                    <div className="text-sm font-semibold text-graphite">
-                      {field.name} {field.unit ? <span className="text-muted">({field.unit})</span> : null}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="number"
-                        name={`min_${field.slug}`}
-                        defaultValue={singleParam(selected[`min_${field.slug}`]) ?? ""}
-                        placeholder={field.min?.toString() ?? "от"}
-                        className="h-10 rounded-2xl border border-border px-3 text-sm outline-none focus:ring-2 focus:ring-lime/30"
-                      />
-                      <input
-                        type="number"
-                        name={`max_${field.slug}`}
-                        defaultValue={singleParam(selected[`max_${field.slug}`]) ?? ""}
-                        placeholder={field.max?.toString() ?? "до"}
-                        className="h-10 rounded-2xl border border-border px-3 text-sm outline-none focus:ring-2 focus:ring-lime/30"
-                      />
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div key={field.id} className="space-y-2">
-                  <div className="text-sm font-semibold text-graphite">{field.name}</div>
-                  {field.options.map((option) => {
-                    const count = field.optionCounts[option.id] ?? 0;
-                    const checked = selectedValues.includes(option.slug);
-                    if (!count && !checked) return null;
-                    return (
-                      <label key={option.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-3 py-2 hover:bg-background">
-                        <span className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            name={field.slug}
-                            value={option.slug}
-                            defaultChecked={checked}
-                            className="accent-lime"
-                          />
-                          <span className="text-sm">{option.label}</span>
-                        </span>
-                        <span className="text-xs text-muted">{count}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              );
-            })}
+            {group.fields.map((field) => (
+              <FilterFieldBlock key={field.id} field={field} selected={selected} />
+            ))}
           </div>
-        </section>
+        </FilterAccordion>
       ))}
 
-      <div className="grid gap-2 border-t border-border pt-5">
+      <div className="sticky bottom-0 grid gap-2 border-t border-border bg-white pt-4">
         <button type="submit" className="h-11 rounded-full bg-petrol text-sm font-bold text-white transition hover:bg-petrol-soft">
-          Показать товары
+          Показать товары ({total})
         </button>
-        <Link href={basePath} className="inline-flex h-11 items-center justify-center rounded-full border border-border text-sm font-bold text-petrol hover:bg-background">
+        <Link
+          href={basePath}
+          className="inline-flex h-11 items-center justify-center rounded-full border border-border text-sm font-bold text-petrol hover:bg-background"
+        >
           Сбросить
         </Link>
       </div>
@@ -135,11 +272,13 @@ export function CatalogFilter({
   brands,
   selected,
   basePath,
+  total,
 }: {
-  groups: FilterGroup[];
+  groups: CatalogFilterGroup[];
   brands: BrandOption[];
   selected: Record<string, string | string[] | undefined>;
   basePath: string;
+  total: number;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -151,8 +290,27 @@ export function CatalogFilter({
       chips.push({ label: `Бренд: ${brandName}`, href: buildCatalogQuery(basePath, selected, { brand: null }) });
     }
 
+    const minPrice = singleParam(selected.min_price);
+    const maxPrice = singleParam(selected.max_price);
+    if (minPrice || maxPrice) {
+      chips.push({
+        label: `Цена: ${minPrice ?? "…"}–${maxPrice ?? "…"}`,
+        href: buildCatalogQuery(basePath, selected, { min_price: null, max_price: null }),
+      });
+    }
+
+    if (singleParam(selected.inStock) === "1") {
+      chips.push({ label: "В наличии", href: buildCatalogQuery(basePath, selected, { inStock: null }) });
+    }
+
+    if (singleParam(selected.sale) === "1") {
+      chips.push({ label: "Со скидкой", href: buildCatalogQuery(basePath, selected, { sale: null }) });
+    }
+
     for (const group of groups) {
       for (const field of group.fields) {
+        if (field.type === "PRICE") continue;
+
         if (field.type === "NUMBER" || field.type === "RANGE") {
           const min = singleParam(selected[`min_${field.slug}`]);
           const max = singleParam(selected[`max_${field.slug}`]);
@@ -160,6 +318,16 @@ export function CatalogFilter({
             chips.push({
               label: `${field.name}: ${min ?? "…"}–${max ?? "…"}`,
               href: buildCatalogQuery(basePath, selected, { [`min_${field.slug}`]: null, [`max_${field.slug}`]: null }),
+            });
+          }
+          continue;
+        }
+
+        if (field.type === "BOOLEAN") {
+          if (singleParam(selected[field.slug]) === "1") {
+            chips.push({
+              label: field.name,
+              href: buildCatalogQuery(basePath, selected, { [field.slug]: null }),
             });
           }
           continue;
@@ -205,7 +373,7 @@ export function CatalogFilter({
           ))}
         </div>
       ) : null}
-      <FilterForm groups={groups} brands={brands} selected={selected} basePath={basePath} onDone={() => setMobileOpen(false)} />
+      <FilterForm groups={groups} brands={brands} selected={selected} basePath={basePath} total={total} onDone={() => setMobileOpen(false)} />
     </div>
   );
 

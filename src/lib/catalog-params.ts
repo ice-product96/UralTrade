@@ -1,3 +1,9 @@
+import { parseSpecFacetParams, SPEC_FACET_PREFIX, specFacetParamKey } from "@/lib/catalog-facets";
+
+export { parseSpecFacetParams, SPEC_FACET_PREFIX, specFacetParamKey };
+
+const IGNORED_FILTER_PARAMS = new Set(["page", "perPage", "sort", "all", "q"]);
+
 export function singleParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -5,6 +11,17 @@ export function singleParam(value: string | string[] | undefined) {
 export function multiParam(value: string | string[] | undefined) {
   if (!value) return [];
   return Array.isArray(value) ? value : value.split(",").filter(Boolean);
+}
+
+export function hasActiveCatalogFilters(searchParams?: Record<string, string | string[] | undefined>) {
+  if (!searchParams) return false;
+
+  return Object.entries(searchParams).some(([key, value]) => {
+    if (IGNORED_FILTER_PARAMS.has(key)) return false;
+    if (value == null || value === "") return false;
+    if (Array.isArray(value) && value.length === 0) return false;
+    return true;
+  });
 }
 
 export function buildCatalogQuery(

@@ -1,8 +1,20 @@
-import { FieldType, Prisma } from "@/generated/prisma/client";
+import { FieldType, FilterWidget, Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/safe-query";
 import { asNumber } from "@/lib/utils";
-import { multiParam, singleParam } from "@/lib/catalog-params";
+import {
+  countSpecFacetOptions,
+  discoverSpecFacets,
+  filterProductIdsBySpecFacets,
+  parseSpecFacetParams,
+  parseSpecJson,
+  SPEC_FACET_SEARCH_THRESHOLD,
+  SPEC_FACET_TOP_VALUES,
+  specFacetParamKey,
+  type ProductSpecRow,
+} from "@/lib/catalog-facets";
+import { hasActiveCatalogFilters, multiParam, singleParam } from "@/lib/catalog-params";
+import type { CatalogFilterGroup } from "@/lib/catalog-types";
 
 export { multiParam, singleParam, buildCatalogQuery } from "@/lib/catalog-params";
 
@@ -45,6 +57,22 @@ export type ProductCardItem = Prisma.ProductGetPayload<{
 }>;
 
 export type CatalogSort = "new" | "price_asc" | "price_desc" | "name_asc" | "name_desc";
+
+export type { CatalogFilterField, CatalogFilterGroup } from "@/lib/catalog-types";
+
+type WhereBuildOptions = {
+  categoryIds?: string[];
+  templateId?: string | null;
+  searchParams?: Record<string, string | string[] | undefined>;
+  specRows?: ProductSpecRow[];
+  exclude?: {
+    brand?: boolean;
+    price?: boolean;
+    availability?: boolean;
+    specKeySlug?: string;
+    fieldSlug?: string;
+  };
+};
 
 export async function getNavigationCategories() {
   return safeQuery(
@@ -160,45 +188,24 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
   const page = Math.max(1, asNumber(searchParams?.page, 1));
   const perPage = Math.min(48, Math.max(12, asNumber(searchParams?.perPage, 12)));
   const skip = (page - 1) * perPage;
-  const q = singleParam(searchParams?.q);
-  const brandSlug = singleParam(searchParams?.brand);
   const sort = singleParam(searchParams?.sort) ?? "new";
   const showAllProducts = singleParam(searchParams?.all) === "1";
-  const hasFilters =
-    showAllProducts ||
-    Boolean(
-      q ||
-        brandSlug ||
-        sort !== "new" ||
-        Object.keys(searchParams ?? {}).some(
-          (key) =>
-            key.startsWith("min_") ||
-            key.startsWith("max_") ||
-            (key !== "page" && key !== "perPage" && key !== "sort" && key !== "all" && !key.startsWith("f_")),
-        ),
-    );
+  const hasFilters = showAllProducts || hasActiveCatalogFilters(searchParams);
+  const showFilterPanel = Boolean(category) || hasFilters;
 
   const categoryIds = category ? await getCategoryTreeIds(category.id) : undefined;
-  const templateId = category ? await resolveCategoryTemplate(category) : null;
+  const templateId = category ? await resolveCategoryTemplate(category) : await resolveCatalogTemplateId(categoryIds);
+  const scopeWhere: Prisma.ProductWhereInput = categoryIds ? { categoryId: { in: categoryIds } } : {};
 
-  const where: Prisma.ProductWhereInput = {
-    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
-    ...(q
-      ? {
-          OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { sku: { contains: q, mode: "insensitive" } },
-            { brand: { name: { contains: q, mode: "insensitive" } } },
-          ],
-        }
-      : {}),
-    ...(brandSlug ? { brand: { slug: brandSlug } } : {}),
-  };
+  const specsFieldIds = await getSpecsFieldIds(templateId, categoryIds);
+  const specRows = await loadProductSpecRows(specsFieldIds, scopeWhere);
 
-  const fieldFilters = await buildFieldFilters(templateId, searchParams);
-  if (fieldFilters.length) {
-    where.AND = fieldFilters;
-  }
+  const where = await buildProductWhere({
+    categoryIds,
+    templateId,
+    searchParams,
+    specRows,
+  });
 
   const [products, total, brands, filterGroups] = await Promise.all([
     prisma.product.findMany({
@@ -209,14 +216,17 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
       skip,
     }),
     prisma.product.count({ where }),
-    getScopedBrands(categoryIds, searchParams, templateId),
-    getFilterGroups(templateId, categoryIds, searchParams),
+    getScopedBrands(categoryIds, searchParams, templateId, specRows),
+    showFilterPanel
+      ? getCatalogFilters(templateId, categoryIds, searchParams, specRows)
+      : Promise.resolve([] as CatalogFilterGroup[]),
   ]);
 
   return {
     category,
     rootCategories,
     hasFilters,
+    showFilterPanel,
     products,
     total,
     page,
@@ -229,28 +239,156 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
   };
 }
 
-async function getScopedBrands(
-  categoryIds: string[] | undefined,
-  searchParams?: Record<string, string | string[] | undefined>,
-  templateId?: string | null,
-) {
-  const baseWhere: Prisma.ProductWhereInput = {
-    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
-  };
+async function resolveCatalogTemplateId(categoryIds?: string[]): Promise<string | null> {
+  const products = await prisma.product.findMany({
+    where: categoryIds ? { categoryId: { in: categoryIds } } : {},
+    select: { templateId: true },
+    distinct: ["templateId"],
+    take: 5,
+  });
+
+  const templateIds = products.map((item) => item.templateId).filter((id): id is string => Boolean(id));
+  return templateIds.length === 1 ? templateIds[0] : null;
+}
+
+async function getSpecsFieldIds(templateId: string | null, categoryIds?: string[]): Promise<string[]> {
+  const templateIds = templateId
+    ? [templateId]
+    : (
+        await prisma.product.findMany({
+          where: categoryIds ? { categoryId: { in: categoryIds } } : {},
+          select: { templateId: true },
+          distinct: ["templateId"],
+        })
+      )
+        .map((item) => item.templateId)
+        .filter((id): id is string => Boolean(id));
+
+  if (!templateIds.length) return [];
+
+  const fields = await prisma.fieldDefinition.findMany({
+    where: {
+      templateId: { in: templateIds },
+      type: FieldType.KEY_VALUE,
+    },
+    select: { id: true },
+  });
+
+  return [...new Set(fields.map((field) => field.id))];
+}
+
+async function loadProductSpecRows(fieldIds: string[], scopeWhere: Prisma.ProductWhereInput): Promise<ProductSpecRow[]> {
+  if (!fieldIds.length) return [];
+
+  const values = await prisma.productFieldValue.findMany({
+    where: {
+      fieldId: { in: fieldIds },
+      product: scopeWhere,
+      valueJson: { not: Prisma.DbNull },
+    },
+    select: { productId: true, valueJson: true },
+  });
+
+  const byProduct = new Map<string, ReturnType<typeof parseSpecJson>>();
+  for (const row of values) {
+    const specs = parseSpecJson(row.valueJson);
+    if (!specs.length) continue;
+    const existing = byProduct.get(row.productId) ?? [];
+    byProduct.set(row.productId, [...existing, ...specs]);
+  }
+
+  return [...byProduct.entries()].map(([productId, specs]) => ({ productId, specs }));
+}
+
+async function getSaleProductIds(categoryIds?: string[]): Promise<string[]> {
+  const products = await prisma.product.findMany({
+    where: {
+      ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+      oldPrice: { not: null },
+    },
+    select: { id: true, price: true, oldPrice: true },
+  });
+
+  return products.filter((product) => Number(product.oldPrice) > Number(product.price)).map((product) => product.id);
+}
+
+async function buildProductWhere(options: WhereBuildOptions): Promise<Prisma.ProductWhereInput> {
+  const { categoryIds, templateId, searchParams, specRows, exclude } = options;
+  const where: Prisma.ProductWhereInput = {};
+  const andFilters: Prisma.ProductWhereInput[] = [];
+
+  if (categoryIds?.length) {
+    where.categoryId = { in: categoryIds };
+  }
 
   const q = singleParam(searchParams?.q);
   if (q) {
-    baseWhere.OR = [
+    where.OR = [
       { name: { contains: q, mode: "insensitive" } },
       { sku: { contains: q, mode: "insensitive" } },
       { brand: { name: { contains: q, mode: "insensitive" } } },
     ];
   }
 
-  const fieldFilters = await buildFieldFilters(templateId, searchParams, { skipBrand: true });
-  if (fieldFilters.length) {
-    baseWhere.AND = fieldFilters;
+  const brandSlug = singleParam(searchParams?.brand);
+  if (!exclude?.brand && brandSlug) {
+    where.brand = { slug: brandSlug };
   }
+
+  if (!exclude?.price) {
+    const minPrice = singleParam(searchParams?.min_price);
+    const maxPrice = singleParam(searchParams?.max_price);
+    if (minPrice || maxPrice) {
+      where.price = {
+        ...(minPrice ? { gte: asNumber(minPrice) } : {}),
+        ...(maxPrice ? { lte: asNumber(maxPrice) } : {}),
+      };
+    }
+  }
+
+  if (!exclude?.availability) {
+    if (singleParam(searchParams?.inStock) === "1") {
+      where.inStock = true;
+    }
+
+    if (singleParam(searchParams?.sale) === "1") {
+      const saleIds = await getSaleProductIds(categoryIds);
+      andFilters.push({ id: { in: saleIds.length ? saleIds : ["__none__"] } });
+    }
+  }
+
+  const templateFilters = await buildTemplateFieldFilters(templateId, searchParams, exclude?.fieldSlug);
+  if (templateFilters.length) andFilters.push(...templateFilters);
+
+  const selectedFacets = parseSpecFacetParams(searchParams);
+  const reducedFacets = { ...selectedFacets };
+  if (exclude?.specKeySlug) delete reducedFacets[exclude.specKeySlug];
+
+  if (specRows?.length && Object.keys(reducedFacets).length) {
+    const matchedIds = filterProductIdsBySpecFacets(specRows, reducedFacets);
+    andFilters.push({ id: { in: matchedIds?.length ? matchedIds : ["__none__"] } });
+  }
+
+  if (andFilters.length) {
+    where.AND = andFilters;
+  }
+
+  return where;
+}
+
+async function getScopedBrands(
+  categoryIds: string[] | undefined,
+  searchParams?: Record<string, string | string[] | undefined>,
+  templateId?: string | null,
+  specRows?: ProductSpecRow[],
+) {
+  const baseWhere = await buildProductWhere({
+    categoryIds,
+    templateId,
+    searchParams,
+    specRows,
+    exclude: { brand: true },
+  });
 
   const grouped = await prisma.product.groupBy({
     by: ["brandId"],
@@ -275,13 +413,177 @@ async function getScopedBrands(
   }));
 }
 
-async function getFilterGroups(
+async function getCatalogFilters(
   templateId: string | null | undefined,
   categoryIds: string[] | undefined,
   searchParams?: Record<string, string | string[] | undefined>,
-) {
-  if (!templateId) return [];
+  specRows: ProductSpecRow[] = [],
+): Promise<CatalogFilterGroup[]> {
+  const groups: CatalogFilterGroup[] = [];
 
+  const priceWhere = await buildProductWhere({
+    categoryIds,
+    templateId,
+    searchParams,
+    specRows,
+    exclude: { price: true },
+  });
+
+  const priceAgg = await prisma.product.aggregate({
+    where: priceWhere,
+    _min: { price: true },
+    _max: { price: true },
+  });
+
+  const minPrice = priceAgg._min.price ? Number(priceAgg._min.price) : undefined;
+  const maxPrice = priceAgg._max.price ? Number(priceAgg._max.price) : undefined;
+
+  if (minPrice != null && maxPrice != null && minPrice <= maxPrice) {
+    groups.push({
+      id: "price",
+      name: "Цена",
+      collapsed: false,
+      fields: [
+        {
+          id: "price-range",
+          name: "Цена",
+          slug: "price",
+          type: "PRICE",
+          min: minPrice,
+          max: maxPrice,
+          options: [],
+          optionCounts: {},
+        },
+      ],
+    });
+  }
+
+  const availabilityWhere = await buildProductWhere({
+    categoryIds,
+    templateId,
+    searchParams,
+    specRows,
+    exclude: { availability: true },
+  });
+
+  const [inStockCount, saleIds] = await Promise.all([
+    prisma.product.count({ where: { ...availabilityWhere, inStock: true } }),
+    getSaleProductIds(categoryIds),
+  ]);
+
+  const saleCount = saleIds.length
+    ? await prisma.product.count({
+        where: {
+          ...availabilityWhere,
+          id: { in: saleIds },
+        },
+      })
+    : 0;
+
+  if (inStockCount > 0 || saleCount > 0) {
+    groups.push({
+      id: "availability",
+      name: "Наличие",
+      collapsed: false,
+      fields: [
+        {
+          id: "in-stock",
+          name: "В наличии",
+          slug: "inStock",
+          type: "BOOLEAN",
+          options: [{ id: "in-stock", label: "В наличии", slug: "1" }],
+          optionCounts: { "1": inStockCount },
+        },
+        ...(saleCount > 0
+          ? [
+              {
+                id: "on-sale",
+                name: "Со скидкой",
+                slug: "sale",
+                type: "BOOLEAN" as const,
+                options: [{ id: "on-sale", label: "Со скидкой", slug: "1" }],
+                optionCounts: { "1": saleCount },
+              },
+            ]
+          : []),
+      ],
+    });
+  }
+
+  if (templateId) {
+    const templateGroups = await getTemplateFilterGroups(templateId, categoryIds, searchParams, specRows);
+    groups.push(...templateGroups);
+  }
+
+  const specFacets = discoverSpecFacets(specRows);
+  const templateSpecKeys = templateId
+    ? new Set(
+        (
+          await prisma.fieldDefinition.findMany({
+            where: { templateId, isFilterable: true, slug: { startsWith: "spec-" } },
+            select: { slug: true },
+          })
+        ).map((field) => field.slug),
+      )
+    : new Set<string>();
+
+  if (specFacets.length) {
+    const selected = parseSpecFacetParams(searchParams);
+
+    for (const facet of specFacets) {
+      if (templateSpecKeys.has(`spec-${facet.keySlug}`)) continue;
+      const facetWhere = await buildProductWhere({
+        categoryIds,
+        templateId,
+        searchParams,
+        specRows,
+        exclude: { specKeySlug: facet.keySlug },
+      });
+
+      const scopedIds = (
+        await prisma.product.findMany({
+          where: facetWhere,
+          select: { id: true },
+        })
+      ).map((product) => product.id);
+
+      const scopedRows = specRows.filter((row) => scopedIds.includes(row.productId));
+      const countsMap = countSpecFacetOptions(scopedRows, [facet], selected, facet.keySlug);
+      const optionCounts = countsMap.get(facet.keySlug) ?? {};
+
+      groups.push({
+        id: `spec-${facet.keySlug}`,
+        name: facet.key,
+        collapsed: false,
+        fields: [
+          {
+            id: facet.keySlug,
+            name: facet.key,
+            slug: specFacetParamKey(facet.keySlug),
+            type: "SPEC",
+            searchable: facet.options.length >= SPEC_FACET_SEARCH_THRESHOLD,
+            topValuesLimit: SPEC_FACET_TOP_VALUES,
+            options: facet.options.map((option) => ({
+              id: option.id,
+              label: option.label,
+              slug: option.slug,
+            })),
+            optionCounts,
+          },
+        ],
+      });
+    }
+  }
+
+  return groups;
+}
+
+async function getTemplateFilterGroups(
+  templateId: string,
+  categoryIds: string[] | undefined,
+  searchParams?: Record<string, string | string[] | undefined>,
+  specRows: ProductSpecRow[] = [],
+): Promise<CatalogFilterGroup[]> {
   const fields = await prisma.fieldDefinition.findMany({
     where: { templateId, isFilterable: true },
     include: {
@@ -291,60 +593,28 @@ async function getFilterGroups(
     orderBy: [{ group: { sortOrder: "asc" } }, { sortOrder: "asc" }],
   });
 
-  const baseWhere: Prisma.ProductWhereInput = {
-    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
-  };
-
-  const q = singleParam(searchParams?.q);
-  const brandSlug = singleParam(searchParams?.brand);
-  if (q) {
-    baseWhere.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { sku: { contains: q, mode: "insensitive" } },
-      { brand: { name: { contains: q, mode: "insensitive" } } },
-    ];
-  }
-  if (brandSlug) {
-    baseWhere.brand = { slug: brandSlug };
-  }
-
-  const otherFieldFilters = await buildFieldFilters(templateId, searchParams);
-  if (otherFieldFilters.length) {
-    baseWhere.AND = otherFieldFilters;
-  }
-
-  const productIds = (
-    await prisma.product.findMany({
-      where: baseWhere,
-      select: { id: true },
-    })
-  ).map((product) => product.id);
-
-  const grouped = new Map<
-    string,
-    {
-      id: string;
-      name: string;
-      collapsed: boolean;
-      fields: Array<{
-        id: string;
-        name: string;
-        slug: string;
-        type: string;
-        unit: string | null;
-        min?: number;
-        max?: number;
-        options: Array<{ id: string; label: string; slug: string }>;
-        optionCounts: Record<string, number>;
-      }>;
-    }
-  >();
+  const grouped = new Map<string, CatalogFilterGroup>();
 
   for (const field of fields) {
-    const groupId = field.group?.id ?? "common";
+    const facetWhere = await buildProductWhere({
+      categoryIds,
+      templateId,
+      searchParams,
+      specRows,
+      exclude: { fieldSlug: field.slug },
+    });
+
+    const productIds = (
+      await prisma.product.findMany({
+        where: facetWhere,
+        select: { id: true },
+      })
+    ).map((product) => product.id);
+
+    const groupId = field.group?.id ?? "template-common";
     const group = grouped.get(groupId) ?? {
       id: groupId,
-      name: field.group?.name ?? "Основные фильтры",
+      name: field.group?.name ?? "Параметры",
       collapsed: field.group?.collapsed ?? false,
       fields: [],
     };
@@ -361,11 +631,12 @@ async function getFilterGroups(
         select: { valueNumber: true },
       });
       const numbers = numericValues.map((value) => Number(value.valueNumber)).filter(Number.isFinite);
+
       group.fields.push({
         id: field.id,
         name: field.name,
         slug: field.slug,
-        type: field.type,
+        type: field.type === FieldType.RANGE ? "RANGE" : "NUMBER",
         unit: field.unit,
         min: numbers.length ? Math.min(...numbers) : undefined,
         max: numbers.length ? Math.max(...numbers) : undefined,
@@ -384,30 +655,88 @@ async function getFilterGroups(
       });
 
       for (const row of counts) {
-        if (row.optionId) optionCounts[row.optionId] = row._count.id;
+        const option = field.options.find((item) => item.id === row.optionId);
+        if (option) optionCounts[option.slug] = row._count.id;
       }
 
       group.fields.push({
         id: field.id,
         name: field.name,
         slug: field.slug,
-        type: field.type,
+        type: field.type === FieldType.MULTISELECT ? "MULTISELECT" : "SELECT",
         unit: field.unit,
+        searchable: field.filterWidget === FilterWidget.SEARCHABLE_LIST || field.options.length >= SPEC_FACET_SEARCH_THRESHOLD,
+        topValuesLimit: field.topValuesLimit,
         options: field.options,
         optionCounts,
       });
+    } else if (field.type === FieldType.BOOLEAN) {
+      const trueCount = await prisma.productFieldValue.count({
+        where: {
+          fieldId: field.id,
+          productId: productIds.length ? { in: productIds } : undefined,
+          valueBoolean: true,
+        },
+      });
+
+      if (trueCount > 0) {
+        group.fields.push({
+          id: field.id,
+          name: field.name,
+          slug: field.slug,
+          type: "BOOLEAN",
+          options: [{ id: `${field.id}-true`, label: field.name, slug: "1" }],
+          optionCounts: { "1": trueCount },
+        });
+      }
+    } else if (field.type === FieldType.TEXT) {
+      const textValues = await prisma.productFieldValue.findMany({
+        where: {
+          fieldId: field.id,
+          productId: productIds.length ? { in: productIds } : undefined,
+          valueText: { not: null },
+        },
+        select: { valueText: true },
+      });
+
+      const valueCounts = new Map<string, number>();
+      for (const row of textValues) {
+        const label = row.valueText?.trim();
+        if (!label) continue;
+        valueCounts.set(label, (valueCounts.get(label) ?? 0) + 1);
+      }
+
+      const options = [...valueCounts.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ru"))
+        .map(([label, count]) => {
+          optionCounts[label] = count;
+          return { id: `${field.id}-${label}`, label, slug: label };
+        });
+
+      if (options.length) {
+        group.fields.push({
+          id: field.id,
+          name: field.name,
+          slug: field.slug,
+          type: "SELECT",
+          searchable: options.length >= SPEC_FACET_SEARCH_THRESHOLD,
+          topValuesLimit: field.topValuesLimit,
+          options,
+          optionCounts,
+        });
+      }
     }
 
     grouped.set(groupId, group);
   }
 
-  return Array.from(grouped.values());
+  return [...grouped.values()].filter((group) => group.fields.length > 0);
 }
 
-async function buildFieldFilters(
+async function buildTemplateFieldFilters(
   templateId?: string | null,
   searchParams?: Record<string, string | string[] | undefined>,
-  options?: { skipBrand?: boolean },
+  excludeFieldSlug?: string,
 ): Promise<Prisma.ProductWhereInput[]> {
   if (!templateId || !searchParams) return [];
 
@@ -419,6 +748,8 @@ async function buildFieldFilters(
   const filters: Prisma.ProductWhereInput[] = [];
 
   for (const field of fields) {
+    if (excludeFieldSlug && field.slug === excludeFieldSlug) continue;
+
     if (field.type === FieldType.NUMBER || field.type === FieldType.RANGE) {
       const min = singleParam(searchParams[`min_${field.slug}`]);
       const max = singleParam(searchParams[`max_${field.slug}`]);
@@ -432,6 +763,33 @@ async function buildFieldFilters(
               ...(min ? { gte: asNumber(min) } : {}),
               ...(max ? { lte: asNumber(max) } : {}),
             },
+          },
+        },
+      });
+      continue;
+    }
+
+    if (field.type === FieldType.BOOLEAN) {
+      if (singleParam(searchParams[field.slug]) !== "1") continue;
+      filters.push({
+        fieldValues: {
+          some: {
+            fieldId: field.id,
+            valueBoolean: true,
+          },
+        },
+      });
+      continue;
+    }
+
+    if (field.type === FieldType.TEXT) {
+      const selected = multiParam(searchParams[field.slug]);
+      if (!selected.length) continue;
+      filters.push({
+        fieldValues: {
+          some: {
+            fieldId: field.id,
+            valueText: { in: selected },
           },
         },
       });
@@ -452,10 +810,6 @@ async function buildFieldFilters(
         },
       },
     });
-  }
-
-  if (!options?.skipBrand && singleParam(searchParams.brand)) {
-    // brand handled in main where
   }
 
   return filters;
