@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Boxes, FileText, Home, Layers3, Package, Settings2, ShoppingBag, Tags } from "lucide-react";
+import { Boxes, FileText, Home, Layers3, Package, Settings2, ShoppingBag, Tags, Files } from "lucide-react";
 import { SiteLogo } from "@/components/site-logo";
 
 const items = [
@@ -10,6 +10,7 @@ const items = [
   { href: "/admin/brands", label: "Бренды", icon: Tags },
   { href: "/admin/orders", label: "Заказы", icon: ShoppingBag },
   { href: "/admin/content", label: "Главная", icon: Boxes },
+  { href: "/admin/pages", label: "Страницы", icon: Files },
   { href: "/admin/seo", label: "SEO", icon: FileText },
 ];
 

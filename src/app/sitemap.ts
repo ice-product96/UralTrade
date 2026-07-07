@@ -6,18 +6,23 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
-  const [products, categories, brands] = await Promise.all([
+  const [products, categories, brands, pages] = await Promise.all([
     prisma.product.findMany({ select: { slug: true, updatedAt: true } }),
     prisma.category.findMany({ select: { slug: true, updatedAt: true } }),
     prisma.brand.findMany({ select: { slug: true, updatedAt: true } }),
+    prisma.contentPage.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
   ]);
 
   return [
     { url: siteUrl, lastModified: new Date(), priority: 1 },
     { url: `${siteUrl}/catalog`, lastModified: new Date(), priority: 0.9 },
-    { url: `${siteUrl}/page/about`, lastModified: new Date(), priority: 0.5 },
-    { url: `${siteUrl}/page/delivery`, lastModified: new Date(), priority: 0.5 },
-    { url: `${siteUrl}/page/contacts`, lastModified: new Date(), priority: 0.5 },
+    { url: `${siteUrl}/promotions`, lastModified: new Date(), priority: 0.8 },
+    { url: `${siteUrl}/brands`, lastModified: new Date(), priority: 0.7 },
+    ...pages.map((page) => ({
+      url: `${siteUrl}/page/${page.slug}`,
+      lastModified: page.updatedAt,
+      priority: 0.5,
+    })),
     ...categories.map((category) => ({
       url: `${siteUrl}/catalog/${category.slug}`,
       lastModified: category.updatedAt,

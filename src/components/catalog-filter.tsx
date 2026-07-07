@@ -207,6 +207,7 @@ function FilterForm({
   selected,
   basePath,
   total,
+  hiddenFields,
   onDone,
 }: {
   groups: CatalogFilterGroup[];
@@ -214,10 +215,22 @@ function FilterForm({
   selected: Record<string, string | string[] | undefined>;
   basePath: string;
   total: number;
+  hiddenFields?: string[];
   onDone?: () => void;
 }) {
+  const visibleGroups = groups
+    .map((group) => ({
+      ...group,
+      fields: group.fields.filter((field) => !hiddenFields?.includes(field.slug)),
+    }))
+    .filter((group) => group.fields.length > 0);
+
   return (
     <form action={basePath} className="space-y-2" onSubmit={onDone}>
+      {hiddenFields?.includes("sale") || singleParam(selected.sale) === "1" ? (
+        <input type="hidden" name="sale" value="1" />
+      ) : null}
+      {singleParam(selected.all) === "1" ? <input type="hidden" name="all" value="1" /> : null}
       <FilterAccordion title="Бренд">
         <div className="space-y-1">
           <label className="flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-2 hover:bg-background">
@@ -242,7 +255,7 @@ function FilterForm({
         </div>
       </FilterAccordion>
 
-      {groups.map((group) => (
+      {visibleGroups.map((group) => (
         <FilterAccordion key={group.id} title={group.name} collapsed={group.collapsed}>
           <div className="space-y-5">
             {group.fields.map((field) => (
@@ -273,12 +286,14 @@ export function CatalogFilter({
   selected,
   basePath,
   total,
+  hiddenFields,
 }: {
   groups: CatalogFilterGroup[];
   brands: BrandOption[];
   selected: Record<string, string | string[] | undefined>;
   basePath: string;
   total: number;
+  hiddenFields?: string[];
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -373,7 +388,7 @@ export function CatalogFilter({
           ))}
         </div>
       ) : null}
-      <FilterForm groups={groups} brands={brands} selected={selected} basePath={basePath} total={total} onDone={() => setMobileOpen(false)} />
+      <FilterForm groups={groups} brands={brands} selected={selected} basePath={basePath} total={total} hiddenFields={hiddenFields} onDone={() => setMobileOpen(false)} />
     </div>
   );
 

@@ -249,6 +249,20 @@ model HomeBanner {
   active      Boolean  @default(true)
 }
 
+model ContentPage {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  description     String?
+  body            String   @default("")
+  metaTitle       String?
+  metaDescription String?
+  h1              String?
+  published       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model SeoTemplate {
   id              String   @id @default(cuid())
   entityType      String

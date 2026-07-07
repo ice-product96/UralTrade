@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteLogo } from "@/components/site-logo";
 import { getNavigationCategories } from "@/lib/data";
+import { mainNavLinks } from "@/lib/site-nav";
 
 export async function SiteFooter() {
   const categories = await getNavigationCategories();
@@ -22,6 +23,9 @@ export async function SiteFooter() {
           <Link href="/brands" className="block text-muted hover:text-petrol">
             Бренды
           </Link>
+          <Link href="/promotions" className="block text-muted hover:text-petrol">
+            Акции
+          </Link>
           {categories.slice(0, 5).map((category) => (
             <Link key={category.id} href={`/catalog/${category.slug}`} className="block text-muted hover:text-petrol">
               {category.name}
@@ -30,15 +34,13 @@ export async function SiteFooter() {
         </div>
         <div className="space-y-3 text-sm">
           <div className="font-bold text-graphite">Покупателям</div>
-          <Link href="/page/delivery" className="block text-muted hover:text-petrol">
-            Доставка
-          </Link>
-          <Link href="/page/about" className="block text-muted hover:text-petrol">
-            О компании
-          </Link>
-          <Link href="/page/contacts" className="block text-muted hover:text-petrol">
-            Контакты
-          </Link>
+          {mainNavLinks
+            .filter((item) => item.href !== "/brands" && item.href !== "/promotions")
+            .map((item) => (
+              <Link key={item.href} href={item.href} className="block text-muted hover:text-petrol">
+                {item.label}
+              </Link>
+            ))}
         </div>
       </div>
     </footer>

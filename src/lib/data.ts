@@ -14,6 +14,7 @@ import {
   type ProductSpecRow,
 } from "@/lib/catalog-facets";
 import { hasActiveCatalogFilters, multiParam, singleParam } from "@/lib/catalog-params";
+import { contentPageSeeds } from "@/lib/site-nav";
 import type { CatalogFilterGroup } from "@/lib/catalog-types";
 
 export { multiParam, singleParam, buildCatalogQuery } from "@/lib/catalog-params";
@@ -167,6 +168,16 @@ export async function getPublicBrands() {
       }),
     [],
   );
+}
+
+export async function getContentPage(slug: string) {
+  const existing = await prisma.contentPage.findUnique({ where: { slug } });
+  if (existing) return existing;
+
+  const seed = contentPageSeeds.find((page) => page.slug === slug);
+  if (!seed) return null;
+
+  return prisma.contentPage.create({ data: seed });
 }
 
 export async function getCatalogData(slug?: string, searchParams?: Record<string, string | string[] | undefined>) {

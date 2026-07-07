@@ -507,6 +507,30 @@ export async function deleteHomeBanner(formData: FormData) {
   revalidatePath("/");
 }
 
+// --- Content pages ---
+
+export async function updateContentPage(formData: FormData) {
+  const id = required(formData, "id");
+  const slug = required(formData, "slug");
+
+  await prisma.contentPage.update({
+    where: { id },
+    data: {
+      title: required(formData, "title"),
+      description: optional(formData, "description"),
+      body: optional(formData, "body") ?? "",
+      metaTitle: optional(formData, "metaTitle"),
+      metaDescription: optional(formData, "metaDescription"),
+      h1: optional(formData, "h1"),
+      published: formData.get("published") === "on",
+    },
+  });
+
+  revalidatePath("/admin/pages");
+  revalidatePath(`/page/${slug}`);
+  revalidatePath("/sitemap.xml");
+}
+
 // --- SEO ---
 
 export async function createSeoTemplate(formData: FormData) {
