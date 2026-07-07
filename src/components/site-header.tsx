@@ -25,7 +25,10 @@ export async function SiteHeader() {
         <SiteLogo priority height={46} />
         <nav className="hidden items-center gap-1 rounded-full bg-white p-1 text-sm font-semibold shadow-sm lg:flex">
           <CatalogMegaMenu categories={navCategories} />
-          {categories.slice(0, 3).map((category) => (
+          <Link href="/brands" className="rounded-full px-4 py-2 text-muted hover:bg-background hover:text-petrol">
+            Бренды
+          </Link>
+          {categories.slice(0, 2).map((category) => (
             <Link key={category.id} href={`/catalog/${category.slug}`} className="rounded-full px-4 py-2 text-muted hover:bg-background hover:text-petrol">
               {category.name}
             </Link>

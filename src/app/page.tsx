@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { CategoryCard } from "@/components/category-card";
 import { MotionReveal } from "@/components/motion-reveal";
 import { ProductCard } from "@/components/product-card";
@@ -13,7 +13,7 @@ import { organizationJsonLd } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const { banners, categories, products } = await getHomeData();
+  const { banners, categories, products, brands } = await getHomeData();
   const banner = banners[0];
 
   return (
@@ -33,11 +33,26 @@ export default async function Home() {
                   {banner?.title ?? "Интернет-магазин гидравлического оборудования"}
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-                  {banner?.subtitle ??
-                    "Большой каталог с поиском по артикулу, подбором по характеристикам и оформлением заказа онлайн."}
+                  {banner?.subtitle ?? "Большой каталог с поиском по артикулу, подбором по характеристикам и оформлением заказа онлайн."}
                 </p>
-                <div className="mt-8">
+                <div className="mt-8 flex flex-wrap gap-3">
                   <ButtonLink href={banner?.href ?? "/catalog"}>{banner?.buttonLabel ?? "Перейти в каталог"}</ButtonLink>
+                  <ButtonLink href="/brands" variant="ghost">
+                    Бренды
+                  </ButtonLink>
+                </div>
+                <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                  {[
+                    { icon: Wrench, title: "Подбор по параметрам", text: "Фильтры по характеристикам и брендам" },
+                    { icon: Truck, title: "Доставка по РФ", text: "Отправка до транспортной компании" },
+                    { icon: ShieldCheck, title: "Консультация", text: "Поможем подобрать оборудование" },
+                  ].map(({ icon: Icon, title, text }) => (
+                    <div key={title} className="rounded-3xl border border-border bg-white/80 p-4">
+                      <Icon className="h-5 w-5 text-lime" />
+                      <div className="mt-3 font-bold text-graphite">{title}</div>
+                      <div className="text-sm text-muted">{text}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </MotionReveal>
@@ -77,6 +92,26 @@ export default async function Home() {
           </section>
         </MotionReveal>
 
+        {brands.length ? (
+          <MotionReveal>
+            <section className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <h2 className="text-3xl font-black text-graphite">Популярные бренды</h2>
+                <Link href="/brands" className="font-bold text-petrol hover:text-lime">
+                  Все бренды
+                </Link>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                {brands.map((brand) => (
+                  <Link key={brand.id} href={`/catalog?brand=${brand.slug}`} className="rounded-2xl border border-border bg-white p-4 text-center transition hover:border-lime">
+                    <div className="font-bold text-graphite">{brand.name}</div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </MotionReveal>
+        ) : null}
+
         <MotionReveal>
           <section className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
             <div className="mb-8 flex items-end justify-between gap-4">
@@ -84,7 +119,7 @@ export default async function Home() {
                 <h2 className="text-3xl font-black text-graphite">Популярные товары</h2>
                 <p className="mt-2 text-muted">Актуальные позиции из каталога</p>
               </div>
-              <Link href="/catalog" className="hidden font-bold text-petrol md:inline">
+              <Link href="/catalog?all=1" className="hidden font-bold text-petrol md:inline">
                 Смотреть все
               </Link>
             </div>

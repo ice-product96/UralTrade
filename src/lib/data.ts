@@ -1,6 +1,10 @@
 import { FieldType, Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { safeQuery } from "@/lib/safe-query";
 import { asNumber } from "@/lib/utils";
+import { multiParam, singleParam } from "@/lib/catalog-params";
+
+export { multiParam, singleParam, buildCatalogQuery } from "@/lib/catalog-params";
 
 export const productDetailsInclude = {
   category: { include: { parent: true } },
@@ -40,12 +44,19 @@ export type ProductCardItem = Prisma.ProductGetPayload<{
   };
 }>;
 
+export type CatalogSort = "new" | "price_asc" | "price_desc" | "name_asc" | "name_desc";
+
 export async function getNavigationCategories() {
-  return prisma.category.findMany({
-    where: { parentId: null },
-    include: { children: { orderBy: { sortOrder: "asc" } } },
-    orderBy: { sortOrder: "asc" },
-  });
+  return safeQuery(
+    "navigationCategories",
+    () =>
+      prisma.category.findMany({
+        where: { parentId: null },
+        include: { children: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { sortOrder: "asc" },
+      }),
+    [],
+  );
 }
 
 async function getCategoryTreeIds(categoryId: string): Promise<string[]> {
@@ -57,18 +68,77 @@ async function getCategoryTreeIds(categoryId: string): Promise<string[]> {
   return [categoryId, ...nested.flat()];
 }
 
+async function resolveCategoryTemplate(category: {
+  id: string;
+  templateId: string | null;
+  parentId: string | null;
+}): Promise<string | null> {
+  if (category.templateId) return category.templateId;
+  if (!category.parentId) return null;
+
+  const parent = await prisma.category.findUnique({
+    where: { id: category.parentId },
+    select: { id: true, templateId: true, parentId: true },
+  });
+
+  return parent ? resolveCategoryTemplate(parent) : null;
+}
+
+function resolveSortOrder(sort?: string): Prisma.ProductOrderByWithRelationInput {
+  switch (sort as CatalogSort) {
+    case "price_asc":
+      return { price: "asc" };
+    case "price_desc":
+      return { price: "desc" };
+    case "name_asc":
+      return { name: "asc" };
+    case "name_desc":
+      return { name: "desc" };
+    default:
+      return { createdAt: "desc" };
+  }
+}
+
 export async function getHomeData() {
-  const [banners, categories, products] = await Promise.all([
-    prisma.homeBanner.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+  const [banners, categories, products, brands] = await Promise.all([
+    safeQuery("homeBanners", () => prisma.homeBanner.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }), []),
     getNavigationCategories(),
-    prisma.product.findMany({
-      take: 8,
-      include: { brand: true, category: true, images: { orderBy: { sortOrder: "asc" } } },
-      orderBy: { createdAt: "desc" },
-    }),
+    safeQuery(
+      "homeProducts",
+      () =>
+        prisma.product.findMany({
+          take: 8,
+          include: { brand: true, category: true, images: { orderBy: { sortOrder: "asc" } } },
+          orderBy: { createdAt: "desc" },
+        }),
+      [],
+    ),
+    safeQuery(
+      "homeBrands",
+      () =>
+        prisma.brand.findMany({
+          where: { products: { some: {} } },
+          orderBy: { name: "asc" },
+          take: 12,
+        }),
+      [],
+    ),
   ]);
 
-  return { banners, categories, products };
+  return { banners, categories, products, brands };
+}
+
+export async function getPublicBrands() {
+  return safeQuery(
+    "publicBrands",
+    () =>
+      prisma.brand.findMany({
+        where: { products: { some: {} } },
+        include: { _count: { select: { products: true } } },
+        orderBy: { name: "asc" },
+      }),
+    [],
+  );
 }
 
 export async function getCatalogData(slug?: string, searchParams?: Record<string, string | string[] | undefined>) {
@@ -88,16 +158,28 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
     : [];
 
   const page = Math.max(1, asNumber(searchParams?.page, 1));
-  const take = 12;
-  const skip = (page - 1) * take;
+  const perPage = Math.min(48, Math.max(12, asNumber(searchParams?.perPage, 12)));
+  const skip = (page - 1) * perPage;
   const q = singleParam(searchParams?.q);
   const brandSlug = singleParam(searchParams?.brand);
+  const sort = singleParam(searchParams?.sort) ?? "new";
   const showAllProducts = singleParam(searchParams?.all) === "1";
   const hasFilters =
     showAllProducts ||
-    Boolean(q || brandSlug || Object.keys(searchParams ?? {}).some((key) => key.startsWith("f_") || (key === "page" && Number(searchParams?.page) > 1)));
+    Boolean(
+      q ||
+        brandSlug ||
+        sort !== "new" ||
+        Object.keys(searchParams ?? {}).some(
+          (key) =>
+            key.startsWith("min_") ||
+            key.startsWith("max_") ||
+            (key !== "page" && key !== "perPage" && key !== "sort" && key !== "all" && !key.startsWith("f_")),
+        ),
+    );
 
   const categoryIds = category ? await getCategoryTreeIds(category.id) : undefined;
+  const templateId = category ? await resolveCategoryTemplate(category) : null;
 
   const where: Prisma.ProductWhereInput = {
     ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
@@ -113,22 +195,22 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
     ...(brandSlug ? { brand: { slug: brandSlug } } : {}),
   };
 
-  const filters = await buildFieldFilters(category?.templateId, searchParams);
-  if (filters.length) {
-    where.AND = filters;
+  const fieldFilters = await buildFieldFilters(templateId, searchParams);
+  if (fieldFilters.length) {
+    where.AND = fieldFilters;
   }
 
   const [products, total, brands, filterGroups] = await Promise.all([
     prisma.product.findMany({
       where,
       include: { brand: true, category: true, images: { orderBy: { sortOrder: "asc" } } },
-      orderBy: { createdAt: "desc" },
-      take,
+      orderBy: resolveSortOrder(sort),
+      take: perPage,
       skip,
     }),
     prisma.product.count({ where }),
-    prisma.brand.findMany({ orderBy: { name: "asc" } }),
-    getFilterGroups(category?.templateId),
+    getScopedBrands(categoryIds, searchParams, templateId),
+    getFilterGroups(templateId, categoryIds, searchParams),
   ]);
 
   return {
@@ -138,14 +220,66 @@ export async function getCatalogData(slug?: string, searchParams?: Record<string
     products,
     total,
     page,
-    pages: Math.max(1, Math.ceil(total / take)),
+    perPage,
+    sort,
+    pages: Math.max(1, Math.ceil(total / perPage)),
     brands,
     filterGroups,
     selected: searchParams ?? {},
   };
 }
 
-async function getFilterGroups(templateId?: string | null) {
+async function getScopedBrands(
+  categoryIds: string[] | undefined,
+  searchParams?: Record<string, string | string[] | undefined>,
+  templateId?: string | null,
+) {
+  const baseWhere: Prisma.ProductWhereInput = {
+    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+  };
+
+  const q = singleParam(searchParams?.q);
+  if (q) {
+    baseWhere.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { sku: { contains: q, mode: "insensitive" } },
+      { brand: { name: { contains: q, mode: "insensitive" } } },
+    ];
+  }
+
+  const fieldFilters = await buildFieldFilters(templateId, searchParams, { skipBrand: true });
+  if (fieldFilters.length) {
+    baseWhere.AND = fieldFilters;
+  }
+
+  const grouped = await prisma.product.groupBy({
+    by: ["brandId"],
+    where: { ...baseWhere, brandId: { not: null } },
+    _count: { id: true },
+  });
+
+  const brandIds = grouped.map((item) => item.brandId).filter((id): id is string => Boolean(id));
+  if (!brandIds.length) return [];
+
+  const brands = await prisma.brand.findMany({
+    where: { id: { in: brandIds } },
+    orderBy: { name: "asc" },
+  });
+
+  const countMap = new Map(grouped.map((item) => [item.brandId, item._count.id]));
+
+  return brands.map((brand) => ({
+    name: brand.name,
+    slug: brand.slug,
+    count: countMap.get(brand.id) ?? 0,
+  }));
+}
+
+async function getFilterGroups(
+  templateId: string | null | undefined,
+  categoryIds: string[] | undefined,
+  searchParams?: Record<string, string | string[] | undefined>,
+) {
   if (!templateId) return [];
 
   const fields = await prisma.fieldDefinition.findMany({
@@ -153,12 +287,38 @@ async function getFilterGroups(templateId?: string | null) {
     include: {
       group: true,
       options: { orderBy: { sortOrder: "asc" } },
-      values: {
-        include: { option: true },
-      },
     },
     orderBy: [{ group: { sortOrder: "asc" } }, { sortOrder: "asc" }],
   });
+
+  const baseWhere: Prisma.ProductWhereInput = {
+    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+  };
+
+  const q = singleParam(searchParams?.q);
+  const brandSlug = singleParam(searchParams?.brand);
+  if (q) {
+    baseWhere.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { sku: { contains: q, mode: "insensitive" } },
+      { brand: { name: { contains: q, mode: "insensitive" } } },
+    ];
+  }
+  if (brandSlug) {
+    baseWhere.brand = { slug: brandSlug };
+  }
+
+  const otherFieldFilters = await buildFieldFilters(templateId, searchParams);
+  if (otherFieldFilters.length) {
+    baseWhere.AND = otherFieldFilters;
+  }
+
+  const productIds = (
+    await prisma.product.findMany({
+      where: baseWhere,
+      select: { id: true },
+    })
+  ).map((product) => product.id);
 
   const grouped = new Map<
     string,
@@ -166,7 +326,17 @@ async function getFilterGroups(templateId?: string | null) {
       id: string;
       name: string;
       collapsed: boolean;
-      fields: Array<(typeof fields)[number] & { min?: number; max?: number; optionCounts?: Map<string, number> }>;
+      fields: Array<{
+        id: string;
+        name: string;
+        slug: string;
+        type: string;
+        unit: string | null;
+        min?: number;
+        max?: number;
+        options: Array<{ id: string; label: string; slug: string }>;
+        optionCounts: Record<string, number>;
+      }>;
     }
   >();
 
@@ -179,22 +349,55 @@ async function getFilterGroups(templateId?: string | null) {
       fields: [],
     };
 
-    const numericValues = field.values
-      .map((value) => (value.valueNumber == null ? null : Number(value.valueNumber)))
-      .filter((value): value is number => value !== null);
-    const optionCounts = new Map<string, number>();
-    for (const value of field.values) {
-      if (value.optionId) {
-        optionCounts.set(value.optionId, (optionCounts.get(value.optionId) ?? 0) + 1);
+    const optionCounts: Record<string, number> = {};
+
+    if (field.type === FieldType.NUMBER || field.type === FieldType.RANGE) {
+      const numericValues = await prisma.productFieldValue.findMany({
+        where: {
+          fieldId: field.id,
+          productId: productIds.length ? { in: productIds } : undefined,
+          valueNumber: { not: null },
+        },
+        select: { valueNumber: true },
+      });
+      const numbers = numericValues.map((value) => Number(value.valueNumber)).filter(Number.isFinite);
+      group.fields.push({
+        id: field.id,
+        name: field.name,
+        slug: field.slug,
+        type: field.type,
+        unit: field.unit,
+        min: numbers.length ? Math.min(...numbers) : undefined,
+        max: numbers.length ? Math.max(...numbers) : undefined,
+        options: field.options,
+        optionCounts,
+      });
+    } else if (field.type === FieldType.SELECT || field.type === FieldType.MULTISELECT) {
+      const counts = await prisma.productFieldValue.groupBy({
+        by: ["optionId"],
+        where: {
+          fieldId: field.id,
+          productId: productIds.length ? { in: productIds } : undefined,
+          optionId: { not: null },
+        },
+        _count: { id: true },
+      });
+
+      for (const row of counts) {
+        if (row.optionId) optionCounts[row.optionId] = row._count.id;
       }
+
+      group.fields.push({
+        id: field.id,
+        name: field.name,
+        slug: field.slug,
+        type: field.type,
+        unit: field.unit,
+        options: field.options,
+        optionCounts,
+      });
     }
 
-    group.fields.push({
-      ...field,
-      min: numericValues.length ? Math.min(...numericValues) : undefined,
-      max: numericValues.length ? Math.max(...numericValues) : undefined,
-      optionCounts,
-    });
     grouped.set(groupId, group);
   }
 
@@ -204,6 +407,7 @@ async function getFilterGroups(templateId?: string | null) {
 async function buildFieldFilters(
   templateId?: string | null,
   searchParams?: Record<string, string | string[] | undefined>,
+  options?: { skipBrand?: boolean },
 ): Promise<Prisma.ProductWhereInput[]> {
   if (!templateId || !searchParams) return [];
 
@@ -248,6 +452,10 @@ async function buildFieldFilters(
         },
       },
     });
+  }
+
+  if (!options?.skipBrand && singleParam(searchParams.brand)) {
+    // brand handled in main where
   }
 
   return filters;
@@ -314,7 +522,7 @@ export async function getAdminCatalog() {
     prisma.product.findMany({
       include: { brand: true, category: true, images: { orderBy: { sortOrder: "asc" } }, fieldValues: { include: { field: true, option: true } } },
       orderBy: { updatedAt: "desc" },
-      take: 50,
+      take: 500,
     }),
   ]);
 
@@ -335,13 +543,4 @@ export async function getSeoData() {
   ]);
 
   return { templates, redirects };
-}
-
-export function singleParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-export function multiParam(value: string | string[] | undefined) {
-  if (!value) return [];
-  return Array.isArray(value) ? value : value.split(",").filter(Boolean);
 }

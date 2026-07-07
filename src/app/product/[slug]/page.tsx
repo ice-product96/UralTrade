@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileText, ShieldCheck, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { SiteFooter } from "@/components/site-footer";
@@ -86,7 +87,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <AddToCartButton productId={product.id} />
-                <Link href="/cart" className="inline-flex h-13 items-center justify-center rounded-full border border-border px-6 text-base font-bold text-petrol hover:bg-background">
+                <QuickOrderButton productId={product.id} productName={product.name} />
+              </div>
+              <div className="mt-3">
+                <Link href="/cart" className="inline-flex h-11 items-center justify-center rounded-full border border-border px-6 text-sm font-bold text-petrol hover:bg-background">
                   Перейти в корзину
                 </Link>
               </div>

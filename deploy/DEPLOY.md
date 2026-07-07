@@ -38,6 +38,8 @@ nano .env
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
+Миграции применяются **автоматически** при каждом старте контейнера `app` (скрипт `docker/entrypoint.sh`).
+
 Проверка:
 
 ```bash
@@ -47,14 +49,34 @@ curl -I http://127.0.0.1:3010
 
 ## 4. Миграции и демо-данные
 
+При обновлении достаточно пересобрать контейнер — миграции выполнятся сами. Вручную:
+
 ```bash
 docker compose -f docker-compose.prod.yml exec app npm run db:deploy
+```
+
+```bash
 docker compose -f docker-compose.prod.yml exec app npm run db:seed
 ```
 
 Админка: `https://ваш-домен/admin`
 
-## 4.1. Импорт каталога с ural-trade96.ru
+### Ошибка «An error occurred in the Server Components render»
+
+После обновления кода без миграции БД Prisma не находит новые поля (например `Category.imageUrl`). Решение:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app npm run db:deploy
+docker compose -f docker-compose.prod.yml restart app
+```
+
+Или пересоберите с новым `Dockerfile` — миграции применятся при старте автоматически.
+
+Проверить логи:
+
+```bash
+docker compose -f docker-compose.prod.yml logs app --tail 50
+```
 
 Скрипт загружает категории, подкатегории, товары, фото, характеристики и создаёт редиректы со старых URL.
 

@@ -19,7 +19,10 @@ export async function SiteFooter() {
           <Link href="/catalog" className="block text-muted hover:text-petrol">
             Все товары
           </Link>
-          {categories.slice(0, 6).map((category) => (
+          <Link href="/brands" className="block text-muted hover:text-petrol">
+            Бренды
+          </Link>
+          {categories.slice(0, 5).map((category) => (
             <Link key={category.id} href={`/catalog/${category.slug}`} className="block text-muted hover:text-petrol">
               {category.name}
             </Link>

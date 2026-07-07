@@ -7,10 +7,17 @@ import { normalizeImageSrc } from "@/lib/image-url";
 
 export function ProductCard({ product }: { product: ProductCardItem }) {
   const image = normalizeImageSrc(product.images[0]?.url ?? "/demo/pump-1.svg");
+  const discount = hasDiscount(product.oldPrice, product.price);
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-petrol/10">
-      <Link href={`/product/${product.slug}`} className="block bg-background p-4">
+      <Link href={`/product/${product.slug}`} className="relative block bg-background p-4">
+        <div className="absolute left-6 top-6 z-10 flex flex-col gap-2">
+          <span className={`rounded-full px-3 py-1 text-xs font-bold ${product.inStock ? "bg-lime text-white" : "bg-white text-muted"}`}>
+            {product.inStock ? "В наличии" : "Под заказ"}
+          </span>
+          {discount ? <span className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">Скидка</span> : null}
+        </div>
         <div className="relative aspect-square overflow-hidden rounded-[22px]">
           <ProductImage
             src={image}
@@ -35,9 +42,7 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xl font-black text-petrol">{formatPrice(product.price)}</div>
-            {hasDiscount(product.oldPrice, product.price) ? (
-              <div className="text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div>
-            ) : null}
+            {discount ? <div className="text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div> : null}
           </div>
           <Link
             href={`/cart?add=${product.id}`}

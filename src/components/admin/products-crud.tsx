@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus } from "lucide-react";
+import { ExternalLink, Pencil, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -8,7 +8,9 @@ import { createProduct, deleteProduct, updateProduct } from "@/app/admin/actions
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
+import { ProductImage } from "@/components/product-image";
 import { formatPrice } from "@/lib/format";
+import { normalizeImageSrc } from "@/lib/image-url";
 
 type FieldRow = {
   id: string;
@@ -55,6 +57,15 @@ type CategoryOption = { id: string; name: string; templateId: string | null; par
 type BrandOption = { id: string; name: string };
 type TemplateOption = { id: string; name: string };
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-border bg-background p-4">
+      <div className="mb-3 text-sm font-black uppercase tracking-[0.16em] text-petrol">{title}</div>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+
 function fieldValueToString(value: ProductRow["fieldValues"][number]) {
   if (value.option) return value.option.label;
   if (value.valueNumber != null) return value.valueNumber.toString();
@@ -75,13 +86,7 @@ function fieldValueToString(value: ProductRow["fieldValues"][number]) {
   return "";
 }
 
-function ProductFieldInput({
-  field,
-  defaultValue,
-}: {
-  field: FieldRow;
-  defaultValue: string;
-}) {
+function ProductFieldInput({ field, defaultValue }: { field: FieldRow; defaultValue: string }) {
   const inputName = `field_${field.id}`;
 
   if (field.type === "SELECT" && field.options.length) {
@@ -103,13 +108,7 @@ function ProductFieldInput({
       <div className="space-y-2 rounded-2xl border border-border bg-white p-3">
         {field.options.map((option) => (
           <label key={option.slug} className="flex items-center gap-2 text-sm font-semibold text-graphite">
-            <input
-              type="checkbox"
-              name={inputName}
-              value={option.label}
-              defaultChecked={selected.has(option.label) || selected.has(option.slug)}
-              className="accent-lime"
-            />
+            <input type="checkbox" name={inputName} value={option.label} defaultChecked={selected.has(option.label) || selected.has(option.slug)} className="accent-lime" />
             {option.label}
           </label>
         ))}
@@ -127,16 +126,7 @@ function ProductFieldInput({
   }
 
   if (field.type === "NUMBER" || field.type === "RANGE") {
-    return (
-      <input
-        name={inputName}
-        type="number"
-        step="any"
-        defaultValue={defaultValue}
-        placeholder={field.unit ?? "Число"}
-        className="admin-input bg-white"
-      />
-    );
+    return <input name={inputName} type="number" step="any" defaultValue={defaultValue} placeholder={field.unit ?? "Число"} className="admin-input bg-white" />;
   }
 
   return (
@@ -169,6 +159,9 @@ export function ProductsCrud({
   const [error, setError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState("");
   const [templateId, setTemplateId] = useState("");
+  const [query, setQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterBrand, setFilterBrand] = useState("");
   const current = modal.item;
 
   useEffect(() => {
@@ -184,25 +177,34 @@ export function ProductsCrud({
     return category?.templateId ?? "";
   }, [templateId, categoryId, categories]);
 
-  const visibleFields = useMemo(
-    () => fields.filter((field) => field.templateId === activeTemplateId),
-    [fields, activeTemplateId],
-  );
-
+  const visibleFields = useMemo(() => fields.filter((field) => field.templateId === activeTemplateId), [fields, activeTemplateId]);
   const activeTemplateName = templates.find((template) => template.id === activeTemplateId)?.name;
+
+  const filteredProducts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return products.filter((product) => {
+      if (filterCategory && product.categoryId !== filterCategory) return false;
+      if (filterBrand && product.brandId !== filterBrand) return false;
+      if (!q) return true;
+      return (
+        product.name.toLowerCase().includes(q) ||
+        product.sku.toLowerCase().includes(q) ||
+        product.slug.toLowerCase().includes(q) ||
+        product.brand?.name.toLowerCase().includes(q)
+      );
+    });
+  }, [products, query, filterCategory, filterBrand]);
 
   function submit(action: (fd: FormData) => Promise<void>) {
     return (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const formData = new FormData(event.currentTarget);
-
       for (const field of visibleFields) {
         if (field.type !== "MULTISELECT") continue;
         const values = formData.getAll(`field_${field.id}`).map(String);
         formData.delete(`field_${field.id}`);
         if (values.length) formData.set(`field_${field.id}`, values.join(", "));
       }
-
       startTransition(async () => {
         try {
           setError(null);
@@ -238,65 +240,21 @@ export function ProductsCrud({
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black text-graphite">Товары</h1>
-            <p className="mt-2 text-muted">Карточка товара, характеристики из шаблона категории, фото и SEO.</p>
+            <p className="mt-2 text-muted">Поиск, фильтры и редактирование карточек каталога.</p>
           </div>
           <button type="button" onClick={modal.openCreate} className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-5 text-sm font-bold text-white hover:bg-lime-hover">
             <Plus className="h-4 w-4" />
             Добавить
           </button>
         </div>
-        <div className="mt-6 grid gap-4">
-          {products.map((product) => (
-            <article key={product.id} className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-border p-4">
-              <div>
-                <Link href={`/product/${product.slug}`} className="text-lg font-black text-petrol hover:text-lime">
-                  {product.name}
-                </Link>
-                <div className="mt-1 text-sm text-muted">
-                  {product.sku} • {product.category.name} • {product.brand?.name ?? "Без бренда"}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="font-black text-graphite">{formatPrice(product.price)}</div>
-                <button type="button" onClick={() => modal.openEdit(product)} className="inline-flex h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-bold text-petrol hover:bg-background">
-                  <Pencil className="h-4 w-4" />
-                  Изменить
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
 
-      <AdminModal open={modal.open} onClose={modal.close} title={modal.isEdit ? "Редактировать товар" : "Новый товар"} size="xl">
-        <form onSubmit={submit(modal.isEdit ? updateProduct : createProduct)} className="space-y-3">
-          {current ? <input type="hidden" name="id" value={current.id} /> : null}
-          <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
-          <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
-          <input name="sku" required defaultValue={current?.sku} placeholder="Артикул" className="admin-input" />
-          <div className="grid grid-cols-2 gap-3">
-            <input name="price" required type="number" min="0" step="0.01" defaultValue={current?.price} placeholder="Цена, ₽" className="admin-input" />
-            <input name="oldPrice" type="number" min="0" step="0.01" defaultValue={current?.oldPrice ?? ""} placeholder="Старая цена (необязательно)" className="admin-input" />
-          </div>
-          <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold">
-            <input name="inStock" type="checkbox" defaultChecked={current?.inStock ?? true} className="accent-lime" />
-            В наличии
+        <div className="mt-6 grid gap-3 md:grid-cols-[1fr_180px_180px]">
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск по названию, артикулу, slug" className="admin-input pl-11" />
           </label>
-          <select
-            name="categoryId"
-            required
-            value={categoryId}
-            onChange={(event) => {
-              const nextCategoryId = event.target.value;
-              setCategoryId(nextCategoryId);
-              const category = categories.find((item) => item.id === nextCategoryId);
-              if (category?.templateId && !templateId) {
-                setTemplateId(category.templateId);
-              }
-            }}
-            className="admin-input"
-          >
-            <option value="">Категория</option>
+          <select value={filterCategory} onChange={(event) => setFilterCategory(event.target.value)} className="admin-input">
+            <option value="">Все категории</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.parent ? `${category.parent.name} / ` : ""}
@@ -304,68 +262,148 @@ export function ProductsCrud({
               </option>
             ))}
           </select>
-          <select name="brandId" defaultValue={current?.brandId ?? ""} className="admin-input">
-            <option value="">Бренд</option>
+          <select value={filterBrand} onChange={(event) => setFilterBrand(event.target.value)} className="admin-input">
+            <option value="">Все бренды</option>
             {brands.map((brand) => (
               <option key={brand.id} value={brand.id}>
                 {brand.name}
               </option>
             ))}
           </select>
-          <select
-            name="templateId"
-            value={templateId}
-            onChange={(event) => setTemplateId(event.target.value)}
-            className="admin-input"
-          >
-            <option value="">Шаблон характеристик (из категории)</option>
-            {templates.map((template) => (
-              <option key={template.id} value={template.id}>
-                {template.name}
-              </option>
-            ))}
-          </select>
-          <textarea name="shortDescription" required defaultValue={current?.shortDescription} rows={3} placeholder="Краткое описание" className="admin-textarea" />
-          <textarea name="fullDescription" required defaultValue={current?.fullDescription} rows={5} placeholder="Полное описание (HTML)" className="admin-textarea" />
-          <textarea
-            name="images"
-            rows={3}
-            defaultValue={current?.images.map((image) => image.url).join("\n")}
-            placeholder="URL фото, каждый с новой строки"
-            className="admin-textarea"
-          />
-          {activeTemplateId ? (
-            <div className="rounded-2xl border border-border bg-background p-4">
-              <div className="mb-3 font-bold text-graphite">
-                Характеристики{activeTemplateName ? `: ${activeTemplateName}` : ""}
-              </div>
-              {visibleFields.length ? (
-                <div className="space-y-3">
-                  {visibleFields.map((field) => {
-                    const existing = current?.fieldValues.find((value) => value.fieldId === field.id);
-                    return (
-                      <label key={field.id} className="block">
-                        <span className="mb-1 block text-xs font-bold uppercase tracking-[0.16em] text-muted">
-                          {field.name}
-                          {field.unit ? `, ${field.unit}` : ""}
-                        </span>
-                        <ProductFieldInput field={field} defaultValue={existing ? fieldValueToString(existing) : ""} />
-                      </label>
-                    );
-                  })}
+        </div>
+
+        <div className="mt-4 text-sm text-muted">Показано {filteredProducts.length} из {products.length}</div>
+
+        <div className="mt-4 grid gap-3">
+          {filteredProducts.map((product) => {
+            const image = normalizeImageSrc(product.images[0]?.url ?? "/demo/pump-1.svg");
+            return (
+              <article key={product.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-border p-4">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-background">
+                  <ProductImage src={image} alt={product.name} fill sizes="64px" className="object-cover" />
                 </div>
-              ) : (
-                <p className="text-sm text-muted">В шаблоне пока нет полей. Добавьте их в разделе «Поля и фильтры».</p>
-              )}
+                <div className="min-w-0 flex-1">
+                  <Link href={`/product/${product.slug}`} className="text-lg font-black text-petrol hover:text-lime">
+                    {product.name}
+                  </Link>
+                  <div className="mt-1 text-sm text-muted">
+                    {product.sku} • {product.category.name} • {product.brand?.name ?? "Без бренда"}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${product.inStock ? "bg-lime/10 text-lime" : "bg-background text-muted"}`}>
+                      {product.inStock ? "В наличии" : "Под заказ"}
+                    </span>
+                    {product.oldPrice ? <span className="rounded-full bg-background px-3 py-1 text-xs font-bold text-muted line-through">{formatPrice(product.oldPrice)}</span> : null}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="font-black text-graphite">{formatPrice(product.price)}</div>
+                  <button type="button" onClick={() => modal.openEdit(product)} className="inline-flex h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-bold text-petrol hover:bg-background">
+                    <Pencil className="h-4 w-4" />
+                    Изменить
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <AdminModal open={modal.open} onClose={modal.close} title={modal.isEdit ? "Редактировать товар" : "Новый товар"} size="xl">
+        <form onSubmit={submit(modal.isEdit ? updateProduct : createProduct)} className="space-y-4">
+          {current ? <input type="hidden" name="id" value={current.id} /> : null}
+
+          <Section title="Основное">
+            <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
+            <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
+            <input name="sku" required defaultValue={current?.sku} placeholder="Артикул" className="admin-input" />
+            <textarea name="shortDescription" required defaultValue={current?.shortDescription} rows={3} placeholder="Краткое описание" className="admin-textarea" />
+            <textarea name="fullDescription" required defaultValue={current?.fullDescription} rows={5} placeholder="Полное описание (HTML)" className="admin-textarea" />
+          </Section>
+
+          <Section title="Цена и наличие">
+            <div className="grid grid-cols-2 gap-3">
+              <input name="price" required type="number" min="0" step="0.01" defaultValue={current?.price} placeholder="Цена, ₽" className="admin-input" />
+              <input name="oldPrice" type="number" min="0" step="0.01" defaultValue={current?.oldPrice ?? ""} placeholder="Старая цена" className="admin-input" />
             </div>
+            <label className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 text-sm font-semibold">
+              <input name="inStock" type="checkbox" defaultChecked={current?.inStock ?? true} className="accent-lime" />
+              В наличии
+            </label>
+          </Section>
+
+          <Section title="Категория и бренд">
+            <select
+              name="categoryId"
+              required
+              value={categoryId}
+              onChange={(event) => {
+                const nextCategoryId = event.target.value;
+                setCategoryId(nextCategoryId);
+                const category = categories.find((item) => item.id === nextCategoryId);
+                if (category?.templateId && !templateId) setTemplateId(category.templateId);
+              }}
+              className="admin-input"
+            >
+              <option value="">Категория</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.parent ? `${category.parent.name} / ` : ""}
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <select name="brandId" defaultValue={current?.brandId ?? ""} className="admin-input">
+              <option value="">Бренд</option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.name}
+                </option>
+              ))}
+            </select>
+            <select name="templateId" value={templateId} onChange={(event) => setTemplateId(event.target.value)} className="admin-input">
+              <option value="">Шаблон характеристик (из категории)</option>
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </Section>
+
+          <Section title="Фото">
+            <textarea name="images" rows={3} defaultValue={current?.images.map((image) => image.url).join("\n")} placeholder="URL фото, каждый с новой строки" className="admin-textarea" />
+          </Section>
+
+          {activeTemplateId ? (
+            <Section title={`Характеристики${activeTemplateName ? `: ${activeTemplateName}` : ""}`}>
+              {visibleFields.length ? (
+                visibleFields.map((field) => {
+                  const existing = current?.fieldValues.find((value) => value.fieldId === field.id);
+                  return (
+                    <label key={field.id} className="block">
+                      <span className="mb-1 block text-xs font-bold uppercase tracking-[0.16em] text-muted">
+                        {field.name}
+                        {field.unit ? `, ${field.unit}` : ""}
+                      </span>
+                      <ProductFieldInput field={field} defaultValue={existing ? fieldValueToString(existing) : ""} />
+                    </label>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted">В шаблоне пока нет полей.</p>
+              )}
+            </Section>
           ) : (
-            <p className="rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted">
-              Выберите категорию с шаблоном или укажите шаблон характеристик вручную.
-            </p>
+            <p className="rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted">Выберите категорию с шаблоном характеристик.</p>
           )}
-          <input name="h1" defaultValue={current?.h1 ?? ""} placeholder="H1" className="admin-input" />
-          <input name="metaTitle" defaultValue={current?.metaTitle ?? ""} placeholder="Meta title" className="admin-input" />
-          <textarea name="metaDescription" defaultValue={current?.metaDescription ?? ""} rows={3} placeholder="Meta description" className="admin-textarea" />
+
+          <Section title="SEO">
+            <input name="h1" defaultValue={current?.h1 ?? ""} placeholder="H1" className="admin-input" />
+            <input name="metaTitle" defaultValue={current?.metaTitle ?? ""} placeholder="Meta title" className="admin-input" />
+            <textarea name="metaDescription" defaultValue={current?.metaDescription ?? ""} rows={3} placeholder="Meta description" className="admin-textarea" />
+          </Section>
+
           {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
           <AdminFormActions onCancel={modal.close} onDelete={modal.isEdit ? handleDelete : undefined} />
           {pending ? <p className="text-sm text-muted">Сохранение...</p> : null}
