@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export type UploadKind = "image" | "document";
+export type UploadScope = "product-image" | "product-document" | "site-image";
 
 const IMAGE_MIME: Record<string, string> = {
   "image/jpeg": ".jpg",
@@ -37,11 +38,31 @@ function resolveExtension(kind: UploadKind, mimeType: string, fileName: string) 
   return map[mimeType] ?? "";
 }
 
-export function getUploadDir(kind: UploadKind) {
-  return path.join(process.cwd(), "public", "uploads", "products", kind === "image" ? "images" : "documents");
+export function getUploadDir(scope: UploadScope) {
+  const segments =
+    scope === "product-document"
+      ? ["products", "documents"]
+      : scope === "site-image"
+        ? ["site", "images"]
+        : ["products", "images"];
+
+  return path.join(process.cwd(), "public", "uploads", ...segments);
 }
 
-export async function saveUploadedFile(file: File, kind: UploadKind) {
+export function getUploadPublicPath(scope: UploadScope, fileName: string) {
+  const segments =
+    scope === "product-document"
+      ? ["products", "documents"]
+      : scope === "site-image"
+        ? ["site", "images"]
+        : ["products", "images"];
+
+  return `/uploads/${segments.join("/")}/${fileName}`;
+}
+
+export async function saveUploadedFile(file: File, kind: UploadKind, scope?: UploadScope) {
+  const resolvedScope: UploadScope =
+    scope ?? (kind === "document" ? "product-document" : "product-image");
   const mimeType = file.type || "application/octet-stream";
   const allowed = kind === "image" ? IMAGE_MIME : DOCUMENT_MIME;
   const maxBytes = kind === "image" ? MAX_IMAGE_BYTES : MAX_DOCUMENT_BYTES;
@@ -59,7 +80,7 @@ export async function saveUploadedFile(file: File, kind: UploadKind) {
     throw new Error("Не удалось определить тип файла");
   }
 
-  const dir = getUploadDir(kind);
+  const dir = getUploadDir(resolvedScope);
   await mkdir(dir, { recursive: true });
 
   const safeName = `${Date.now()}-${randomBytes(6).toString("hex")}${ext}`;
@@ -67,7 +88,7 @@ export async function saveUploadedFile(file: File, kind: UploadKind) {
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(diskPath, buffer);
 
-  const publicPath = `/uploads/products/${kind === "image" ? "images" : "documents"}/${safeName}`;
+  const publicPath = getUploadPublicPath(resolvedScope, safeName);
 
   return {
     url: publicPath,

@@ -5,6 +5,7 @@ import { Pencil, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { createBrand, deleteBrand, updateBrand } from "@/app/admin/actions";
+import { AdminImageUpload } from "@/components/admin/admin-file-upload";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
@@ -83,7 +84,12 @@ export function BrandsCrud({ brands }: { brands: BrandRow[] }) {
           {current ? <input type="hidden" name="id" value={current.id} /> : null}
           <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
           <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
-          <input name="logoUrl" defaultValue={current?.logoUrl ?? ""} placeholder="URL логотипа" className="admin-input" />
+          <AdminImageUpload
+            name="logoUrl"
+            defaultValue={current?.logoUrl ?? ""}
+            label="Логотип"
+            previewClassName="relative mx-auto aspect-square w-32 overflow-hidden rounded-2xl border border-border bg-background"
+          />
           <textarea name="description" defaultValue={current?.description ?? ""} rows={4} placeholder="Описание" className="admin-textarea" />
           <input name="metaTitle" defaultValue={current?.metaTitle ?? ""} placeholder="Meta title" className="admin-input" />
           <textarea name="metaDescription" defaultValue={current?.metaDescription ?? ""} rows={3} placeholder="Meta description" className="admin-textarea" />

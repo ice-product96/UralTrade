@@ -5,6 +5,7 @@ import { Pencil, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { createHomeBanner, deleteHomeBanner, updateHomeBanner } from "@/app/admin/actions";
+import { AdminImageUpload } from "@/components/admin/admin-file-upload";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
@@ -84,7 +85,7 @@ export function ContentCrud({ banners }: { banners: BannerRow[] }) {
           {current ? <input type="hidden" name="id" value={current.id} /> : null}
           <input name="title" required defaultValue={current?.title} placeholder="Заголовок" className="admin-input" />
           <textarea name="subtitle" defaultValue={current?.subtitle ?? ""} rows={3} placeholder="Подзаголовок" className="admin-textarea" />
-          <input name="imageUrl" required defaultValue={current?.imageUrl} placeholder="/demo/hero-equipment.jpg" className="admin-input" />
+          <AdminImageUpload name="imageUrl" defaultValue={current?.imageUrl ?? ""} label="Изображение баннера" required />
           <input name="href" defaultValue={current?.href ?? ""} placeholder="/catalog/nasosy" className="admin-input" />
           <input name="buttonLabel" defaultValue={current?.buttonLabel ?? ""} placeholder="Текст кнопки" className="admin-input" />
           <input name="sortOrder" type="number" defaultValue={current?.sortOrder ?? 0} placeholder="Порядок" className="admin-input" />

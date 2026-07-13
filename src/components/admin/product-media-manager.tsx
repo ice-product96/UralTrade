@@ -2,26 +2,12 @@
 
 import { FileText, ImagePlus, Loader2, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
+import { uploadAdminFile, AdminDocumentUpload } from "@/components/admin/admin-file-upload";
 import { ProductImage } from "@/components/product-image";
 import { normalizeImageSrc } from "@/lib/image-url";
 
 type ImageItem = { url: string; alt?: string };
 type DocumentItem = { title: string; url: string; fileName?: string };
-
-async function uploadFile(file: File, kind: "image" | "document") {
-  const body = new FormData();
-  body.set("file", file);
-  body.set("kind", kind);
-
-  const response = await fetch("/api/admin/upload", { method: "POST", body });
-  const data = (await response.json()) as { url?: string; fileName?: string; error?: string };
-
-  if (!response.ok) {
-    throw new Error(data.error ?? "Не удалось загрузить файл");
-  }
-
-  return data as { url: string; fileName: string };
-}
 
 function fileTitle(fileName: string) {
   return fileName.replace(/\.[^.]+$/, "") || fileName;
@@ -49,7 +35,7 @@ export function ProductImagesManager({
     try {
       const next = [...images];
       for (const file of Array.from(fileList)) {
-        const saved = await uploadFile(file, "image");
+        const saved = await uploadAdminFile(file, "image", "product-image");
         next.push({
           url: saved.url,
           alt: productName ? `${productName} фото ${next.length + 1}` : undefined,
@@ -130,7 +116,7 @@ export function ProductDocumentsManager({
     try {
       const next = [...documents];
       for (const file of Array.from(fileList)) {
-        const saved = await uploadFile(file, "document");
+        const saved = await uploadAdminFile(file, "document", "product-document");
         next.push({
           title: fileTitle(saved.fileName),
           url: saved.url,
@@ -223,57 +209,5 @@ export function ProductFileFieldInput({
   defaultValue: string;
   label: string;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState(defaultValue);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleFile(file: File | undefined) {
-    if (!file) return;
-
-    setUploading(true);
-    setError(null);
-
-    try {
-      const saved = await uploadFile(file, "document");
-      setValue(saved.url);
-    } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Ошибка загрузки");
-    } finally {
-      setUploading(false);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-  }
-
-  return (
-    <div className="space-y-2">
-      <input type="hidden" name={name} value={value} />
-      {value ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 text-sm">
-          <FileText className="h-4 w-4 text-lime" />
-          <a href={value} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate font-semibold text-petrol hover:text-lime">
-            {value.split("/").pop()}
-          </a>
-          <button type="button" onClick={() => setValue("")} className="font-bold text-muted hover:text-red-600">
-            Удалить
-          </button>
-        </div>
-      ) : (
-        <p className="text-sm text-muted">Файл не прикреплён.</p>
-      )}
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={uploading}
-          onClick={() => inputRef.current?.click()}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-bold text-petrol hover:bg-background disabled:opacity-60"
-        >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          {uploading ? "Загрузка…" : `Загрузить ${label.toLowerCase()}`}
-        </button>
-      </div>
-      <input ref={inputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,application/pdf" className="hidden" onChange={(event) => void handleFile(event.target.files?.[0])} />
-      {error ? <p className="text-sm font-semibold text-red-600">{error}</p> : null}
-    </div>
-  );
+  return <AdminDocumentUpload name={name} defaultValue={defaultValue} label={label} />;
 }

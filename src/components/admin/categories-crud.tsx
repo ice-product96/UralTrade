@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { createCategory, deleteCategory, updateCategory } from "@/app/admin/actions";
+import { AdminImageUpload } from "@/components/admin/admin-file-upload";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
@@ -31,6 +32,7 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
   const modal = useCrudModal<CategoryRow>();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const current = modal.item;
 
   const sortedCategories = useMemo(
     () =>
@@ -74,8 +76,6 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
       }
     });
   }
-
-  const current = modal.item;
 
   return (
     <>
@@ -139,11 +139,7 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
           {current ? <input type="hidden" name="id" value={current.id} /> : null}
           <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
           <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
-          <input name="imageUrl" defaultValue={current?.imageUrl ?? ""} placeholder="URL изображения категории" className="admin-input" />
-          {current?.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={current.imageUrl} alt="" className="h-24 w-full rounded-2xl object-cover" />
-          ) : null}
+          <AdminImageUpload name="imageUrl" defaultValue={current?.imageUrl ?? ""} label="Изображение категории" />
           <select name="parentId" defaultValue={current?.parentId ?? ""} className="admin-input">
             <option value="">Без родителя</option>
             {categories.filter((c) => c.id !== current?.id).map((category) => (
