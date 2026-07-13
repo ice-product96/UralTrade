@@ -15,6 +15,7 @@ import {
 } from "@/lib/catalog-facets";
 import { hasActiveCatalogFilters, multiParam, singleParam } from "@/lib/catalog-params";
 import { contentPageSeeds } from "@/lib/site-nav";
+import { parseFaqHtml } from "@/lib/faq";
 import type { CatalogFilterGroup } from "@/lib/catalog-types";
 
 export { multiParam, singleParam, buildCatalogQuery } from "@/lib/catalog-params";
@@ -181,10 +182,53 @@ export async function getContentPage(slug: string) {
 }
 
 export async function getPublishedFaqItems() {
-  return prisma.faqItem.findMany({
-    where: { published: true },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    select: { id: true, question: true, answer: true },
+  const select = { id: true, question: true, answer: true } as const;
+
+  try {
+    let items = await prisma.faqItem.findMany({
+      where: { published: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select,
+    });
+
+    if (items.length === 0) {
+      await importFaqItemsFromContentPage();
+      items = await prisma.faqItem.findMany({
+        where: { published: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        select,
+      });
+    }
+
+    if (items.length > 0) return items;
+  } catch {
+    // Таблица FaqItem ещё не создана (миграция не применена) — fallback ниже.
+  }
+
+  const page = await getContentPage("faq");
+  const parsed = parseFaqHtml(page?.body ?? "");
+  return parsed.map((item, index) => ({
+    id: `legacy-${index}`,
+    question: item.question,
+    answer: item.answer,
+  }));
+}
+
+async function importFaqItemsFromContentPage() {
+  const count = await prisma.faqItem.count();
+  if (count > 0) return;
+
+  const page = await prisma.contentPage.findUnique({ where: { slug: "faq" } });
+  const parsed = parseFaqHtml(page?.body ?? "");
+  if (!parsed.length) return;
+
+  await prisma.faqItem.createMany({
+    data: parsed.map((item, index) => ({
+      question: item.question,
+      answer: item.answer,
+      sortOrder: (index + 1) * 10,
+      published: true,
+    })),
   });
 }
 
