@@ -40,7 +40,7 @@ export function CatalogProductGrid({
 
   const hasMore = loadedPage < pages;
   const remaining = Math.max(0, total - products.length);
-  const pageItems = useMemo(() => buildCatalogPageRange(page, pages), [page, pages]);
+  const pageItems = useMemo(() => buildCatalogPageRange(loadedPage, pages), [loadedPage, pages]);
 
   function buildPageHref(pageNum: number) {
     const params = new URLSearchParams();
@@ -115,9 +115,9 @@ export function CatalogProductGrid({
           ) : null}
 
           <nav className="flex flex-wrap items-center justify-center gap-2" aria-label="Пагинация каталога">
-            {page > 1 ? (
+            {loadedPage > 1 ? (
               <Link
-                href={buildPageHref(page - 1)}
+                href={buildPageHref(loadedPage - 1)}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-petrol shadow-sm transition hover:bg-petrol hover:text-white"
                 aria-label="Предыдущая страница"
               >
@@ -140,18 +140,18 @@ export function CatalogProductGrid({
                   href={buildPageHref(item)}
                   className={cn(
                     "inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold leading-10 transition",
-                    item === page ? "bg-petrol text-white shadow-sm" : "bg-white text-petrol shadow-sm hover:bg-petrol-soft hover:text-white",
+                    item === loadedPage ? "bg-petrol text-white shadow-sm" : "bg-white text-petrol shadow-sm hover:bg-petrol-soft hover:text-white",
                   )}
-                  aria-current={item === page ? "page" : undefined}
+                  aria-current={item === loadedPage ? "page" : undefined}
                 >
                   {item}
                 </Link>
               ),
             )}
 
-            {page < pages ? (
+            {loadedPage < pages ? (
               <Link
-                href={buildPageHref(page + 1)}
+                href={buildPageHref(loadedPage + 1)}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-petrol shadow-sm transition hover:bg-petrol hover:text-white"
                 aria-label="Следующая страница"
               >
