@@ -876,22 +876,73 @@ export async function getAdminStats() {
   return { products, categories, orders, fields };
 }
 
-export async function getAdminCatalog() {
-  const [categories, brands, templates, products] = await Promise.all([
-    prisma.category.findMany({ include: { parent: true, template: true }, orderBy: { sortOrder: "asc" } }),
+export async function getAdminCatalog(filters?: {
+  categoryId?: string;
+  brandId?: string;
+  q?: string;
+  page?: number;
+  perPage?: number;
+}) {
+  const perPage = filters?.perPage ?? 50;
+  const page = Math.max(1, filters?.page ?? 1);
+  const q = filters?.q?.trim();
+
+  let categoryIds: string[] | undefined;
+  if (filters?.categoryId) {
+    categoryIds = await getCategoryTreeIds(filters.categoryId);
+  }
+
+  const where: Prisma.ProductWhereInput = {
+    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+    ...(filters?.brandId ? { brandId: filters.brandId } : {}),
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { sku: { contains: q, mode: "insensitive" } },
+            { slug: { contains: q, mode: "insensitive" } },
+            { brand: { name: { contains: q, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
+  };
+
+  const [categories, brands, templates, products, total, categoryCounts] = await Promise.all([
+    prisma.category.findMany({ include: { parent: true, template: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
     prisma.brand.findMany({ orderBy: { name: "asc" } }),
     prisma.fieldTemplate.findMany({
       include: { fields: { include: { group: true, options: true }, orderBy: { sortOrder: "asc" } } },
       orderBy: { name: "asc" },
     }),
     prisma.product.findMany({
-      include: { brand: true, category: true, images: { orderBy: { sortOrder: "asc" } }, fieldValues: { include: { field: true, option: true } } },
+      where,
+      include: {
+        brand: true,
+        category: { include: { parent: true } },
+        images: { orderBy: { sortOrder: "asc" } },
+        fieldValues: { include: { field: true, option: true } },
+      },
       orderBy: { updatedAt: "desc" },
-      take: 500,
+      skip: (page - 1) * perPage,
+      take: perPage,
     }),
+    prisma.product.count({ where }),
+    prisma.product.groupBy({ by: ["categoryId"], _count: { _all: true } }),
   ]);
 
-  return { categories, brands, templates, products };
+  const countsByCategory = new Map(categoryCounts.map((row) => [row.categoryId, row._count._all]));
+
+  return {
+    categories,
+    brands,
+    templates,
+    products,
+    total,
+    page,
+    perPage,
+    pages: Math.max(1, Math.ceil(total / perPage)),
+    categoryCounts: countsByCategory,
+  };
 }
 
 export async function getAdminOrders() {

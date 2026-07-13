@@ -53,7 +53,23 @@ type ProductRow = {
   }>;
 };
 
-type CategoryOption = { id: string; name: string; templateId: string | null; parent: { name: string } | null };
+type CategoryOption = {
+  id: string;
+  name: string;
+  templateId: string | null;
+  parent: { name: string } | null;
+  label?: string;
+};
+
+function buildProductsUrl(filters: { q?: string; category?: string; brand?: string; page?: number }) {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.category) params.set("category", filters.category);
+  if (filters.brand) params.set("brand", filters.brand);
+  if (filters.page && filters.page > 1) params.set("page", String(filters.page));
+  const query = params.toString();
+  return query ? `/admin/products?${query}` : "/admin/products";
+}
 type BrandOption = { id: string; name: string };
 type TemplateOption = { id: string; name: string };
 
@@ -146,12 +162,26 @@ export function ProductsCrud({
   brands,
   templates,
   fields,
+  total,
+  page,
+  pages,
+  perPage,
+  initialQuery = "",
+  initialCategoryId = "",
+  initialBrandId = "",
 }: {
   products: ProductRow[];
   categories: CategoryOption[];
   brands: BrandOption[];
   templates: TemplateOption[];
   fields: FieldRow[];
+  total: number;
+  page: number;
+  pages: number;
+  perPage: number;
+  initialQuery?: string;
+  initialCategoryId?: string;
+  initialBrandId?: string;
 }) {
   const router = useRouter();
   const modal = useCrudModal<ProductRow>();
@@ -159,10 +189,16 @@ export function ProductsCrud({
   const [error, setError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState("");
   const [templateId, setTemplateId] = useState("");
-  const [query, setQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterBrand, setFilterBrand] = useState("");
+  const [query, setQuery] = useState(initialQuery);
+  const [filterCategory, setFilterCategory] = useState(initialCategoryId);
+  const [filterBrand, setFilterBrand] = useState(initialBrandId);
   const current = modal.item;
+
+  useEffect(() => {
+    setQuery(initialQuery);
+    setFilterCategory(initialCategoryId);
+    setFilterBrand(initialBrandId);
+  }, [initialQuery, initialCategoryId, initialBrandId]);
 
   useEffect(() => {
     if (!modal.open) return;
@@ -170,6 +206,26 @@ export function ProductsCrud({
     setCategoryId(current?.categoryId ?? "");
     setTemplateId(current?.templateId ?? categories.find((item) => item.id === current?.categoryId)?.templateId ?? "");
   }, [modal.open, current, categories]);
+
+  function applyFilters(next: { q?: string; category?: string; brand?: string; page?: number }) {
+    router.push(
+      buildProductsUrl({
+        q: next.q ?? query,
+        category: next.category ?? filterCategory,
+        brand: next.brand ?? filterBrand,
+        page: next.page ?? 1,
+      }),
+    );
+  }
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (query === initialQuery) return;
+      applyFilters({ q: query, page: 1 });
+    }, 350);
+    return () => window.clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   const activeTemplateId = useMemo(() => {
     if (templateId) return templateId;
@@ -179,21 +235,7 @@ export function ProductsCrud({
 
   const visibleFields = useMemo(() => fields.filter((field) => field.templateId === activeTemplateId), [fields, activeTemplateId]);
   const activeTemplateName = templates.find((template) => template.id === activeTemplateId)?.name;
-
-  const filteredProducts = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return products.filter((product) => {
-      if (filterCategory && product.categoryId !== filterCategory) return false;
-      if (filterBrand && product.brandId !== filterBrand) return false;
-      if (!q) return true;
-      return (
-        product.name.toLowerCase().includes(q) ||
-        product.sku.toLowerCase().includes(q) ||
-        product.slug.toLowerCase().includes(q) ||
-        product.brand?.name.toLowerCase().includes(q)
-      );
-    });
-  }, [products, query, filterCategory, filterBrand]);
+  const hasFilters = Boolean(query.trim() || filterCategory || filterBrand);
 
   function submit(action: (fd: FormData) => Promise<void>) {
     return (event: React.FormEvent<HTMLFormElement>) => {
@@ -248,21 +290,36 @@ export function ProductsCrud({
           </button>
         </div>
 
-        <div className="mt-6 grid gap-3 md:grid-cols-[1fr_180px_180px]">
+        <div className="mt-6 grid gap-3 lg:grid-cols-[1fr_220px_180px]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск по названию, артикулу, slug" className="admin-input pl-11" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск по названию, артикулу, slug, бренду" className="admin-input pl-11" />
           </label>
-          <select value={filterCategory} onChange={(event) => setFilterCategory(event.target.value)} className="admin-input">
+          <select
+            value={filterCategory}
+            onChange={(event) => {
+              const value = event.target.value;
+              setFilterCategory(value);
+              applyFilters({ category: value, page: 1 });
+            }}
+            className="admin-input"
+          >
             <option value="">Все категории</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.parent ? `${category.parent.name} / ` : ""}
-                {category.name}
+                {category.label ?? (category.parent ? `${category.parent.name} / ${category.name}` : category.name)}
               </option>
             ))}
           </select>
-          <select value={filterBrand} onChange={(event) => setFilterBrand(event.target.value)} className="admin-input">
+          <select
+            value={filterBrand}
+            onChange={(event) => {
+              const value = event.target.value;
+              setFilterBrand(value);
+              applyFilters({ brand: value, page: 1 });
+            }}
+            className="admin-input"
+          >
             <option value="">Все бренды</option>
             {brands.map((brand) => (
               <option key={brand.id} value={brand.id}>
@@ -272,10 +329,29 @@ export function ProductsCrud({
           </select>
         </div>
 
-        <div className="mt-4 text-sm text-muted">Показано {filteredProducts.length} из {products.length}</div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
+          <div>
+            Показано {products.length} из {total}
+            {filterCategory ? " • с учётом подкатегорий" : ""}
+          </div>
+          {hasFilters ? (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setFilterCategory("");
+                setFilterBrand("");
+                router.push("/admin/products");
+              }}
+              className="font-semibold text-petrol hover:text-lime"
+            >
+              Сбросить фильтры
+            </button>
+          ) : null}
+        </div>
 
         <div className="mt-4 grid gap-3">
-          {filteredProducts.map((product) => {
+          {products.map((product) => {
             const image = normalizeImageSrc(product.images[0]?.url ?? "/demo/pump-1.svg");
             return (
               <article key={product.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-border p-4">
@@ -307,6 +383,34 @@ export function ProductsCrud({
             );
           })}
         </div>
+
+        {pages > 1 ? (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            {Array.from({ length: pages }).map((_, index) => {
+              const pageNum = index + 1;
+              if (pages > 7 && pageNum > 2 && pageNum < pages - 1 && Math.abs(pageNum - page) > 1) {
+                if (pageNum === 3 || pageNum === pages - 2) {
+                  return (
+                    <span key={pageNum} className="px-2 text-muted">
+                      …
+                    </span>
+                  );
+                }
+                return null;
+              }
+              return (
+                <button
+                  key={pageNum}
+                  type="button"
+                  onClick={() => applyFilters({ page: pageNum })}
+                  className={`h-10 min-w-10 rounded-full px-3 text-sm font-bold ${pageNum === page ? "bg-petrol text-white" : "border border-border bg-white text-petrol"}`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </section>
 
       <AdminModal open={modal.open} onClose={modal.close} title={modal.isEdit ? "Редактировать товар" : "Новый товар"} size="xl">

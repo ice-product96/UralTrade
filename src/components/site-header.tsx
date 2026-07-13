@@ -1,6 +1,5 @@
-import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
 import { SiteDesktopNav, SiteMobileNav } from "@/components/site-nav";
+import { CartNavLink } from "@/components/cart-nav-link";
 import { getNavigationCategories } from "@/lib/data";
 import { SearchBox } from "@/components/search-box";
 import { SiteLogo } from "@/components/site-logo";
@@ -28,14 +27,7 @@ export async function SiteHeader() {
           <SearchBox />
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <Link
-            href="/cart"
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-petrol px-3 text-sm font-semibold text-white transition hover:bg-petrol-soft sm:px-4"
-            aria-label="Корзина"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            <span className="hidden sm:inline">Корзина</span>
-          </Link>
+          <CartNavLink />
           <SiteMobileNav categories={navCategories} />
         </div>
       </div>
