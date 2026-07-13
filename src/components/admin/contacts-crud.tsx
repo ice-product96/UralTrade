@@ -7,6 +7,7 @@ import { updateSiteContacts } from "@/app/admin/actions";
 type ContactRow = {
   phone: string | null;
   email: string | null;
+  address: string | null;
   telegram: string | null;
   whatsapp: string | null;
   maxMessenger: string | null;
@@ -29,7 +30,7 @@ export function ContactsCrud({ contacts }: { contacts: ContactRow }) {
     <section className="rounded-[30px] border border-border bg-white p-6">
       <div>
         <h1 className="text-3xl font-black text-graphite">Контакты</h1>
-        <p className="mt-2 text-sm text-muted">Телефон, почта и мессенджеры отображаются в подвале сайта на всех страницах.</p>
+        <p className="mt-2 text-sm text-muted">Телефон, адрес, почта и мессенджеры отображаются на странице «Контакты», в шапке и подвале сайта.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 max-w-2xl space-y-4">
@@ -41,6 +42,11 @@ export function ContactsCrud({ contacts }: { contacts: ContactRow }) {
         <label className="block">
           <span className="mb-1 block text-xs font-bold uppercase tracking-[0.16em] text-muted">Email</span>
           <input name="email" type="email" defaultValue={contacts.email ?? ""} placeholder="sales@uraltrade.ru" className="admin-input" />
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-xs font-bold uppercase tracking-[0.16em] text-muted">Адрес</span>
+          <textarea name="address" defaultValue={contacts.address ?? ""} rows={2} placeholder="Екатеринбург, ул. Примерная, 1" className="admin-textarea" />
         </label>
 
         <div className="rounded-2xl border border-border bg-background p-4">

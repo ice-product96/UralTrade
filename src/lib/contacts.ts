@@ -1,6 +1,7 @@
 export type SiteContactData = {
   phone: string | null;
   email: string | null;
+  address: string | null;
   telegram: string | null;
   whatsapp: string | null;
   maxMessenger: string | null;
@@ -60,4 +61,9 @@ export function maxLabel(value: string) {
   const trimmed = value.trim();
   if (!trimmed || /^https?:\/\//i.test(trimmed)) return "MAX";
   return trimmed;
+}
+
+export function buildMapsHref(address: string) {
+  const trimmed = address.trim();
+  return trimmed ? `https://yandex.ru/maps/?text=${encodeURIComponent(trimmed)}` : "";
 }

@@ -685,6 +685,7 @@ export async function updateSiteContacts(formData: FormData) {
     update: {
       phone: nullableField(formData, "phone"),
       email: nullableField(formData, "email"),
+      address: nullableField(formData, "address"),
       telegram: nullableField(formData, "telegram"),
       whatsapp: nullableField(formData, "whatsapp"),
       maxMessenger: nullableField(formData, "maxMessenger"),
@@ -693,6 +694,7 @@ export async function updateSiteContacts(formData: FormData) {
       id: "default",
       phone: nullableField(formData, "phone"),
       email: nullableField(formData, "email"),
+      address: nullableField(formData, "address"),
       telegram: nullableField(formData, "telegram"),
       whatsapp: nullableField(formData, "whatsapp"),
       maxMessenger: nullableField(formData, "maxMessenger"),
@@ -700,6 +702,7 @@ export async function updateSiteContacts(formData: FormData) {
   });
 
   revalidatePath("/admin/contacts");
+  revalidatePath("/page/contacts");
   revalidatePath("/", "layout");
 }
 

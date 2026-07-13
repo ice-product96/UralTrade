@@ -293,6 +293,7 @@ model SiteContact {
   id           String   @id @default("default")
   phone        String?
   email        String?
+  address      String?
   telegram     String?
   whatsapp     String?
   maxMessenger String?

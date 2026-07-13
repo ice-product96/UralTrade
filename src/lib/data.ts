@@ -1039,6 +1039,7 @@ export async function getSeoData() {
 const defaultSiteContacts = {
   phone: null,
   email: null,
+  address: null,
   telegram: null,
   whatsapp: null,
   maxMessenger: null,
@@ -1051,6 +1052,7 @@ export async function getSiteContacts() {
   return {
     phone: contacts.phone,
     email: contacts.email,
+    address: contacts.address,
     telegram: contacts.telegram,
     whatsapp: contacts.whatsapp,
     maxMessenger: contacts.maxMessenger,

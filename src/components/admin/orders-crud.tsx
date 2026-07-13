@@ -8,8 +8,7 @@ import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
 import { formatPrice } from "@/lib/format";
-
-const ORDER_STATUSES = ["NEW", "IN_PROGRESS", "DONE", "CANCELED"];
+import { ORDER_STATUSES, orderStatusLabel } from "@/lib/order-status";
 
 type OrderItem = {
   id: string;
@@ -72,7 +71,7 @@ export function OrdersCrud({ orders }: { orders: OrderRow[] }) {
                 <div className="mt-1 text-sm text-muted">
                   {order.name} • {order.phone} {order.email ? `• ${order.email}` : ""}
                 </div>
-                <div className="mt-2 text-sm font-bold text-petrol">{order.status}</div>
+                <div className="mt-2 text-sm font-bold text-petrol">{orderStatusLabel(order.status)}</div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="font-black text-graphite">{formatPrice(order.total)}</div>
@@ -98,7 +97,7 @@ export function OrdersCrud({ orders }: { orders: OrderRow[] }) {
             <select name="status" defaultValue={current.status} className="admin-input">
               {ORDER_STATUSES.map((status) => (
                 <option key={status} value={status}>
-                  {status}
+                  {orderStatusLabel(status)}
                 </option>
               ))}
             </select>

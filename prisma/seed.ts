@@ -388,6 +388,7 @@ async function main() {
       id: "default",
       phone: "+7 (343) 000-00-00",
       email: "sales@uraltrade.local",
+      address: "Екатеринбург, промышленная зона",
       telegram: "@uraltrade",
       whatsapp: "+79001234567",
       maxMessenger: null,

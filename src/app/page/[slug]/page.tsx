@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ContactsPage } from "@/components/contacts-page";
 import { FaqAccordion, FaqPageIntro } from "@/components/faq-accordion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getContentPage, getPublishedFaqItems } from "@/lib/data";
+import { getContentPage, getPublishedFaqItems, getSiteContacts } from "@/lib/data";
 import { absolutizeImportedHtml } from "@/lib/image-url";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,20 @@ export default async function InfoPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const page = await getContentPage(slug);
   if (!page || !page.published) notFound();
+
+  if (slug === "contacts") {
+    const contacts = await getSiteContacts();
+
+    return (
+      <>
+        <SiteHeader />
+        <main>
+          <ContactsPage title={page.h1 ?? page.title} description={page.description} contacts={contacts} />
+        </main>
+        <SiteFooter />
+      </>
+    );
+  }
 
   if (slug === "faq") {
     const faqItems = await getPublishedFaqItems();
