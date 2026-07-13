@@ -5,6 +5,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { CatalogMegaMenu } from "@/components/catalog-mega-menu";
+import { MobileMenuContacts } from "@/components/header-contacts";
 import { mainNavLinks } from "@/lib/site-nav";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { cn } from "@/lib/utils";
@@ -74,7 +75,13 @@ function MobileCategoryItem({
   );
 }
 
-export function SiteMobileNav({ categories }: { categories: NavCategory[] }) {
+export function SiteMobileNav({
+  categories,
+  contacts,
+}: {
+  categories: NavCategory[];
+  contacts: { phone: string | null; email: string | null };
+}) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -138,6 +145,7 @@ export function SiteMobileNav({ categories }: { categories: NavCategory[] }) {
                 </div>
               </div>
             ) : null}
+            <MobileMenuContacts contacts={contacts} />
           </nav>
         </div>
       </div>

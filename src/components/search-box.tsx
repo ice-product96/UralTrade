@@ -74,12 +74,12 @@ export function SearchBox() {
           onFocus={() => {
             if (results.length > 0) setOpen(true);
           }}
-          placeholder="Поиск по артикулу, названию"
-          className="h-11 w-full rounded-full border border-border bg-white pl-12 pr-4 text-sm outline-none ring-lime/30 transition focus:ring-4 sm:h-12"
+          placeholder="Поиск по артикулу, названию, бренду"
+          className="h-12 w-full rounded-2xl border border-border bg-white pl-12 pr-4 text-base outline-none ring-lime/30 transition focus:ring-4 sm:h-[52px]"
         />
       </form>
       {open && results.length > 0 ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 max-h-[min(60vh,24rem)] overflow-y-auto overscroll-contain rounded-3xl border border-border bg-white shadow-2xl shadow-petrol/15">
+        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[60] max-h-[min(70vh,28rem)] overflow-y-auto overscroll-contain rounded-3xl border border-border bg-white shadow-2xl shadow-petrol/15">
           {results.map((item) => (
             <Link
               key={item.id}
