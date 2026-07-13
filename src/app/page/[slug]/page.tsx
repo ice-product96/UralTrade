@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FaqAccordion, FaqPageIntro } from "@/components/faq-accordion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getContentPage } from "@/lib/data";
+import { getContentPage, getPublishedFaqItems } from "@/lib/data";
 import { absolutizeImportedHtml } from "@/lib/image-url";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,33 @@ export default async function InfoPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const page = await getContentPage(slug);
   if (!page || !page.published) notFound();
+
+  if (slug === "faq") {
+    const faqItems = await getPublishedFaqItems();
+
+    return (
+      <>
+        <SiteHeader />
+        <main className="mx-auto max-w-3xl px-3 py-10 sm:px-4 sm:py-14 lg:px-8">
+          <FaqPageIntro title={page.h1 ?? page.title} description={page.description} />
+          <div className="mt-8">
+            <FaqAccordion items={faqItems} />
+          </div>
+          <div className="mt-10 rounded-[28px] border border-border bg-white p-6 text-center shadow-sm">
+            <h2 className="text-xl font-black text-graphite">Не нашли ответ?</h2>
+            <p className="mt-2 text-sm text-muted">Напишите или позвоните — поможем подобрать оборудование и оформить заказ.</p>
+            <Link
+              href="/page/contacts"
+              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-petrol px-6 text-sm font-bold text-white hover:bg-petrol-soft"
+            >
+              Связаться с нами
+            </Link>
+          </div>
+        </main>
+        <SiteFooter />
+      </>
+    );
+  }
 
   return (
     <>

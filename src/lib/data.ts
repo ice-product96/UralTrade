@@ -180,6 +180,14 @@ export async function getContentPage(slug: string) {
   return prisma.contentPage.create({ data: seed });
 }
 
+export async function getPublishedFaqItems() {
+  return prisma.faqItem.findMany({
+    where: { published: true },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    select: { id: true, question: true, answer: true },
+  });
+}
+
 export async function getCatalogData(slug?: string, searchParams?: Record<string, string | string[] | undefined>) {
   const category = slug
     ? await prisma.category.findUnique({

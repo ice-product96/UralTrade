@@ -531,6 +531,46 @@ export async function updateContentPage(formData: FormData) {
   revalidatePath("/sitemap.xml");
 }
 
+// --- FAQ ---
+
+export async function createFaqItem(formData: FormData) {
+  await prisma.faqItem.create({
+    data: {
+      question: required(formData, "question"),
+      answer: required(formData, "answer"),
+      sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
+      published: formData.get("published") === "on",
+    },
+  });
+
+  revalidatePath("/admin/faq");
+  revalidatePath("/page/faq");
+}
+
+export async function updateFaqItem(formData: FormData) {
+  const id = required(formData, "id");
+
+  await prisma.faqItem.update({
+    where: { id },
+    data: {
+      question: required(formData, "question"),
+      answer: required(formData, "answer"),
+      sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
+      published: formData.get("published") === "on",
+    },
+  });
+
+  revalidatePath("/admin/faq");
+  revalidatePath("/page/faq");
+}
+
+export async function deleteFaqItem(formData: FormData) {
+  const id = required(formData, "id");
+  await prisma.faqItem.delete({ where: { id } });
+  revalidatePath("/admin/faq");
+  revalidatePath("/page/faq");
+}
+
 // --- SEO ---
 
 export async function createSeoTemplate(formData: FormData) {
