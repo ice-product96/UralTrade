@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { CatalogMegaMenu } from "@/components/catalog-mega-menu";
 import { mainNavLinks } from "@/lib/site-nav";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
@@ -75,8 +76,13 @@ function MobileCategoryItem({
 
 export function SiteMobileNav({ categories }: { categories: NavCategory[] }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useBodyScrollLock(open);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -91,6 +97,52 @@ export function SiteMobileNav({ categories }: { categories: NavCategory[] }) {
     setOpen(false);
   }
 
+  const menuOverlay =
+    open && mounted ? (
+      <div className="fixed inset-0 z-[100] lg:hidden">
+        <button type="button" className="absolute inset-0 bg-black/40" aria-label="Закрыть" onClick={close} />
+        <div className="absolute inset-y-0 right-0 flex h-full w-full max-w-[360px] flex-col bg-white shadow-2xl">
+          <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-4">
+            <div className="text-lg font-black text-graphite">Меню</div>
+            <button type="button" onClick={close} className="rounded-full p-2 text-petrol" aria-label="Закрыть меню">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="space-y-1">
+              <Link
+                href="/catalog"
+                onClick={close}
+                className="block rounded-2xl bg-petrol px-4 py-3 text-center text-sm font-semibold text-white"
+              >
+                Каталог
+              </Link>
+              {mainNavLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={close}
+                  className="block rounded-2xl px-4 py-3 text-sm font-semibold text-petrol hover:bg-background"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            {categories.length > 0 ? (
+              <div className="mt-4 border-t border-border pt-4">
+                <div className="px-1 pb-2 text-xs font-bold uppercase tracking-[0.2em] text-muted">Разделы каталога</div>
+                <div className="space-y-1">
+                  {categories.map((category) => (
+                    <MobileCategoryItem key={category.id} category={category} onNavigate={close} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </nav>
+        </div>
+      </div>
+    ) : null;
+
   return (
     <>
       <button
@@ -102,48 +154,7 @@ export function SiteMobileNav({ categories }: { categories: NavCategory[] }) {
         <Menu className="h-5 w-5" />
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button type="button" className="absolute inset-0 bg-black/40" aria-label="Закрыть" onClick={close} />
-          <div className="absolute inset-y-0 right-0 flex w-[min(100%,min(360px,100vw))] flex-col bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-border px-4 py-4">
-              <div className="text-lg font-black text-graphite">Меню</div>
-              <button type="button" onClick={close} className="rounded-full p-2 text-petrol" aria-label="Закрыть меню">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <nav className="flex-1 space-y-1 overflow-y-auto overscroll-contain px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-              <Link
-                href="/catalog"
-                onClick={close}
-                className="block rounded-2xl bg-petrol px-4 py-3 text-sm font-semibold text-white"
-              >
-                Каталог
-              </Link>
-              <div className="pt-2">
-                <div className="px-4 pb-2 text-xs font-bold uppercase tracking-[0.2em] text-muted">Разделы</div>
-                <div className="space-y-1">
-                  {categories.map((category) => (
-                    <MobileCategoryItem key={category.id} category={category} onNavigate={close} />
-                  ))}
-                </div>
-              </div>
-              <div className="border-t border-border pt-3">
-                {mainNavLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={close}
-                    className="block rounded-2xl px-4 py-3 text-sm font-semibold text-petrol hover:bg-background"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </nav>
-          </div>
-        </div>
-      ) : null}
+      {mounted && menuOverlay ? createPortal(menuOverlay, document.body) : null}
     </>
   );
 }
