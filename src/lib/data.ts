@@ -24,6 +24,7 @@ export const productDetailsInclude = {
   category: { include: { parent: true } },
   brand: true,
   images: { orderBy: { sortOrder: "asc" as const } },
+  documents: { orderBy: { sortOrder: "asc" as const } },
   relatedFrom: {
     include: {
       related: {
@@ -972,6 +973,7 @@ export async function getAdminCatalog(filters?: {
         brand: true,
         category: { include: { parent: true } },
         images: { orderBy: { sortOrder: "asc" } },
+        documents: { orderBy: { sortOrder: "asc" } },
         fieldValues: { include: { field: true, option: true } },
       },
       orderBy: { updatedAt: "desc" },
@@ -1011,4 +1013,25 @@ export async function getSeoData() {
   ]);
 
   return { templates, redirects };
+}
+
+const defaultSiteContacts = {
+  phone: null,
+  email: null,
+  telegram: null,
+  whatsapp: null,
+  maxMessenger: null,
+} as const;
+
+export async function getSiteContacts() {
+  const contacts = await prisma.siteContact.findUnique({ where: { id: "default" } });
+  if (!contacts) return { ...defaultSiteContacts };
+
+  return {
+    phone: contacts.phone,
+    email: contacts.email,
+    telegram: contacts.telegram,
+    whatsapp: contacts.whatsapp,
+    maxMessenger: contacts.maxMessenger,
+  };
 }

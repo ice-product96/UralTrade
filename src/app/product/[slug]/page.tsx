@@ -134,11 +134,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
           <aside className="space-y-4">
-            {product.fieldValues.some((value) => value.valueFileUrl) ? (
+            {product.documents.length || product.fieldValues.some((value) => value.valueFileUrl) ? (
               <div className="rounded-[30px] border border-border bg-white p-6">
                 <h2 className="text-xl font-black text-graphite">Документы</h2>
+                {product.documents.map((document) => (
+                  <Link key={document.id} href={document.url} className="mt-4 flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol">
+                    <FileText className="h-5 w-5 text-lime" />
+                    {document.title}
+                  </Link>
+                ))}
                 {product.fieldValues
-                  .filter((value) => value.valueFileUrl)
+                  .filter((value) => value.valueFileUrl && !product.documents.some((document) => document.url === value.valueFileUrl))
                   .map((value) => (
                     <Link key={value.id} href={value.valueFileUrl!} className="mt-4 flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol">
                       <FileText className="h-5 w-5 text-lime" />

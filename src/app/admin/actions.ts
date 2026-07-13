@@ -112,19 +112,82 @@ async function saveProductFieldValues(
 }
 
 async function saveProductImages(tx: Tx, productId: string, name: string, formData: FormData) {
-  const imageUrls = String(formData.get("images") ?? "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
+  type ImagePayload = { url: string; alt?: string };
+
+  let imageItems: ImagePayload[] = [];
+  const imagesJson = String(formData.get("imagesJson") ?? "").trim();
+
+  if (imagesJson) {
+    try {
+      const parsed = JSON.parse(imagesJson) as unknown;
+      if (Array.isArray(parsed)) {
+        imageItems = parsed
+          .filter((item): item is ImagePayload => Boolean(item && typeof item === "object" && "url" in item && typeof item.url === "string"))
+          .map((item) => ({ url: item.url.trim(), alt: typeof item.alt === "string" ? item.alt : undefined }))
+          .filter((item) => item.url);
+      }
+    } catch {
+      throw new Error("Некорректный список фото");
+    }
+  } else {
+    imageItems = String(formData.get("images") ?? "")
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((url) => ({ url }));
+  }
 
   await tx.productImage.deleteMany({ where: { productId } });
 
-  if (imageUrls.length) {
+  if (imageItems.length) {
     await tx.productImage.createMany({
-      data: imageUrls.map((url, index) => ({
+      data: imageItems.map((image, index) => ({
         productId,
-        url,
-        alt: `${name} фото ${index + 1}`,
+        url: image.url,
+        alt: image.alt ?? `${name} фото ${index + 1}`,
+        sortOrder: index * 10,
+      })),
+    });
+  }
+}
+
+async function saveProductDocuments(tx: Tx, productId: string, formData: FormData) {
+  type DocumentPayload = { title: string; url: string; fileName?: string };
+
+  const raw = String(formData.get("documentsJson") ?? "").trim();
+  if (!raw) {
+    await tx.productDocument.deleteMany({ where: { productId } });
+    return;
+  }
+
+  let documents: DocumentPayload[] = [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) throw new Error();
+    documents = parsed
+      .filter(
+        (item): item is DocumentPayload =>
+          Boolean(item && typeof item === "object" && "url" in item && typeof item.url === "string" && "title" in item && typeof item.title === "string"),
+      )
+      .map((item) => ({
+        title: item.title.trim() || "Инструкция",
+        url: item.url.trim(),
+        fileName: typeof item.fileName === "string" ? item.fileName : undefined,
+      }))
+      .filter((item) => item.url);
+  } catch {
+    throw new Error("Некорректный список инструкций");
+  }
+
+  await tx.productDocument.deleteMany({ where: { productId } });
+
+  if (documents.length) {
+    await tx.productDocument.createMany({
+      data: documents.map((document, index) => ({
+        productId,
+        title: document.title,
+        url: document.url,
+        fileName: document.fileName ?? null,
         sortOrder: index * 10,
       })),
     });
@@ -384,6 +447,7 @@ export async function createProduct(formData: FormData) {
       });
 
       await saveProductImages(tx, product.id, name, formData);
+      await saveProductDocuments(tx, product.id, formData);
       await saveProductFieldValues(tx, product.id, templateId, formData);
     });
   } catch (error) {
@@ -424,6 +488,7 @@ export async function updateProduct(formData: FormData) {
       });
 
       await saveProductImages(tx, id, name, formData);
+      await saveProductDocuments(tx, id, formData);
       await saveProductFieldValues(tx, id, templateId, formData);
     });
   } catch (error) {
@@ -569,6 +634,37 @@ export async function deleteFaqItem(formData: FormData) {
   await prisma.faqItem.delete({ where: { id } });
   revalidatePath("/admin/faq");
   revalidatePath("/page/faq");
+}
+
+// --- Site contacts ---
+
+function nullableField(formData: FormData, name: string) {
+  const value = String(formData.get(name) ?? "").trim();
+  return value || null;
+}
+
+export async function updateSiteContacts(formData: FormData) {
+  await prisma.siteContact.upsert({
+    where: { id: "default" },
+    update: {
+      phone: nullableField(formData, "phone"),
+      email: nullableField(formData, "email"),
+      telegram: nullableField(formData, "telegram"),
+      whatsapp: nullableField(formData, "whatsapp"),
+      maxMessenger: nullableField(formData, "maxMessenger"),
+    },
+    create: {
+      id: "default",
+      phone: nullableField(formData, "phone"),
+      email: nullableField(formData, "email"),
+      telegram: nullableField(formData, "telegram"),
+      whatsapp: nullableField(formData, "whatsapp"),
+      maxMessenger: nullableField(formData, "maxMessenger"),
+    },
+  });
+
+  revalidatePath("/admin/contacts");
+  revalidatePath("/", "layout");
 }
 
 // --- SEO ---

@@ -23,6 +23,9 @@ services:
       - postgres
     ports:
       - "3000:3000"
+    volumes:
+      - uploads_data:/app/public/uploads
 
 volumes:
   postgres_data:
+  uploads_data:

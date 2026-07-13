@@ -20,5 +20,8 @@ if ! npx prisma migrate deploy; then
 fi
 
 echo "[entrypoint] Migrations applied successfully."
+
+mkdir -p public/uploads/products/images public/uploads/products/documents
+
 echo "[entrypoint] Starting Next.js..."
 exec npm start

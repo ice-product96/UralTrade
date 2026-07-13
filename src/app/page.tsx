@@ -60,12 +60,12 @@ export default async function Home() {
               <div className="relative">
                 <div className="glass-panel overflow-hidden rounded-[42px] p-4">
                   <Image
-                    src={banner?.imageUrl ?? "/demo/hero-equipment.svg"}
+                    src={banner?.imageUrl ?? "/demo/hero-equipment.jpg"}
                     alt={banner?.title ?? "Гидравлическое оборудование"}
-                    width={980}
-                    height={620}
+                    width={1024}
+                    height={341}
                     priority
-                    className="rounded-[32px]"
+                    className="h-auto w-full rounded-[32px] object-cover"
                   />
                 </div>
               </div>

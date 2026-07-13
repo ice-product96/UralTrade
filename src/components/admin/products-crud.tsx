@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { createProduct, deleteProduct, updateProduct } from "@/app/admin/actions";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
+import { ProductDocumentsManager, ProductFileFieldInput, ProductImagesManager } from "@/components/admin/product-media-manager";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
 import { ProductImage } from "@/components/product-image";
 import { formatPrice } from "@/lib/format";
@@ -40,7 +41,8 @@ type ProductRow = {
   metaDescription: string | null;
   category: { name: string; parent?: { name: string } | null };
   brand: { name: string } | null;
-  images: Array<{ url: string }>;
+  images: Array<{ url: string; alt?: string | null }>;
+  documents: Array<{ title: string; url: string; fileName: string | null }>;
   fieldValues: Array<{
     fieldId: string;
     field: { name: string };
@@ -145,6 +147,10 @@ function ProductFieldInput({ field, defaultValue }: { field: FieldRow; defaultVa
     return <input name={inputName} type="number" step="any" defaultValue={defaultValue} placeholder={field.unit ?? "Число"} className="admin-input bg-white" />;
   }
 
+  if (field.type === "FILE") {
+    return <ProductFileFieldInput name={inputName} defaultValue={defaultValue} label={field.name} />;
+  }
+
   return (
     <textarea
       name={inputName}
@@ -192,6 +198,8 @@ export function ProductsCrud({
   const [query, setQuery] = useState(initialQuery);
   const [filterCategory, setFilterCategory] = useState(initialCategoryId);
   const [filterBrand, setFilterBrand] = useState(initialBrandId);
+  const [productImages, setProductImages] = useState<Array<{ url: string; alt?: string }>>([]);
+  const [productDocuments, setProductDocuments] = useState<Array<{ title: string; url: string; fileName?: string }>>([]);
   const current = modal.item;
 
   useEffect(() => {
@@ -205,6 +213,14 @@ export function ProductsCrud({
     setError(null);
     setCategoryId(current?.categoryId ?? "");
     setTemplateId(current?.templateId ?? categories.find((item) => item.id === current?.categoryId)?.templateId ?? "");
+    setProductImages(current?.images.map((image) => ({ url: image.url, alt: image.alt ?? undefined })) ?? []);
+    setProductDocuments(
+      current?.documents.map((document) => ({
+        title: document.title,
+        url: document.url,
+        fileName: document.fileName ?? undefined,
+      })) ?? [],
+    );
   }, [modal.open, current, categories]);
 
   function applyFilters(next: { q?: string; category?: string; brand?: string; page?: number }) {
@@ -476,7 +492,13 @@ export function ProductsCrud({
           </Section>
 
           <Section title="Фото">
-            <textarea name="images" rows={3} defaultValue={current?.images.map((image) => image.url).join("\n")} placeholder="URL фото, каждый с новой строки" className="admin-textarea" />
+            <ProductImagesManager images={productImages} onChange={setProductImages} productName={current?.name} />
+            <input type="hidden" name="imagesJson" value={JSON.stringify(productImages)} />
+          </Section>
+
+          <Section title="Инструкции">
+            <ProductDocumentsManager documents={productDocuments} onChange={setProductDocuments} />
+            <input type="hidden" name="documentsJson" value={JSON.stringify(productDocuments)} />
           </Section>
 
           {activeTemplateId ? (

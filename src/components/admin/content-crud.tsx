@@ -84,7 +84,7 @@ export function ContentCrud({ banners }: { banners: BannerRow[] }) {
           {current ? <input type="hidden" name="id" value={current.id} /> : null}
           <input name="title" required defaultValue={current?.title} placeholder="Заголовок" className="admin-input" />
           <textarea name="subtitle" defaultValue={current?.subtitle ?? ""} rows={3} placeholder="Подзаголовок" className="admin-textarea" />
-          <input name="imageUrl" required defaultValue={current?.imageUrl} placeholder="/demo/hero-equipment.svg" className="admin-input" />
+          <input name="imageUrl" required defaultValue={current?.imageUrl} placeholder="/demo/hero-equipment.jpg" className="admin-input" />
           <input name="href" defaultValue={current?.href ?? ""} placeholder="/catalog/nasosy" className="admin-input" />
           <input name="buttonLabel" defaultValue={current?.buttonLabel ?? ""} placeholder="Текст кнопки" className="admin-input" />
           <input name="sortOrder" type="number" defaultValue={current?.sortOrder ?? 0} placeholder="Порядок" className="admin-input" />

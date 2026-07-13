@@ -262,14 +262,27 @@ async function main() {
     create: { productId: productA.id, relatedId: productB.id },
   });
 
+  await prisma.productDocument.upsert({
+    where: { id: "seed-manual-a" },
+    update: { title: "Инструкция по эксплуатации", url: "/demo/manual.pdf", fileName: "manual.pdf", sortOrder: 10 },
+    create: {
+      id: "seed-manual-a",
+      productId: productA.id,
+      title: "Инструкция по эксплуатации",
+      url: "/demo/manual.pdf",
+      fileName: "manual.pdf",
+      sortOrder: 10,
+    },
+  });
+
   await prisma.homeBanner.upsert({
     where: { id: "banner-main" },
-    update: {},
+    update: { imageUrl: "/demo/hero-equipment.jpg" },
     create: {
       id: "banner-main",
       title: "Инженерное оборудование с умным подбором",
       subtitle: "Каталог UralTrade помогает быстро найти товар по артикулу, бренду и точным техническим параметрам.",
-      imageUrl: "/demo/hero-equipment.svg",
+      imageUrl: "/demo/hero-equipment.jpg",
       href: "/catalog/nasosy",
       buttonLabel: "Перейти в каталог",
     },
@@ -358,6 +371,19 @@ async function main() {
   if (faqCount === 0) {
     await prisma.faqItem.createMany({ data: faqItems });
   }
+
+  await prisma.siteContact.upsert({
+    where: { id: "default" },
+    update: {},
+    create: {
+      id: "default",
+      phone: "+7 (343) 000-00-00",
+      email: "sales@uraltrade.local",
+      telegram: "@uraltrade",
+      whatsapp: "+79001234567",
+      maxMessenger: null,
+    },
+  });
 }
 
 main()

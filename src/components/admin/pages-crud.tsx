@@ -44,11 +44,7 @@ export function PagesCrud({ pages }: { pages: PageRow[] }) {
         <div className="mb-6">
           <h1 className="text-3xl font-black text-graphite">Страницы сайта</h1>
           <p className="mt-2 text-sm text-muted">
-            Редактируйте информационные страницы. Раздел «Акции» формируется автоматически из товаров со скидкой. Вопросы FAQ — в разделе{" "}
-            <Link href="/admin/faq" className="font-semibold text-petrol hover:text-lime">
-              Вопрос — ответ
-            </Link>
-            .
+            Редактируйте информационные страницы. Раздел «Акции» формируется автоматически из товаров со скидкой.
           </p>
         </div>
 
@@ -112,24 +108,13 @@ export function PagesCrud({ pages }: { pages: PageRow[] }) {
               placeholder="Краткое описание под заголовком"
               className="admin-textarea"
             />
-            {current.slug === "faq" ? <input type="hidden" name="body" value={current.body} /> : null}
             <textarea
               name="body"
               rows={12}
               defaultValue={current.body}
               placeholder="Содержимое страницы (HTML: p, h3, ul, li, strong)"
               className="admin-textarea font-mono text-xs"
-              disabled={current.slug === "faq"}
             />
-            {current.slug === "faq" ? (
-              <p className="text-sm text-muted">
-                Список вопросов редактируется в разделе{" "}
-                <Link href="/admin/faq" className="font-semibold text-petrol hover:text-lime">
-                  Вопрос — ответ
-                </Link>
-                . Здесь можно менять только заголовок и SEO страницы.
-              </p>
-            ) : null}
             <input name="metaTitle" defaultValue={current.metaTitle ?? ""} placeholder="Meta title" className="admin-input" />
             <textarea
               name="metaDescription"

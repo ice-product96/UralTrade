@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Boxes, FileText, HelpCircle, Home, Layers3, Package, Settings2, ShoppingBag, Tags, Files } from "lucide-react";
+import { Boxes, FileText, HelpCircle, Home, Layers3, Package, Phone, Settings2, ShoppingBag, Tags, Files } from "lucide-react";
 import { SiteLogo } from "@/components/site-logo";
 
 const items = [
@@ -12,6 +12,7 @@ const items = [
   { href: "/admin/content", label: "Главная", icon: Boxes },
   { href: "/admin/pages", label: "Страницы", icon: Files },
   { href: "/admin/faq", label: "Вопрос — ответ", icon: HelpCircle },
+  { href: "/admin/contacts", label: "Контакты", icon: Phone },
   { href: "/admin/seo", label: "SEO", icon: FileText },
 ];
 

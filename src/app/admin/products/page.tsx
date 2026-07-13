@@ -48,6 +48,11 @@ export default async function AdminProductsPage({
       valueFileUrl: value.valueFileUrl,
       valueJson: value.valueJson,
     })),
+    documents: product.documents.map((document) => ({
+      title: document.title,
+      url: document.url,
+      fileName: document.fileName,
+    })),
   }));
 
   const categoryOptions = buildCategoryOptions(categories, categoryCounts);
