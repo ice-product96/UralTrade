@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { Pencil, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { createHomeBanner, deleteHomeBanner, updateHomeBanner } from "@/app/admin/actions";
 import { AdminImageUpload } from "@/components/admin/admin-file-upload";
+import { ProductImage } from "@/components/product-image";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
@@ -64,7 +64,7 @@ export function ContentCrud({ banners }: { banners: BannerRow[] }) {
           {banners.map((banner) => (
             <article key={banner.id} className="grid gap-4 rounded-2xl border border-border p-4 md:grid-cols-[220px_1fr_auto]">
               <div className="relative aspect-video overflow-hidden rounded-2xl bg-background">
-                <Image src={banner.imageUrl} alt={banner.title} fill className="object-cover" />
+                <ProductImage src={banner.imageUrl} alt={banner.title} fill className="object-cover" />
               </div>
               <div>
                 <div className="text-lg font-black text-graphite">{banner.title}</div>

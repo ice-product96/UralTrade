@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileText, ShieldCheck, Truck } from "lucide-react";
@@ -7,6 +6,7 @@ import { AddToCartButton } from "@/components/add-to-cart-button";
 import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
+import { ProductImage } from "@/components/product-image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
@@ -105,7 +105,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
                 {product.brand ? (
                   <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
-                    {product.brand.logoUrl ? <Image src={product.brand.logoUrl} alt={product.brand.name} width={64} height={32} /> : null}
+                    {product.brand.logoUrl ? <ProductImage src={product.brand.logoUrl} alt={product.brand.name} width={64} height={32} /> : null}
                     <span className="text-sm font-semibold text-graphite">{product.brand.name}</span>
                   </div>
                 ) : null}

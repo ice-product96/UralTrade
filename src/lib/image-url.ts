@@ -12,6 +12,13 @@ export function isExternalProductImage(src: string) {
   return normalized.startsWith("http://") || normalized.startsWith("https://");
 }
 
+/** Загруженные и внешние изображения отдаём напрямую, без /_next/image (ограничения Next.js 16 в production). */
+export function shouldUnoptimizeImage(src: string) {
+  const normalized = normalizeImageSrc(src);
+  if (normalized.startsWith("/uploads/")) return true;
+  return isExternalProductImage(normalized);
+}
+
 /** Пути /uploadedFiles/... в HTML описания → абсолютные URL источника. */
 export function absolutizeImportedHtml(html: string) {
   return html

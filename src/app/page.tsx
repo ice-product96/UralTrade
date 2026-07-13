@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ProductImage } from "@/components/product-image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { CategoryCard } from "@/components/category-card";
@@ -59,7 +59,7 @@ export default async function Home() {
             <MotionReveal delay={0.12}>
               <div className="relative">
                 <div className="glass-panel overflow-hidden rounded-[42px] p-4">
-                  <Image
+                  <ProductImage
                     src={banner?.imageUrl ?? "/demo/hero-equipment.jpg"}
                     alt={banner?.title ?? "Гидравлическое оборудование"}
                     width={1024}

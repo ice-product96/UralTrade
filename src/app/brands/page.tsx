@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { ProductImage } from "@/components/product-image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicBrands } from "@/lib/data";
@@ -31,7 +31,7 @@ export default async function BrandsPage() {
             >
               <div className="flex h-16 items-center justify-center rounded-2xl bg-background">
                 {brand.logoUrl ? (
-                  <Image src={brand.logoUrl} alt={brand.name} width={120} height={48} className="max-h-12 w-auto object-contain" />
+                  <ProductImage src={brand.logoUrl} alt={brand.name} width={120} height={48} className="max-h-12 w-auto object-contain" />
                 ) : (
                   <span className="text-lg font-black text-petrol">{brand.name.slice(0, 2)}</span>
                 )}
