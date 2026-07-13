@@ -1,6 +1,6 @@
 import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
-import { MessengerIcon, MESSENGER_ICONS } from "@/components/messenger-icon";
+import { MessengerIcon, MESSENGER_ICONS, type MessengerKey } from "@/components/messenger-icon";
 import {
   buildEmailHref,
   buildMapsHref,
@@ -87,7 +87,7 @@ export function ContactsPage({ title = "Контакты", description, contacts
           label: maxLabel(contacts.maxMessenger),
         }
       : null,
-  ].filter(Boolean);
+  ].filter((item): item is { key: MessengerKey; href: string; label: string } => item !== null);
 
   const hasAny = Boolean(contacts.phone || contacts.email || contacts.address || messengers.length);
 
