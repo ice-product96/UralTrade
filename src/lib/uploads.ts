@@ -1,5 +1,3 @@
-import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export type UploadKind = "image" | "document";
@@ -38,6 +36,11 @@ function resolveExtension(kind: UploadKind, mimeType: string, fileName: string) 
   return map[mimeType] ?? "";
 }
 
+/** Корень загрузок: в Docker — volume /app/data/uploads, локально — data/uploads. */
+export function getUploadRoot() {
+  return process.env.UPLOADS_DIR ?? path.join(process.cwd(), "data", "uploads");
+}
+
 export function getUploadDir(scope: UploadScope) {
   const segments =
     scope === "product-document"
@@ -46,7 +49,7 @@ export function getUploadDir(scope: UploadScope) {
         ? ["site", "images"]
         : ["products", "images"];
 
-  return path.join(process.cwd(), "public", "uploads", ...segments);
+  return path.join(getUploadRoot(), ...segments);
 }
 
 export function getUploadPublicPath(scope: UploadScope, fileName: string) {
@@ -59,6 +62,32 @@ export function getUploadPublicPath(scope: UploadScope, fileName: string) {
 
   return `/uploads/${segments.join("/")}/${fileName}`;
 }
+
+export function resolveUploadedFilePath(segments: string[]) {
+  const root = path.resolve(getUploadRoot());
+  const filePath = path.resolve(root, ...segments);
+
+  if (!filePath.startsWith(`${root}${path.sep}`) && filePath !== root) {
+    return null;
+  }
+
+  return filePath;
+}
+
+export const UPLOAD_EXTENSION_MIME: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".pdf": "application/pdf",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".txt": "text/plain",
+};
 
 export async function saveUploadedFile(file: File, kind: UploadKind, scope?: UploadScope) {
   const resolvedScope: UploadScope =
@@ -80,6 +109,9 @@ export async function saveUploadedFile(file: File, kind: UploadKind, scope?: Upl
     throw new Error("Не удалось определить тип файла");
   }
 
+  const { mkdir, writeFile, stat } = await import("node:fs/promises");
+  const { randomBytes } = await import("node:crypto");
+
   const dir = getUploadDir(resolvedScope);
   await mkdir(dir, { recursive: true });
 
@@ -87,6 +119,11 @@ export async function saveUploadedFile(file: File, kind: UploadKind, scope?: Upl
   const diskPath = path.join(dir, safeName);
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(diskPath, buffer);
+
+  const saved = await stat(diskPath);
+  if (!saved.isFile() || saved.size !== buffer.length) {
+    throw new Error("Файл не сохранился на диск");
+  }
 
   const publicPath = getUploadPublicPath(resolvedScope, safeName);
 

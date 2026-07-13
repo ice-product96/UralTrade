@@ -40,6 +40,7 @@ services:
     env_file: .env
     environment:
       NODE_ENV: production
+      UPLOADS_DIR: /app/data/uploads
       POSTGRES_USER: ${POSTGRES_USER:-uraltrade}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-uraltrade}
@@ -50,7 +51,7 @@ services:
     ports:
       - "127.0.0.1:${APP_PORT:-3010}:3000"
     volumes:
-      - uraltrade_uploads:/app/public/uploads
+      - uraltrade_uploads:/app/data/uploads
     networks:
       - uraltrade
     healthcheck:

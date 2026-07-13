@@ -44,6 +44,10 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# user uploads
+# user uploads (local dev)
+/data/uploads/**
+!/data/uploads/.gitkeep
+
+# legacy path
 /public/uploads/**
 !/public/uploads/.gitkeep

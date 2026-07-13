@@ -21,7 +21,7 @@ fi
 
 echo "[entrypoint] Migrations applied successfully."
 
-mkdir -p public/uploads/products/images public/uploads/products/documents public/uploads/site/images
+mkdir -p /app/data/uploads/products/images /app/data/uploads/products/documents /app/data/uploads/site/images
 
 echo "[entrypoint] Starting Next.js..."
 exec npm start

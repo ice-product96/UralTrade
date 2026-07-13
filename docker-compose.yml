@@ -16,6 +16,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://uraltrade:uraltrade@postgres:5432/uraltrade?schema=public
+      UPLOADS_DIR: /app/data/uploads
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_SECRET: change-me-in-production
       SITE_URL: http://localhost:3000
@@ -24,7 +25,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - uploads_data:/app/public/uploads
+      - uploads_data:/app/data/uploads
 
 volumes:
   postgres_data:
