@@ -44,6 +44,7 @@ type CategoryNode = {
   name: string;
   depth: number;
   parentPath: string | null;
+  imageUrl?: string | null;
 };
 
 type ParsedProduct = {
@@ -271,16 +272,26 @@ function parseSitemapCategories(html: string): CategoryNode[] {
 }
 
 function parseCategoryPage(html: string, currentPath: string) {
-  const subcategories: { path: string; name: string }[] = [];
+  const subcategories: { path: string; name: string; imageUrl: string | null }[] = [];
   const productUrls = new Set<string>();
 
   const catsBlock = html.match(/<div class="uss_shop_block_cat uss_shop_cats">([\s\S]*?)<\/div>\s*<div class="(?:filter|uss_cleaner)"/);
   if (catsBlock) {
-    const links = [...catsBlock[1].matchAll(/<div class="uss_shop_cat_name">\s*<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)];
-    for (const [, href, name] of links) {
-      const path = normalizeStorePath(href);
+    const categoryBlocks = [
+      ...catsBlock[1].matchAll(/<div class="uss_shop_category[\s\S]*?<div class="uss_shop_cat_text">[\s\S]*?<\/div>\s*<\/div>/g),
+    ];
+    for (const block of categoryBlocks) {
+      const blockHtml = block[0];
+      const href = blockHtml.match(/<div class="uss_shop_cat_name">\s*<a href="([^"]+)"/)?.[1];
+      const name = blockHtml.match(/<div class="uss_shop_cat_name">\s*<a href="[^"]+"[^>]*>([^<]+)<\/a>/)?.[1];
+      const imgSrc = blockHtml.match(/<div class="uss_shop_cat_img[\s\S]*?<img[^>]*src="([^"]+)"/)?.[1];
+      const path = normalizeStorePath(href ?? "");
       if (path && path !== currentPath && path.startsWith(currentPath ? `${currentPath}/` : "")) {
-        subcategories.push({ path, name: decodeHtml(name) });
+        subcategories.push({
+          path,
+          name: decodeHtml(name ?? ""),
+          imageUrl: imgSrc ? toAbsoluteUrl(imgSrc) : null,
+        });
       }
     }
   }
@@ -578,6 +589,7 @@ async function importCategories(categories: CategoryNode[], templateId: string) 
         templateId,
         sortOrder: index * 10,
         h1: category.name,
+        ...(category.imageUrl ? { imageUrl: category.imageUrl } : {}),
       },
       create: {
         name: category.name,
@@ -586,6 +598,7 @@ async function importCategories(categories: CategoryNode[], templateId: string) 
         templateId,
         sortOrder: index * 10,
         h1: category.name,
+        imageUrl: category.imageUrl ?? null,
         metaTitle: `${category.name} купить — UralTrade`,
         metaDescription: `${category.name}: каталог запчастей с доставкой по России.`,
       },
@@ -714,9 +727,36 @@ async function discoverCatalog(initialCategories: CategoryNode[]) {
     categories.set(category.path, category);
   }
 
-  const queue = [...categories.keys()];
-  const seen = new Set(queue);
+  const queue = [""];
+  const seen = new Set<string>([""]);
+  for (const path of categories.keys()) {
+    if (!seen.has(path)) {
+      seen.add(path);
+      queue.push(path);
+    }
+  }
   const productUrls = new Set<string>();
+
+  const upsertCategory = (sub: { path: string; name: string; imageUrl: string | null }, parentPath: string | null) => {
+    const existing = categories.get(sub.path);
+    if (!existing) {
+      categories.set(sub.path, {
+        path: sub.path,
+        name: sub.name,
+        depth: parentPath ? parentPath.split("/").filter(Boolean).length + 1 : 1,
+        parentPath,
+        imageUrl: sub.imageUrl,
+      });
+      return;
+    }
+
+    if (sub.imageUrl && !existing.imageUrl) {
+      existing.imageUrl = sub.imageUrl;
+    }
+    if (!existing.name && sub.name) {
+      existing.name = sub.name;
+    }
+  };
 
   while (queue.length > 0) {
     const path = queue.shift()!;
@@ -733,14 +773,7 @@ async function discoverCatalog(initialCategories: CategoryNode[]) {
     }
 
     for (const sub of parsed.subcategories) {
-      if (!categories.has(sub.path)) {
-        categories.set(sub.path, {
-          path: sub.path,
-          name: sub.name,
-          depth: path ? path.split("/").length + 1 : 1,
-          parentPath: path || null,
-        });
-      }
+      upsertCategory(sub, path || null);
       if (!seen.has(sub.path)) {
         seen.add(sub.path);
         queue.push(sub.path);

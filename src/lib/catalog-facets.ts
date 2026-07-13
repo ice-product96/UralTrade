@@ -1,4 +1,4 @@
-import { slugify } from "@/lib/utils";
+import { slugify } from "./utils";
 
 export const SPEC_FACET_PREFIX = "f_";
 
