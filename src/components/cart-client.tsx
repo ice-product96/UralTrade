@@ -5,11 +5,7 @@ import { ProductImage } from "@/components/product-image";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
 import { normalizeImageSrc } from "@/lib/image-url";
-
-type CartLine = {
-  id: string;
-  quantity: number;
-};
+import { addToCart, incrementCart, readCart, setCartQuantity, type CartLine } from "@/lib/cart-storage";
 
 type CartProduct = {
   id: string;
@@ -21,16 +17,21 @@ type CartProduct = {
 };
 
 export function CartClient() {
-  const [lines, setLines] = useState<CartLine[]>(() => {
-    if (typeof window === "undefined") return [];
+  const [lines, setLines] = useState<CartLine[]>([]);
 
-    const initial = JSON.parse(window.localStorage.getItem("uraltrade-cart") ?? "[]") as CartLine[];
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const add = params.get("add");
-    const next = add ? increment(initial, add) : initial;
-    window.localStorage.setItem("uraltrade-cart", JSON.stringify(next));
-    return next;
-  });
+    if (add) {
+      addToCart(add);
+      params.delete("add");
+      const nextUrl = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
+
+    setLines(readCart());
+  }, []);
+
   const [products, setProducts] = useState<CartProduct[]>([]);
 
   useEffect(() => {
@@ -54,11 +55,7 @@ export function CartClient() {
   );
 
   function updateQuantity(id: string, quantity: number) {
-    const next = lines
-      .map((line) => (line.id === id ? { ...line, quantity: Math.max(0, quantity) } : line))
-      .filter((line) => line.quantity > 0);
-    setLines(next);
-    window.localStorage.setItem("uraltrade-cart", JSON.stringify(next));
+    setLines(setCartQuantity(id, quantity));
   }
 
   return (
@@ -80,11 +77,11 @@ export function CartClient() {
                   <div className="mt-2 font-bold text-petrol">{formatPrice(product.price)}</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => updateQuantity(product.id, quantity - 1)} className="h-10 w-10 rounded-full border border-border">
+                  <button type="button" onClick={() => updateQuantity(product.id, quantity - 1)} className="h-10 w-10 rounded-full border border-border">
                     -
                   </button>
                   <span className="w-8 text-center font-bold">{quantity}</span>
-                  <button onClick={() => updateQuantity(product.id, quantity + 1)} className="h-10 w-10 rounded-full border border-border">
+                  <button type="button" onClick={() => setLines(incrementCart(product.id))} className="h-10 w-10 rounded-full border border-border">
                     +
                   </button>
                 </div>
@@ -96,20 +93,19 @@ export function CartClient() {
       <form action="/api/checkout" method="post" className="h-fit rounded-[30px] border border-border bg-white p-6 shadow-xl shadow-petrol/5">
         <input type="hidden" name="items" value={JSON.stringify(lines)} />
         <div className="text-xl font-black text-graphite">Оформление заказа</div>
-        <div className="mt-2 text-sm text-muted">Итого: <span className="font-bold text-petrol">{formatPrice(total)}</span></div>
+        <div className="mt-2 text-sm text-muted">
+          Итого: <span className="font-bold text-petrol">{formatPrice(total)}</span>
+        </div>
         <div className="mt-6 space-y-3">
           <input required name="name" placeholder="Ваше имя" className="h-12 w-full rounded-2xl border border-border px-4 outline-none focus:ring-4 focus:ring-lime/20" />
           <input required name="phone" placeholder="Телефон" className="h-12 w-full rounded-2xl border border-border px-4 outline-none focus:ring-4 focus:ring-lime/20" />
           <input name="email" type="email" placeholder="Email" className="h-12 w-full rounded-2xl border border-border px-4 outline-none focus:ring-4 focus:ring-lime/20" />
           <textarea name="comment" placeholder="Комментарий" rows={4} className="w-full rounded-2xl border border-border px-4 py-3 outline-none focus:ring-4 focus:ring-lime/20" />
         </div>
-        <Button disabled={!products.length} className="mt-5 w-full">Отправить заявку</Button>
+        <Button disabled={!products.length} className="mt-5 w-full">
+          Отправить заявку
+        </Button>
       </form>
     </div>
   );
-}
-
-function increment(lines: CartLine[], id: string) {
-  const existing = lines.find((line) => line.id === id);
-  return existing ? lines.map((line) => (line.id === id ? { ...line, quantity: line.quantity + 1 } : line)) : [...lines, { id, quantity: 1 }];
 }
