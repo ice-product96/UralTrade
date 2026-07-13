@@ -89,11 +89,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <AddToCartButton productId={product.id} />
                 <QuickOrderButton productId={product.id} productName={product.name} />
               </div>
-              <div className="mt-3">
-                <Link href="/cart" className="inline-flex h-11 items-center justify-center rounded-full border border-border px-6 text-sm font-bold text-petrol hover:bg-background">
-                  Перейти в корзину
-                </Link>
-              </div>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
                   <ShieldCheck className="h-5 w-5 text-lime" />
