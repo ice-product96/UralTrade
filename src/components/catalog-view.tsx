@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { CatalogFilter } from "@/components/catalog-filter";
+import { CatalogProductGrid } from "@/components/catalog-product-grid";
 import { CatalogToolbar } from "@/components/catalog-toolbar";
 import { CategoryCard } from "@/components/category-card";
-import { ProductCard } from "@/components/product-card";
 import { ProductImage } from "@/components/product-image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getCatalogData } from "@/lib/data";
+import { serializeProductCard } from "@/lib/catalog-serialize";
 import { normalizeImageSrc } from "@/lib/image-url";
 
 export async function CatalogView({
@@ -113,11 +114,6 @@ export async function CatalogView({
         ) : null}
         <section>
           <CatalogToolbar basePath={basePath} selected={data.selected} sort={data.sort} perPage={data.perPage} total={data.total} />
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {data.products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
           {data.products.length === 0 ? (
             <div className="rounded-[30px] border border-border bg-white p-10 text-center">
               <p className="text-muted">
@@ -132,30 +128,18 @@ export async function CatalogView({
                 </Link>
               </div>
             </div>
-          ) : null}
-          {data.pages > 1 ? (
-            <div className="mt-8 flex flex-wrap gap-2">
-              {Array.from({ length: data.pages }).map((_, index) => {
-                const pageNum = index + 1;
-                const params = new URLSearchParams();
-                for (const [key, value] of Object.entries(data.selected)) {
-                  if (!value || key === "page") continue;
-                  if (Array.isArray(value)) value.forEach((item) => params.append(key, item));
-                  else params.set(key, value);
-                }
-                params.set("page", String(pageNum));
-                return (
-                  <Link
-                    key={pageNum}
-                    href={`${basePath}?${params}`}
-                    className={`h-10 w-10 rounded-full text-center text-sm font-bold leading-10 ${pageNum === data.page ? "bg-petrol text-white" : "bg-white text-petrol"}`}
-                  >
-                    {pageNum}
-                  </Link>
-                );
-              })}
-            </div>
-          ) : null}
+          ) : (
+            <CatalogProductGrid
+              initialProducts={data.products.map(serializeProductCard)}
+              page={data.page}
+              pages={data.pages}
+              perPage={data.perPage}
+              total={data.total}
+              basePath={basePath}
+              selected={data.selected}
+              categorySlug={data.category?.slug}
+            />
+          )}
         </section>
       </div>
     </main>

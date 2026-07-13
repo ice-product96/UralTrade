@@ -2,10 +2,11 @@ import Link from "next/link";
 import { ProductCardCart } from "@/components/product-card-cart";
 import { ProductImage } from "@/components/product-image";
 import type { ProductCardItem } from "@/lib/data";
+import type { SerializedProductCard } from "@/lib/catalog-serialize";
 import { formatPrice, hasDiscount } from "@/lib/format";
 import { normalizeImageSrc } from "@/lib/image-url";
 
-export function ProductCard({ product }: { product: ProductCardItem }) {
+export function ProductCard({ product }: { product: ProductCardItem | SerializedProductCard }) {
   const image = normalizeImageSrc(product.images[0]?.url ?? "/demo/pump-1.svg");
   const discount = hasDiscount(product.oldPrice, product.price);
 
