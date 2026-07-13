@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { ProductCardCart } from "@/components/product-card-cart";
 import { ProductImage } from "@/components/product-image";
 import type { ProductCardItem } from "@/lib/data";
 import { formatPrice, hasDiscount } from "@/lib/format";
@@ -44,13 +44,7 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
             <div className="text-xl font-black text-petrol">{formatPrice(product.price)}</div>
             {discount ? <div className="text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div> : null}
           </div>
-          <Link
-            href={`/cart?add=${product.id}`}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-lime text-white shadow-lg shadow-lime/20 transition hover:bg-lime-hover"
-            aria-label={`Добавить ${product.name} в корзину`}
-          >
-            <ShoppingCart className="h-5 w-5" />
-          </Link>
+          <ProductCardCart productId={product.id} productName={product.name} />
         </div>
       </div>
     </article>
