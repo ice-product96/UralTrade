@@ -27,7 +27,8 @@ nano .env
 
 Обязательно задать:
 
-- `POSTGRES_PASSWORD` — сильный пароль БД
+- `POSTGRES_PASSWORD` — сильный пароль БД (только буквы и цифры, без `@`, `:`, `/`, `#`)
+- `DATABASE_URL` в prod **не обязателен** — compose собирает его из `POSTGRES_*` автоматически
 - `NEXTAUTH_SECRET` — `openssl rand -base64 32`
 - `NEXTAUTH_URL` и `SITE_URL` — `https://uraltrade.ice-product.ru` (временный домен)
 - `ADMIN_PASSWORD` — пароль администратора после seed
@@ -78,7 +79,25 @@ docker compose -f docker-compose.prod.yml restart app
 docker compose -f docker-compose.prod.yml logs app --tail 50
 ```
 
+### Ошибка P1000 (Authentication failed)
+
+Пароль в `DATABASE_URL` не совпадал с паролем PostgreSQL в volume. После обновления compose `DATABASE_URL` берётся из `POSTGRES_PASSWORD` автоматически.
+
+```bash
+# В .env задайте один пароль (без спецсимволов @ : / #):
+POSTGRES_PASSWORD=MyStr0ngPass2026
+
+docker compose -f docker-compose.prod.yml down
+docker volume rm uraltrade_postgres_data   # только если нужна чистая БД
+docker compose -f docker-compose.prod.yml up -d --build
+docker logs uraltrade-app --tail 20
+```
+
+## 5. Импорт каталога с ural-trade96.ru
+
 Скрипт загружает категории, подкатегории, товары, фото, характеристики и создаёт редиректы со старых URL.
+
+**Сначала убедитесь, что приложение запущено** (`docker compose -f docker-compose.prod.yml ps` → `Up`).
 
 ```bash
 # Полный сброс каталога и импорт (≈80 категорий, ≈700 товаров, ~15–25 мин)
