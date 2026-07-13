@@ -155,7 +155,7 @@ export async function getHomeData() {
         prisma.brand.findMany({
           where: { products: { some: {} } },
           orderBy: { name: "asc" },
-          take: 12,
+          take: 6,
         }),
       [],
     ),
