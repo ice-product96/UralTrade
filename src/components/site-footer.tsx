@@ -7,7 +7,7 @@ export async function SiteFooter() {
   const categories = await getNavigationCategories();
 
   return (
-    <footer className="mt-24 border-t border-border bg-white">
+    <footer className="mt-16 border-t border-border bg-white sm:mt-24">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div>
           <SiteLogo href="/" height={52} />

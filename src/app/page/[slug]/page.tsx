@@ -29,10 +29,10 @@ export default async function InfoPage({ params }: { params: Promise<{ slug: str
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 py-14 lg:px-8">
-        <div className="rounded-[34px] border border-border bg-white p-8 shadow-xl shadow-petrol/5">
-          <div className="text-sm font-bold uppercase tracking-[0.24em] text-lime">UralTrade</div>
-          <h1 className="mt-4 text-4xl font-black text-graphite">{page.h1 ?? page.title}</h1>
+      <main className="mx-auto max-w-4xl px-3 py-10 sm:px-4 sm:py-14 lg:px-8">
+        <div className="rounded-[28px] border border-border bg-white p-5 shadow-xl shadow-petrol/5 sm:rounded-[34px] sm:p-8">
+          <div className="text-xs font-bold uppercase tracking-[0.24em] text-lime sm:text-sm">UralTrade</div>
+          <h1 className="mt-4 text-3xl font-black text-graphite sm:text-4xl">{page.h1 ?? page.title}</h1>
           {page.description ? <p className="mt-4 text-lg leading-8 text-muted">{page.description}</p> : null}
           <div className="rich-text mt-8" dangerouslySetInnerHTML={{ __html: absolutizeImportedHtml(page.body) }} />
         </div>

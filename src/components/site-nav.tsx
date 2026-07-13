@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { CatalogMegaMenu } from "@/components/catalog-mega-menu";
 import { mainNavLinks } from "@/lib/site-nav";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { cn } from "@/lib/utils";
 
 type NavCategory = {
   id: string;
@@ -14,8 +16,80 @@ type NavCategory = {
   children: Array<{ id: string; name: string; slug: string }>;
 };
 
+function MobileCategoryItem({
+  category,
+  onNavigate,
+}: {
+  category: NavCategory;
+  onNavigate: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasChildren = category.children.length > 0;
+
+  return (
+    <div className="rounded-2xl bg-background/60">
+      <div className="flex items-stretch">
+        <Link
+          href={`/catalog/${category.slug}`}
+          onClick={onNavigate}
+          className="min-w-0 flex-1 rounded-2xl px-4 py-3 text-sm font-semibold text-graphite hover:text-petrol"
+        >
+          {category.name}
+        </Link>
+        {hasChildren ? (
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            className="flex w-11 shrink-0 items-center justify-center rounded-2xl text-petrol"
+            aria-expanded={expanded}
+            aria-label={`Подкатегории: ${category.name}`}
+          >
+            <ChevronDown className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />
+          </button>
+        ) : null}
+      </div>
+      {hasChildren && expanded ? (
+        <div className="space-y-0.5 border-t border-border/70 px-2 pb-2 pt-1">
+          {category.children.map((child) => (
+            <Link
+              key={child.id}
+              href={`/catalog/${child.slug}`}
+              onClick={onNavigate}
+              className="block rounded-xl px-4 py-2.5 text-sm text-muted hover:bg-white hover:text-petrol"
+            >
+              {child.name}
+            </Link>
+          ))}
+          <Link
+            href={`/catalog/${category.slug}`}
+            onClick={onNavigate}
+            className="block rounded-xl px-4 py-2.5 text-sm font-semibold text-petrol hover:bg-white"
+          >
+            Все в разделе →
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function SiteMobileNav({ categories }: { categories: NavCategory[] }) {
   const [open, setOpen] = useState(false);
+
+  useBodyScrollLock(open);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  function close() {
+    setOpen(false);
+  }
 
   return (
     <>
@@ -30,38 +104,42 @@ export function SiteMobileNav({ categories }: { categories: NavCategory[] }) {
 
       {open ? (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <button type="button" className="absolute inset-0 bg-black/40" aria-label="Закрыть" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 right-0 w-[min(100%,320px)] overflow-y-auto bg-white p-5 shadow-2xl">
-            <div className="mb-5 flex items-center justify-between">
+          <button type="button" className="absolute inset-0 bg-black/40" aria-label="Закрыть" onClick={close} />
+          <div className="absolute inset-y-0 right-0 flex w-[min(100%,min(360px,100vw))] flex-col bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-4 py-4">
               <div className="text-lg font-black text-graphite">Меню</div>
-              <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 text-petrol" aria-label="Закрыть меню">
+              <button type="button" onClick={close} className="rounded-full p-2 text-petrol" aria-label="Закрыть меню">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="space-y-1">
-              <Link href="/catalog" onClick={() => setOpen(false)} className="block rounded-2xl px-4 py-3 text-sm font-semibold text-petrol hover:bg-background">
+            <nav className="flex-1 space-y-1 overflow-y-auto overscroll-contain px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <Link
+                href="/catalog"
+                onClick={close}
+                className="block rounded-2xl bg-petrol px-4 py-3 text-sm font-semibold text-white"
+              >
                 Каталог
               </Link>
-              {categories.slice(0, 6).map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/catalog/${category.slug}`}
-                  onClick={() => setOpen(false)}
-                  className="block rounded-2xl px-4 py-2.5 pl-8 text-sm text-muted hover:bg-background hover:text-petrol"
-                >
-                  {category.name}
-                </Link>
-              ))}
-              {mainNavLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="block rounded-2xl px-4 py-3 text-sm font-semibold text-petrol hover:bg-background"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              <div className="pt-2">
+                <div className="px-4 pb-2 text-xs font-bold uppercase tracking-[0.2em] text-muted">Разделы</div>
+                <div className="space-y-1">
+                  {categories.map((category) => (
+                    <MobileCategoryItem key={category.id} category={category} onNavigate={close} />
+                  ))}
+                </div>
+              </div>
+              <div className="border-t border-border pt-3">
+                {mainNavLinks.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={close}
+                    className="block rounded-2xl px-4 py-3 text-sm font-semibold text-petrol hover:bg-background"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             </nav>
           </div>
         </div>

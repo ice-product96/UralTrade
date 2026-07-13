@@ -22,7 +22,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
   }
 
   return (
-    <Button onClick={handleAdd} className="h-13 w-full gap-2 text-base sm:w-auto">
+    <Button onClick={handleAdd} className="h-12 w-full gap-2 text-base sm:w-auto">
       <ShoppingCart className="h-5 w-5" />
       {added ? "Добавлено" : "В корзину"}
     </Button>

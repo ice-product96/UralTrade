@@ -41,15 +41,15 @@ export function CatalogToolbar({
   }
 
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-      <div className="font-bold text-muted">Найдено товаров: {total}</div>
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 text-sm font-semibold text-graphite">
-          Сортировка
+    <div className="mb-5 space-y-3">
+      <div className="text-sm font-bold text-muted sm:text-base">Найдено товаров: {total}</div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <label className="grid gap-1.5 text-sm font-semibold text-graphite">
+          <span>Сортировка</span>
           <select
             value={sort}
             onChange={(event) => router.push(buildUrl({ sort: event.target.value }))}
-            className="h-10 rounded-full border border-border bg-white px-4 text-sm outline-none"
+            className="h-11 w-full rounded-2xl border border-border bg-white px-4 text-sm outline-none"
           >
             {SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -58,12 +58,12 @@ export function CatalogToolbar({
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-2 text-sm font-semibold text-graphite">
-          На странице
+        <label className="grid gap-1.5 text-sm font-semibold text-graphite">
+          <span>На странице</span>
           <select
             value={String(perPage)}
             onChange={(event) => router.push(buildUrl({ perPage: event.target.value }))}
-            className="h-10 rounded-full border border-border bg-white px-4 text-sm outline-none"
+            className="h-11 w-full rounded-2xl border border-border bg-white px-4 text-sm outline-none"
           >
             {PER_PAGE_OPTIONS.map((option) => (
               <option key={option} value={option}>

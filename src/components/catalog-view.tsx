@@ -57,7 +57,7 @@ export async function CatalogView({
     : data.filterGroups;
 
   const content = (
-    <main className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
+    <main className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
       <nav className="mb-4 flex flex-wrap gap-2 text-sm text-muted">
         {breadcrumbs.map((item, index) => (
           <Link key={item.href} href={item.href} className="hover:text-petrol">
@@ -67,16 +67,16 @@ export async function CatalogView({
         ))}
       </nav>
 
-      <div className="mb-8 overflow-hidden rounded-[34px] bg-petrol text-white">
+      <div className="mb-8 overflow-hidden rounded-[28px] bg-petrol text-white sm:rounded-[34px]">
         <div className="grid lg:grid-cols-[1fr_280px]">
-          <div className="p-8">
-            <div className="text-sm font-bold uppercase tracking-[0.24em] text-lime">{heroLabel}</div>
-            <h1 className="mt-3 text-4xl font-black">{heroTitle}</h1>
-            <p className="mt-3 max-w-3xl text-white/75">{heroDescription}</p>
+          <div className="p-5 sm:p-8">
+            <div className="text-xs font-bold uppercase tracking-[0.24em] text-lime sm:text-sm">{heroLabel}</div>
+            <h1 className="mt-3 text-2xl font-black sm:text-3xl lg:text-4xl">{heroTitle}</h1>
+            <p className="mt-3 max-w-3xl text-sm text-white/75 sm:text-base">{heroDescription}</p>
           </div>
           {data.category?.imageUrl ? (
-            <div className="relative hidden min-h-[220px] bg-petrol-soft/40 lg:block">
-              <ProductImage src={normalizeImageSrc(data.category.imageUrl)} alt={data.category.name} fill sizes="280px" className="object-cover opacity-90" />
+            <div className="relative min-h-[160px] bg-petrol-soft/40 sm:min-h-[200px] lg:min-h-[220px]">
+              <ProductImage src={normalizeImageSrc(data.category.imageUrl)} alt={data.category.name} fill sizes="(min-width: 1024px) 280px, 100vw" className="object-cover opacity-90" />
             </div>
           ) : null}
         </div>

@@ -30,18 +30,18 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
       </Link>
       <div className="space-y-4 p-5">
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-            <span>{product.brand?.name ?? "UralTrade"}</span>
-            <span>{product.sku}</span>
+          <div className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted sm:tracking-[0.2em]">
+            <span className="min-w-0 truncate">{product.brand?.name ?? "UralTrade"}</span>
+            <span className="shrink-0 truncate">{product.sku}</span>
           </div>
-          <Link href={`/product/${product.slug}`} className="block text-lg font-bold text-graphite transition-colors hover:text-petrol">
+          <Link href={`/product/${product.slug}`} className="block text-base font-bold text-graphite transition-colors hover:text-petrol sm:text-lg">
             {product.name}
           </Link>
           <p className="line-clamp-2 text-sm text-muted">{product.shortDescription}</p>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="text-xl font-black text-petrol">{formatPrice(product.price)}</div>
+            <div className="text-lg font-black text-petrol sm:text-xl">{formatPrice(product.price)}</div>
             {discount ? <div className="text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div> : null}
           </div>
           <ProductCardCart productId={product.id} productName={product.name} />

@@ -25,7 +25,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-[34px] border border-border bg-white p-4 shadow-xl shadow-petrol/5" ref={emblaRef}>
+      <div className="relative overflow-hidden rounded-[24px] border border-border bg-white p-3 shadow-xl shadow-petrol/5 sm:rounded-[34px] sm:p-4" ref={emblaRef}>
         <div className="flex">
           {safeImages.map((image) => (
             <div key={image.id} className="relative aspect-square min-w-0 flex-[0_0_100%] overflow-hidden rounded-[26px] bg-background">
@@ -36,7 +36,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
         <button
           type="button"
           onClick={scrollPrev}
-          className="absolute left-6 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg"
+          className="absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg sm:left-6 sm:h-11 sm:w-11"
           aria-label="Предыдущее фото"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -44,7 +44,7 @@ export function ProductGallery({ images, productName }: { images: GalleryImage[]
         <button
           type="button"
           onClick={scrollNext}
-          className="absolute right-6 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg"
+          className="absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg sm:right-6 sm:h-11 sm:w-11"
           aria-label="Следующее фото"
         >
           <ChevronRight className="h-5 w-5" />

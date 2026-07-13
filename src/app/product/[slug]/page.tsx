@@ -54,29 +54,29 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbs)) }} />
-        <nav className="mb-6 flex flex-wrap gap-2 text-sm text-muted">
+        <nav className="mb-4 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted sm:mb-6 sm:text-sm">
           {breadcrumbs.map((item, index) => (
-            <Link key={item.href} href={item.href} className="hover:text-petrol">
-              {item.name}
-              {index < breadcrumbs.length - 1 ? " /" : ""}
+            <Link key={item.href} href={item.href} className="max-w-full hover:text-petrol">
+              <span className="line-clamp-1">{item.name}</span>
+              {index < breadcrumbs.length - 1 ? <span className="text-border"> /</span> : null}
             </Link>
           ))}
         </nav>
-        <section className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+        <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
           <ProductGallery images={product.images} productName={product.name} />
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             <div>
-              <div className="text-sm font-bold uppercase tracking-[0.22em] text-lime">{product.sku}</div>
-              <h1 className="mt-3 text-4xl font-black leading-tight text-graphite md:text-5xl">{product.h1 ?? product.name}</h1>
-              <p className="mt-4 text-lg leading-8 text-muted">{product.shortDescription}</p>
+              <div className="text-xs font-bold uppercase tracking-[0.22em] text-lime sm:text-sm">{product.sku}</div>
+              <h1 className="mt-3 text-2xl font-black leading-tight text-graphite sm:text-3xl md:text-4xl lg:text-5xl">{product.h1 ?? product.name}</h1>
+              <p className="mt-3 text-base leading-7 text-muted sm:mt-4 sm:text-lg sm:leading-8">{product.shortDescription}</p>
             </div>
-            <div className="rounded-[30px] border border-border bg-white p-6 shadow-xl shadow-petrol/5">
+            <div className="rounded-[24px] border border-border bg-white p-5 shadow-xl shadow-petrol/5 sm:rounded-[30px] sm:p-6">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <div className="text-4xl font-black text-petrol">{formatPrice(product.price)}</div>
+                  <div className="text-3xl font-black text-petrol sm:text-4xl">{formatPrice(product.price)}</div>
                   {hasDiscount(product.oldPrice, product.price) ? (
                     <div className="text-muted line-through">{formatPrice(product.oldPrice!)}</div>
                   ) : null}
@@ -113,8 +113,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
         </section>
-        <section className="mt-14 grid gap-8 lg:grid-cols-[1fr_380px]">
-          <div className="rounded-[30px] border border-border bg-white p-6">
+        <section className="mt-10 grid gap-6 sm:mt-14 sm:gap-8 lg:grid-cols-[1fr_380px]">
+          <div className="rounded-[24px] border border-border bg-white p-5 sm:rounded-[30px] sm:p-6">
             <h2 className="text-2xl font-black text-graphite">Описание</h2>
             <div className="rich-text mt-5" dangerouslySetInnerHTML={{ __html: absolutizeImportedHtml(product.fullDescription) }} />
             <div className="mt-8 space-y-6">

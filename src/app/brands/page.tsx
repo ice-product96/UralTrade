@@ -17,10 +17,10 @@ export default async function BrandsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-black text-graphite">Бренды</h1>
-          <p className="mt-3 max-w-2xl text-muted">Производители и поставщики оборудования, представленные в нашем каталоге.</p>
+      <main className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-3xl font-black text-graphite sm:text-4xl">Бренды</h1>
+          <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">Производители и поставщики оборудования, представленные в нашем каталоге.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {brands.map((brand) => (

@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { buildCatalogQuery, multiParam, singleParam } from "@/lib/catalog-params";
 import type { CatalogFilterGroup } from "@/lib/catalog-types";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
 type BrandOption = { name: string; slug: string; count: number };
 
@@ -297,6 +298,8 @@ export function CatalogFilter({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  useBodyScrollLock(mobileOpen);
+
   const activeChips = useMemo(() => {
     const chips: Array<{ label: string; href: string }> = [];
     const brand = singleParam(selected.brand);
@@ -408,7 +411,9 @@ export function CatalogFilter({
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button type="button" className="absolute inset-0 bg-black/40" aria-label="Закрыть" onClick={() => setMobileOpen(false)} />
-          <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-[28px] bg-white p-4 shadow-2xl">{filterPanel}</div>
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[90vh] flex-col rounded-t-[28px] bg-white shadow-2xl">
+            <div className="overflow-y-auto overscroll-contain p-4 pb-0">{filterPanel}</div>
+          </div>
         </div>
       ) : null}
     </>

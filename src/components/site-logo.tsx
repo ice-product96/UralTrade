@@ -15,7 +15,7 @@ type SiteLogoProps = {
 
 export function SiteLogo({
   href = "/",
-  height = 44,
+  height,
   className,
   imageClassName,
   priority = false,
@@ -27,8 +27,8 @@ export function SiteLogo({
       width={LOGO_INTRINSIC_WIDTH}
       height={LOGO_INTRINSIC_HEIGHT}
       priority={priority}
-      className={cn("block w-auto max-w-none object-contain object-left", imageClassName)}
-      style={{ height: `${height}px`, width: "auto" }}
+      className={cn("block w-auto max-w-none object-contain object-left", imageClassName ?? "h-11")}
+      style={height != null ? { height: `${height}px`, width: "auto" } : undefined}
     />
   );
 

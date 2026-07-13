@@ -23,16 +23,16 @@ export default async function Home() {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(126,173,22,0.16),transparent_38%),linear-gradient(135deg,#f5fafb_0%,#ffffff_48%,#edf6f7_100%)]" />
-          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
+          <div className="relative mx-auto grid max-w-7xl gap-8 px-3 py-12 sm:gap-10 sm:px-4 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
             <MotionReveal>
               <div className="flex flex-col justify-center">
                 <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-bold text-petrol shadow-sm">
                   Гидравлика и комплектующие
                 </div>
-                <h1 className="max-w-3xl text-5xl font-black leading-[1.02] tracking-tight text-graphite md:text-7xl">
+                <h1 className="max-w-3xl text-balance text-3xl font-black leading-tight tracking-tight text-graphite sm:text-4xl md:text-5xl lg:text-7xl">
                   {banner?.title ?? "Интернет-магазин гидравлического оборудования"}
                 </h1>
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
+                <p className="mt-4 max-w-2xl text-base leading-7 text-muted sm:mt-6 sm:text-lg sm:leading-8">
                   {banner?.subtitle ?? "Большой каталог с поиском по артикулу, подбором по характеристикам и оформлением заказа онлайн."}
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
@@ -74,17 +74,17 @@ export default async function Home() {
         </section>
 
         <MotionReveal>
-          <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-            <div className="mb-8 flex items-end justify-between gap-4">
+          <section className="mx-auto max-w-7xl px-3 py-12 sm:px-4 sm:py-16 lg:px-8">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8 sm:gap-4">
               <div>
-                <h2 className="text-3xl font-black text-graphite">Каталог</h2>
-                <p className="mt-2 text-muted">Основные разделы магазина</p>
+                <h2 className="text-2xl font-black text-graphite sm:text-3xl">Каталог</h2>
+                <p className="mt-2 text-sm text-muted sm:text-base">Основные разделы магазина</p>
               </div>
-              <Link href="/catalog" className="hidden items-center gap-2 font-bold text-petrol md:flex">
+              <Link href="/catalog" className="inline-flex items-center gap-2 text-sm font-bold text-petrol sm:text-base">
                 Весь каталог <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
               {categories.map((category) => (
                 <CategoryCard key={category.id} category={category} size="lg" />
               ))}
@@ -113,17 +113,17 @@ export default async function Home() {
         ) : null}
 
         <MotionReveal>
-          <section className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-            <div className="mb-8 flex items-end justify-between gap-4">
+          <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
               <div>
-                <h2 className="text-3xl font-black text-graphite">Популярные товары</h2>
-                <p className="mt-2 text-muted">Актуальные позиции из каталога</p>
+                <h2 className="text-2xl font-black text-graphite sm:text-3xl">Популярные товары</h2>
+                <p className="mt-2 text-sm text-muted sm:text-base">Актуальные позиции из каталога</p>
               </div>
-              <Link href="/catalog?all=1" className="hidden font-bold text-petrol md:inline">
+              <Link href="/catalog?all=1" className="text-sm font-bold text-petrol sm:text-base">
                 Смотреть все
               </Link>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
