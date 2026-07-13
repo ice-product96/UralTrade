@@ -1,5 +1,6 @@
-import { Mail, MessageCircle, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
+import { MessengerIcon, MESSENGER_ICONS } from "@/components/messenger-icon";
 import { SiteLogo } from "@/components/site-logo";
 import {
   buildEmailHref,
@@ -7,9 +8,6 @@ import {
   buildTelHref,
   buildTelegramHref,
   buildWhatsappHref,
-  maxLabel,
-  telegramLabel,
-  whatsappLabel,
 } from "@/lib/contacts";
 import { getNavigationCategories, getSiteContacts } from "@/lib/data";
 import { mainNavLinks } from "@/lib/site-nav";
@@ -18,16 +16,10 @@ export async function SiteFooter() {
   const [categories, contacts] = await Promise.all([getNavigationCategories(), getSiteContacts()]);
 
   const messengers = [
-    contacts.telegram
-      ? { href: buildTelegramHref(contacts.telegram), label: telegramLabel(contacts.telegram), key: "telegram" }
-      : null,
-    contacts.whatsapp
-      ? { href: buildWhatsappHref(contacts.whatsapp), label: whatsappLabel(contacts.whatsapp), key: "whatsapp" }
-      : null,
-    contacts.maxMessenger
-      ? { href: buildMaxHref(contacts.maxMessenger), label: maxLabel(contacts.maxMessenger), key: "max" }
-      : null,
-  ].filter(Boolean) as Array<{ href: string; label: string; key: string }>;
+    contacts.telegram ? { href: buildTelegramHref(contacts.telegram), key: "telegram" as const } : null,
+    contacts.whatsapp ? { href: buildWhatsappHref(contacts.whatsapp), key: "whatsapp" as const } : null,
+    contacts.maxMessenger ? { href: buildMaxHref(contacts.maxMessenger), key: "max" as const } : null,
+  ].filter(Boolean) as Array<{ href: string; key: keyof typeof MESSENGER_ICONS }>;
 
   const hasContacts = Boolean(contacts.phone || contacts.email || messengers.length);
 
@@ -90,10 +82,10 @@ export async function SiteFooter() {
                     href={item.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 text-muted hover:text-petrol"
+                    className="flex items-center gap-3 rounded-2xl bg-background px-3 py-2.5 font-semibold text-graphite transition hover:text-petrol"
                   >
-                    <MessageCircle className="h-4 w-4 shrink-0" />
-                    {item.label}
+                    <MessengerIcon messenger={item.key} size={22} />
+                    {MESSENGER_ICONS[item.key].label}
                   </a>
                 ))}
               </div>
