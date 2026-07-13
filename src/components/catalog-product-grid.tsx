@@ -114,24 +114,24 @@ export function CatalogProductGrid({
             </div>
           ) : null}
 
-          <nav className="flex items-center justify-center gap-1 sm:gap-2" aria-label="Пагинация каталога">
+          <nav className="flex flex-wrap items-center justify-center gap-2" aria-label="Пагинация каталога">
             {page > 1 ? (
               <Link
                 href={buildPageHref(page - 1)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-petrol transition hover:bg-white hover:text-lime"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-petrol shadow-sm transition hover:bg-petrol hover:text-white"
                 aria-label="Предыдущая страница"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Link>
             ) : (
-              <span className="inline-flex h-10 w-10 items-center justify-center text-border" aria-hidden>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/60 text-border" aria-hidden>
                 <ChevronLeft className="h-5 w-5" />
               </span>
             )}
 
             {pageItems.map((item, index) =>
               item === "ellipsis" ? (
-                <span key={`ellipsis-${index}`} className="px-1 text-sm font-bold text-muted sm:px-2">
+                <span key={`ellipsis-${index}`} className="px-1 text-sm font-bold text-muted">
                   …
                 </span>
               ) : (
@@ -139,8 +139,8 @@ export function CatalogProductGrid({
                   key={item}
                   href={buildPageHref(item)}
                   className={cn(
-                    "inline-flex h-10 min-w-10 items-center justify-center rounded-full px-2 text-sm font-bold transition",
-                    item === page ? "text-lime" : "text-petrol hover:bg-white hover:text-lime",
+                    "inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold leading-10 transition",
+                    item === page ? "bg-petrol text-white shadow-sm" : "bg-white text-petrol shadow-sm hover:bg-petrol-soft hover:text-white",
                   )}
                   aria-current={item === page ? "page" : undefined}
                 >
@@ -152,13 +152,13 @@ export function CatalogProductGrid({
             {page < pages ? (
               <Link
                 href={buildPageHref(page + 1)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-petrol transition hover:bg-white hover:text-lime"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-petrol shadow-sm transition hover:bg-petrol hover:text-white"
                 aria-label="Следующая страница"
               >
                 <ChevronRight className="h-5 w-5" />
               </Link>
             ) : (
-              <span className="inline-flex h-10 w-10 items-center justify-center text-border" aria-hidden>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/60 text-border" aria-hidden>
                 <ChevronRight className="h-5 w-5" />
               </span>
             )}
