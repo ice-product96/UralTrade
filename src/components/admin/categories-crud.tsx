@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { createCategory, deleteCategory, updateCategory } from "@/app/admin/actions";
 import { AdminImageUpload } from "@/components/admin/admin-file-upload";
+import { ProductImage } from "@/components/product-image";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
@@ -107,8 +108,9 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
                 <tr key={category.id} className="border-t border-border hover:bg-background/60">
                   <td className="p-4">
                     {category.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={category.imageUrl} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                      <div className="relative h-12 w-12 overflow-hidden rounded-xl">
+                        <ProductImage src={category.imageUrl} alt="" fill sizes="48px" className="object-cover" />
+                      </div>
                     ) : (
                       <span className="text-muted">—</span>
                     )}

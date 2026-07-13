@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getHomeData } from "@/lib/data";
+import { normalizeImageSrc } from "@/lib/image-url";
 import { resolveHomeFeatureIcon } from "@/lib/home-features";
 import { organizationJsonLd } from "@/lib/seo";
 
@@ -98,10 +99,27 @@ export default async function Home() {
                   Все бренды
                 </Link>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                 {brands.map((brand) => (
-                  <Link key={brand.id} href={`/catalog?brand=${brand.slug}`} className="rounded-2xl border border-border bg-white p-4 text-center transition hover:border-lime">
-                    <div className="font-bold text-graphite">{brand.name}</div>
+                  <Link
+                    key={brand.id}
+                    href={`/catalog?brand=${brand.slug}`}
+                    className="group flex items-center justify-center rounded-2xl border border-border bg-white p-4 transition hover:border-lime hover:shadow-md hover:shadow-petrol/10"
+                    title={brand.name}
+                  >
+                    <div className="flex h-16 w-full items-center justify-center rounded-xl bg-background px-3">
+                      {brand.logoUrl ? (
+                        <ProductImage
+                          src={normalizeImageSrc(brand.logoUrl)}
+                          alt={brand.name}
+                          width={120}
+                          height={48}
+                          className="max-h-12 w-auto object-contain"
+                        />
+                      ) : (
+                        <span className="text-lg font-black text-petrol">{brand.name.slice(0, 2)}</span>
+                      )}
+                    </div>
                   </Link>
                 ))}
               </div>

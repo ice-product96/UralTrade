@@ -75,7 +75,7 @@ export function SearchBox() {
             if (results.length > 0) setOpen(true);
           }}
           placeholder="Поиск по артикулу, названию, бренду"
-          className="h-12 w-full rounded-2xl border border-border bg-white pl-12 pr-4 text-base outline-none ring-lime/30 transition focus:ring-4 sm:h-[52px]"
+          className="h-11 w-full rounded-full border border-border bg-white pl-12 pr-4 text-sm outline-none ring-lime/30 transition focus:ring-4"
         />
       </form>
       {open && results.length > 0 ? (

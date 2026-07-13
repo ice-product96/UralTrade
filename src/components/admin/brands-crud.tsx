@@ -6,6 +6,7 @@ import { useTransition } from "react";
 import { createBrand, deleteBrand, updateBrand } from "@/app/admin/actions";
 import { AdminImageUpload } from "@/components/admin/admin-file-upload";
 import { ProductImage } from "@/components/product-image";
+import { normalizeImageSrc } from "@/lib/image-url";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
@@ -65,7 +66,7 @@ export function BrandsCrud({ brands }: { brands: BrandRow[] }) {
             <article key={brand.id} className="rounded-2xl border border-border p-4">
               {brand.logoUrl ? (
                 <div className="relative mb-4 h-16 overflow-hidden rounded-2xl bg-background">
-                  <ProductImage src={brand.logoUrl} alt={brand.name} fill className="object-contain p-2" />
+                  <ProductImage src={normalizeImageSrc(brand.logoUrl)} alt={brand.name} fill className="object-contain p-2" />
                 </div>
               ) : null}
               <div className="font-black text-graphite">{brand.name}</div>

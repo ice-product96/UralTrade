@@ -15,7 +15,7 @@ export function isExternalProductImage(src: string) {
 /** Загруженные и внешние изображения отдаём напрямую, без /_next/image (ограничения Next.js 16 в production). */
 export function shouldUnoptimizeImage(src: string) {
   const normalized = normalizeImageSrc(src);
-  if (normalized.startsWith("/uploads/")) return true;
+  if (normalized.includes("/uploads/")) return true;
   return isExternalProductImage(normalized);
 }
 

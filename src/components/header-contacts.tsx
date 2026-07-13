@@ -1,5 +1,4 @@
 import { Mail, Phone } from "lucide-react";
-import Link from "next/link";
 import { buildEmailHref, buildTelHref } from "@/lib/contacts";
 
 type HeaderContactsData = {
@@ -7,34 +6,31 @@ type HeaderContactsData = {
   email: string | null;
 };
 
-export function HeaderContacts({ contacts, className = "" }: { contacts: HeaderContactsData; className?: string }) {
+export function HeaderContactIcons({ contacts, className = "" }: { contacts: HeaderContactsData; className?: string }) {
   if (!contacts.phone && !contacts.email) return null;
 
   return (
-    <div className={`flex min-w-0 items-center gap-2 sm:gap-3 ${className}`}>
+    <div className={`flex shrink-0 items-center gap-1.5 ${className}`}>
       {contacts.phone ? (
         <a
           href={buildTelHref(contacts.phone)}
-          className="inline-flex max-w-[9rem] items-center gap-1.5 truncate text-xs font-semibold text-petrol hover:text-lime sm:max-w-none sm:text-sm"
           title={contacts.phone}
+          aria-label={`Позвонить: ${contacts.phone}`}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-petrol shadow-sm transition hover:border-lime hover:text-lime sm:h-12 sm:w-12"
         >
-          <Phone className="h-4 w-4 shrink-0" />
-          <span className="hidden truncate sm:inline">{contacts.phone}</span>
+          <Phone className="h-5 w-5" />
         </a>
       ) : null}
       {contacts.email ? (
         <a
           href={buildEmailHref(contacts.email)}
-          className="inline-flex max-w-[9rem] items-center gap-1.5 truncate text-xs font-semibold text-muted hover:text-petrol sm:max-w-[12rem] sm:text-sm"
           title={contacts.email}
+          aria-label={`Написать: ${contacts.email}`}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-petrol shadow-sm transition hover:border-lime hover:text-lime sm:h-12 sm:w-12"
         >
-          <Mail className="h-4 w-4 shrink-0" />
-          <span className="hidden truncate md:inline">{contacts.email}</span>
+          <Mail className="h-5 w-5" />
         </a>
       ) : null}
-      <Link href="/page/contacts" className="hidden text-xs font-semibold text-muted hover:text-petrol lg:inline">
-        Контакты
-      </Link>
     </div>
   );
 }
