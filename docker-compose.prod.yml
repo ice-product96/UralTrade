@@ -40,7 +40,9 @@ services:
     env_file: .env
     environment:
       NODE_ENV: production
-      # Always derive from POSTGRES_* so credentials cannot drift from DATABASE_URL in .env
+      POSTGRES_USER: ${POSTGRES_USER:-uraltrade}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-uraltrade}
       DATABASE_URL: postgresql://${POSTGRES_USER:-uraltrade}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-uraltrade}?schema=public
     depends_on:
       postgres:
