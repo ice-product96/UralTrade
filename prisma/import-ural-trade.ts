@@ -866,10 +866,6 @@ async function main() {
 
   if (!dryRun) {
     await buildFilterFieldsFromSpecs(templateId, specsFieldId);
-    await prisma.homeBanner.updateMany({
-      where: { id: "banner-main" },
-      data: { href: "/catalog" },
-    });
   }
 
   console.log(`Готово. Импортировано товаров: ${imported}, пропущено: ${skipped}`);

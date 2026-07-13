@@ -529,45 +529,81 @@ export async function deleteOrder(formData: FormData) {
   revalidatePath("/admin/orders");
 }
 
-// --- Home banners ---
+// --- Home page ---
 
-export async function createHomeBanner(formData: FormData) {
-  await prisma.homeBanner.create({
-    data: {
-      title: required(formData, "title"),
-      subtitle: optional(formData, "subtitle"),
-      imageUrl: required(formData, "imageUrl"),
-      href: optional(formData, "href"),
-      buttonLabel: optional(formData, "buttonLabel"),
-      sortOrder: Number(formData.get("sortOrder") ?? 0),
-      active: formData.get("active") === "on",
-    },
-  });
-  revalidatePath("/admin/content");
-  revalidatePath("/");
+type HomeFeaturePayload = {
+  title: string;
+  text: string;
+  icon: string;
+  sortOrder: number;
+};
+
+function parseHomeFeatures(formData: FormData): HomeFeaturePayload[] {
+  const raw = String(formData.get("featuresJson") ?? "").trim();
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) throw new Error();
+
+    return parsed
+      .filter(
+        (item): item is HomeFeaturePayload =>
+          Boolean(
+            item &&
+              typeof item === "object" &&
+              "title" in item &&
+              typeof item.title === "string" &&
+              "text" in item &&
+              typeof item.text === "string",
+          ),
+      )
+      .map((item, index) => ({
+        title: item.title.trim(),
+        text: item.text.trim(),
+        icon: typeof item.icon === "string" && item.icon.trim() ? item.icon.trim() : "wrench",
+        sortOrder: Number(item.sortOrder) || (index + 1) * 10,
+      }))
+      .filter((item) => item.title && item.text);
+  } catch {
+    throw new Error("Некорректный список плашек");
+  }
 }
 
-export async function updateHomeBanner(formData: FormData) {
-  const id = required(formData, "id");
-  await prisma.homeBanner.update({
-    where: { id },
-    data: {
-      title: required(formData, "title"),
-      subtitle: optional(formData, "subtitle"),
-      imageUrl: required(formData, "imageUrl"),
-      href: optional(formData, "href"),
-      buttonLabel: optional(formData, "buttonLabel"),
-      sortOrder: Number(formData.get("sortOrder") ?? 0),
-      active: formData.get("active") === "on",
-    },
-  });
-  revalidatePath("/admin/content");
-  revalidatePath("/");
-}
+export async function updateHomePage(formData: FormData) {
+  const title = required(formData, "title");
+  const imageUrl = required(formData, "imageUrl");
+  const features = parseHomeFeatures(formData);
 
-export async function deleteHomeBanner(formData: FormData) {
-  const id = required(formData, "id");
-  await prisma.homeBanner.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.homePage.upsert({
+      where: { id: "default" },
+      update: {
+        title,
+        subtitle: optional(formData, "subtitle") ?? null,
+        imageUrl,
+      },
+      create: {
+        id: "default",
+        title,
+        subtitle: optional(formData, "subtitle") ?? null,
+        imageUrl,
+      },
+    });
+
+    await tx.homeFeature.deleteMany();
+    if (features.length) {
+      await tx.homeFeature.createMany({
+        data: features.map((feature) => ({
+          title: feature.title,
+          text: feature.text,
+          icon: feature.icon,
+          sortOrder: feature.sortOrder,
+        })),
+      });
+    }
+  });
+
   revalidatePath("/admin/content");
   revalidatePath("/");
 }

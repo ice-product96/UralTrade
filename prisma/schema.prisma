@@ -249,15 +249,20 @@ model OrderItem {
   quantity  Int
 }
 
-model HomeBanner {
-  id          String   @id @default(cuid())
-  title       String
-  subtitle    String?
-  imageUrl    String
-  href        String?
-  buttonLabel String?
-  sortOrder   Int      @default(0)
-  active      Boolean  @default(true)
+model HomePage {
+  id        String   @id @default("default")
+  title     String
+  subtitle  String?
+  imageUrl  String
+  updatedAt DateTime @updatedAt
+}
+
+model HomeFeature {
+  id        String @id @default(cuid())
+  title     String
+  text      String
+  icon      String @default("wrench")
+  sortOrder Int    @default(0)
 }
 
 model ContentPage {

@@ -1,20 +1,25 @@
 import { ProductImage } from "@/components/product-image";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { CategoryCard } from "@/components/category-card";
 import { MotionReveal } from "@/components/motion-reveal";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { ButtonLink } from "@/components/ui/button";
 import { getHomeData } from "@/lib/data";
+import { resolveHomeFeatureIcon } from "@/lib/home-features";
 import { organizationJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const { banners, categories, products, brands } = await getHomeData();
-  const banner = banners[0];
+  const { homePage, features, categories, products, brands } = await getHomeData();
+
+  const hero = homePage ?? {
+    title: "Инженерное оборудование с умным подбором",
+    subtitle: "Каталог UralTrade помогает быстро найти товар по артикулу, бренду и точным техническим параметрам.",
+    imageUrl: "/demo/hero-equipment.jpg",
+  };
 
   return (
     <>
@@ -26,42 +31,34 @@ export default async function Home() {
           <div className="relative mx-auto grid max-w-7xl gap-8 px-3 py-12 sm:gap-10 sm:px-4 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
             <MotionReveal>
               <div className="flex flex-col justify-center">
-                <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-bold text-petrol shadow-sm">
-                  Гидравлика и комплектующие
-                </div>
                 <h1 className="max-w-3xl text-balance text-3xl font-black leading-tight tracking-tight text-graphite sm:text-4xl md:text-5xl lg:text-7xl">
-                  {banner?.title ?? "Интернет-магазин гидравлического оборудования"}
+                  {hero.title}
                 </h1>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-muted sm:mt-6 sm:text-lg sm:leading-8">
-                  {banner?.subtitle ?? "Большой каталог с поиском по артикулу, подбором по характеристикам и оформлением заказа онлайн."}
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <ButtonLink href={banner?.href ?? "/catalog"}>{banner?.buttonLabel ?? "Перейти в каталог"}</ButtonLink>
-                  <ButtonLink href="/brands" variant="ghost">
-                    Бренды
-                  </ButtonLink>
-                </div>
-                <div className="mt-10 grid gap-3 sm:grid-cols-3">
-                  {[
-                    { icon: Wrench, title: "Подбор по параметрам", text: "Фильтры по характеристикам и брендам" },
-                    { icon: Truck, title: "Доставка по РФ", text: "Отправка до транспортной компании" },
-                    { icon: ShieldCheck, title: "Консультация", text: "Поможем подобрать оборудование" },
-                  ].map(({ icon: Icon, title, text }) => (
-                    <div key={title} className="rounded-3xl border border-border bg-white/80 p-4">
-                      <Icon className="h-5 w-5 text-lime" />
-                      <div className="mt-3 font-bold text-graphite">{title}</div>
-                      <div className="text-sm text-muted">{text}</div>
-                    </div>
-                  ))}
-                </div>
+                {hero.subtitle ? (
+                  <p className="mt-4 max-w-2xl text-base leading-7 text-muted sm:mt-6 sm:text-lg sm:leading-8">{hero.subtitle}</p>
+                ) : null}
+                {features.length ? (
+                  <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                    {features.map((feature) => {
+                      const Icon = resolveHomeFeatureIcon(feature.icon);
+                      return (
+                        <div key={feature.id} className="rounded-3xl border border-border bg-white/80 p-4">
+                          <Icon className="h-5 w-5 text-lime" />
+                          <div className="mt-3 font-bold text-graphite">{feature.title}</div>
+                          <div className="text-sm text-muted">{feature.text}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </div>
             </MotionReveal>
             <MotionReveal delay={0.12}>
               <div className="relative">
                 <div className="glass-panel overflow-hidden rounded-[42px] p-4">
                   <ProductImage
-                    src={banner?.imageUrl ?? "/demo/hero-equipment.jpg"}
-                    alt={banner?.title ?? "Гидравлическое оборудование"}
+                    src={hero.imageUrl}
+                    alt={hero.title}
                     width={1024}
                     height={341}
                     priority

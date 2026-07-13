@@ -275,18 +275,27 @@ async function main() {
     },
   });
 
-  await prisma.homeBanner.upsert({
-    where: { id: "banner-main" },
+  await prisma.homePage.upsert({
+    where: { id: "default" },
     update: { imageUrl: "/demo/hero-equipment.jpg" },
     create: {
-      id: "banner-main",
+      id: "default",
       title: "Инженерное оборудование с умным подбором",
       subtitle: "Каталог UralTrade помогает быстро найти товар по артикулу, бренду и точным техническим параметрам.",
       imageUrl: "/demo/hero-equipment.jpg",
-      href: "/catalog/nasosy",
-      buttonLabel: "Перейти в каталог",
     },
   });
+
+  const homeFeatureCount = await prisma.homeFeature.count();
+  if (homeFeatureCount === 0) {
+    await prisma.homeFeature.createMany({
+      data: [
+        { id: "seed-home-feature-1", title: "Подбор по параметрам", text: "Фильтры по характеристикам и брендам", icon: "wrench", sortOrder: 10 },
+        { id: "seed-home-feature-2", title: "Доставка по РФ", text: "Отправка до транспортной компании", icon: "truck", sortOrder: 20 },
+        { id: "seed-home-feature-3", title: "Консультация", text: "Поможем подобрать оборудование", icon: "shield", sortOrder: 30 },
+      ],
+    });
+  }
 
   await prisma.seoTemplate.upsert({
     where: { id: "product-default" },

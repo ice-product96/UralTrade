@@ -131,8 +131,13 @@ function resolveSortOrder(sort?: string): Prisma.ProductOrderByWithRelationInput
 }
 
 export async function getHomeData() {
-  const [banners, categories, products, brands] = await Promise.all([
-    safeQuery("homeBanners", () => prisma.homeBanner.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }), []),
+  const [homePage, features, categories, products, brands] = await Promise.all([
+    safeQuery(
+      "homePage",
+      () => prisma.homePage.findUnique({ where: { id: "default" } }),
+      null,
+    ),
+    safeQuery("homeFeatures", () => prisma.homeFeature.findMany({ orderBy: { sortOrder: "asc" } }), []),
     getNavigationCategories(),
     safeQuery(
       "homeProducts",
@@ -156,7 +161,23 @@ export async function getHomeData() {
     ),
   ]);
 
-  return { banners, categories, products, brands };
+  return { homePage, features, categories, products, brands };
+}
+
+export async function getHomePageSettings() {
+  const [homePage, features] = await Promise.all([
+    prisma.homePage.findUnique({ where: { id: "default" } }),
+    prisma.homeFeature.findMany({ orderBy: { sortOrder: "asc" } }),
+  ]);
+
+  return {
+    homePage: homePage ?? {
+      title: "Инженерное оборудование с умным подбором",
+      subtitle: "Каталог UralTrade помогает быстро найти товар по артикулу, бренду и точным техническим параметрам.",
+      imageUrl: "/demo/hero-equipment.jpg",
+    },
+    features,
+  };
 }
 
 export async function getPublicBrands() {
