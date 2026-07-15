@@ -57,20 +57,24 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbs)) }} />
-        <nav className="mb-4 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted sm:mb-6 sm:text-sm">
+        <nav className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted sm:mb-4 sm:text-sm">
           {breadcrumbs.map((item, index) => (
-            <Link key={item.href} href={item.href} className="max-w-full hover:text-petrol">
-              <span className="line-clamp-1">{item.name}</span>
-              {index < breadcrumbs.length - 1 ? <span className="text-border"> /</span> : null}
-            </Link>
+            <span key={item.href} className="inline-flex min-w-0 items-center gap-x-2">
+              {index > 0 ? <span className="text-border">/</span> : null}
+              <Link href={item.href} className="truncate hover:text-petrol">
+                {item.name}
+              </Link>
+            </span>
           ))}
         </nav>
+        <h1 className="mb-6 max-w-4xl text-2xl font-black leading-tight text-graphite sm:mb-8 sm:text-3xl md:text-4xl">
+          {product.h1 ?? product.name}
+        </h1>
         <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
           <ProductGallery images={product.images} productName={product.name} />
           <div className="space-y-5 sm:space-y-6">
             <div>
               <div className="text-xs font-bold uppercase tracking-[0.22em] text-lime sm:text-sm">{product.sku}</div>
-              <h1 className="mt-3 text-2xl font-black leading-tight text-graphite sm:text-3xl md:text-4xl lg:text-5xl">{product.h1 ?? product.name}</h1>
               <p className="mt-3 text-base leading-7 text-muted sm:mt-4 sm:text-lg sm:leading-8">{product.shortDescription}</p>
             </div>
             <div className="rounded-[24px] border border-border bg-white p-5 shadow-xl shadow-petrol/5 sm:rounded-[30px] sm:p-6">
