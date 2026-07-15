@@ -113,7 +113,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
         </section>
-        <section className="mt-10 grid gap-6 sm:mt-14 sm:gap-8 lg:grid-cols-[1fr_380px]">
+        <section className="mt-10 sm:mt-14">
           <div className="rounded-[24px] border border-border bg-white p-5 sm:rounded-[30px] sm:p-6">
             <h2 className="text-2xl font-black text-graphite">Описание</h2>
             <div className="rich-text mt-5" dangerouslySetInnerHTML={{ __html: absolutizeImportedHtml(product.fullDescription) }} />
@@ -133,28 +133,38 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               ))}
             </div>
           </div>
-          <aside className="space-y-4">
-            {product.documents.length || product.fieldValues.some((value) => value.valueFileUrl) ? (
-              <div className="rounded-[30px] border border-border bg-white p-6">
-                <h2 className="text-xl font-black text-graphite">Документы</h2>
+        </section>
+        {product.documents.length || product.fieldValues.some((value) => value.valueFileUrl) ? (
+          <section className="mt-6 sm:mt-8">
+            <div className="rounded-[24px] border border-border bg-white p-5 sm:rounded-[30px] sm:p-6">
+              <h2 className="text-2xl font-black text-graphite">Техническая документация</h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {product.documents.map((document) => (
-                  <Link key={document.id} href={document.url} className="mt-4 flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol">
-                    <FileText className="h-5 w-5 text-lime" />
+                  <Link
+                    key={document.id}
+                    href={document.url}
+                    className="flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol transition hover:bg-white hover:shadow-sm"
+                  >
+                    <FileText className="h-5 w-5 shrink-0 text-lime" />
                     {document.title}
                   </Link>
                 ))}
                 {product.fieldValues
                   .filter((value) => value.valueFileUrl && !product.documents.some((document) => document.url === value.valueFileUrl))
                   .map((value) => (
-                    <Link key={value.id} href={value.valueFileUrl!} className="mt-4 flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol">
-                      <FileText className="h-5 w-5 text-lime" />
+                    <Link
+                      key={value.id}
+                      href={value.valueFileUrl!}
+                      className="flex items-center gap-3 rounded-2xl bg-background p-4 font-bold text-petrol transition hover:bg-white hover:shadow-sm"
+                    >
+                      <FileText className="h-5 w-5 shrink-0 text-lime" />
                       {value.field.name}
                     </Link>
                   ))}
               </div>
-            ) : null}
-          </aside>
-        </section>
+            </div>
+          </section>
+        ) : null}
         {related.length ? (
           <section className="mt-16">
             <h2 className="text-3xl font-black text-graphite">Похожие товары</h2>
