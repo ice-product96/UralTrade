@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FileText, ShieldCheck, Truck } from "lucide-react";
+import { FileText, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
@@ -94,14 +94,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <QuickOrderButton productId={product.id} productName={product.name} />
               </div>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
-                  <ShieldCheck className="h-5 w-5 text-lime" />
-                  <span className="text-sm font-semibold text-graphite">Оригинальные карточки и документация</span>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
-                  <Truck className="h-5 w-5 text-lime" />
-                  <span className="text-sm font-semibold text-graphite">Доставка до транспортной компании</span>
-                </div>
                 {product.brand ? (
                   <Link
                     href={`/catalog?brand=${product.brand.slug}`}
@@ -113,6 +105,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <span className="text-sm font-semibold text-graphite hover:text-petrol">{product.brand.name}</span>
                   </Link>
                 ) : null}
+                <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
+                  <Truck className="h-5 w-5 shrink-0 text-lime" />
+                  <span className="text-sm font-semibold text-graphite">Доставка до транспортной компании</span>
+                </div>
               </div>
             </div>
           </div>
