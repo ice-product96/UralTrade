@@ -32,7 +32,16 @@ export function ProductCard({ product }: { product: ProductCardItem | Serialized
       <div className="space-y-4 p-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted sm:tracking-[0.2em]">
-            <span className="min-w-0 truncate">{product.brand?.name ?? "UralTrade"}</span>
+            {product.brand?.slug ? (
+              <Link
+                href={`/catalog?brand=${product.brand.slug}`}
+                className="min-w-0 truncate transition-colors hover:text-petrol"
+              >
+                {product.brand.name}
+              </Link>
+            ) : (
+              <span className="min-w-0 truncate">{product.brand?.name ?? "UralTrade"}</span>
+            )}
             <span className="shrink-0 truncate">{product.sku}</span>
           </div>
           <Link href={`/product/${product.slug}`} className="block text-base font-bold text-graphite transition-colors hover:text-petrol sm:text-lg">

@@ -99,12 +99,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   <span className="text-sm font-semibold text-graphite">Доставка до транспортной компании</span>
                 </div>
                 {product.brand ? (
-                  <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
+                  <Link
+                    href={`/catalog?brand=${product.brand.slug}`}
+                    className="flex items-center gap-3 rounded-2xl bg-background p-4 transition hover:bg-white hover:shadow-sm"
+                  >
                     {product.brand.logoUrl ? (
                       <ProductImage src={normalizeImageSrc(product.brand.logoUrl)} alt={product.brand.name} width={64} height={32} className="object-contain" />
                     ) : null}
-                    <span className="text-sm font-semibold text-graphite">{product.brand.name}</span>
-                  </div>
+                    <span className="text-sm font-semibold text-graphite hover:text-petrol">{product.brand.name}</span>
+                  </Link>
                 ) : null}
               </div>
             </div>
