@@ -257,6 +257,8 @@ export function ProductsCrud({
     return (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const formData = new FormData(event.currentTarget);
+      formData.set("imagesJson", JSON.stringify(productImages));
+      formData.set("documentsJson", JSON.stringify(productDocuments));
       for (const field of visibleFields) {
         if (field.type !== "MULTISELECT") continue;
         const values = formData.getAll(`field_${field.id}`).map(String);
@@ -270,7 +272,12 @@ export function ProductsCrud({
           router.refresh();
           modal.close();
         } catch (caught) {
-          setError(caught instanceof Error ? caught.message : "Не удалось сохранить товар");
+          const message = caught instanceof Error ? caught.message : "Не удалось сохранить товар";
+          if (/server action|failed to find/i.test(message)) {
+            setError("Сессия админки устарела после деплоя. Обновите страницу (Ctrl+F5) и сохраните товар ещё раз.");
+          } else {
+            setError(message);
+          }
         }
       });
     };
@@ -496,7 +503,7 @@ export function ProductsCrud({
             <input type="hidden" name="imagesJson" value={JSON.stringify(productImages)} />
           </Section>
 
-          <Section title="Инструкции">
+          <Section title="Техническая документация">
             <ProductDocumentsManager documents={productDocuments} onChange={setProductDocuments} />
             <input type="hidden" name="documentsJson" value={JSON.stringify(productDocuments)} />
           </Section>
