@@ -43,6 +43,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const related = await getRelatedProducts(product);
   const groups = groupValues(product);
+  const allSpecs = groups.flatMap((group) => group.items);
+  const previewSpecs = allSpecs.slice(0, 6);
   const breadcrumbs = [
     { name: "Главная", href: "/" },
     { name: "Каталог", href: "/catalog" },
@@ -72,66 +74,102 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </h1>
         <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
           <ProductGallery images={product.images} productName={product.name} />
-          <div className="space-y-5 sm:space-y-6">
-            <div>
-              <div className="text-xs font-bold uppercase tracking-[0.22em] text-lime sm:text-sm">{product.sku}</div>
-              <p className="mt-3 text-base leading-7 text-muted sm:mt-4 sm:text-lg sm:leading-8">{product.shortDescription}</p>
+          <div className="rounded-[24px] border border-border bg-white p-5 shadow-xl shadow-petrol/5 sm:rounded-[30px] sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Артикул</div>
+                <div className="mt-1 text-sm font-bold text-lime sm:text-base">{product.sku}</div>
+              </div>
+              <span className="rounded-full bg-lime/10 px-4 py-2 text-sm font-bold text-lime">
+                {product.inStock ? "В наличии" : "Под заказ"}
+              </span>
             </div>
-            <div className="rounded-[24px] border border-border bg-white p-5 shadow-xl shadow-petrol/5 sm:rounded-[30px] sm:p-6">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <div className="text-3xl font-black text-petrol sm:text-4xl">{formatPrice(product.price)}</div>
-                  {hasDiscount(product.oldPrice, product.price) ? (
-                    <div className="text-muted line-through">{formatPrice(product.oldPrice!)}</div>
-                  ) : null}
-                </div>
-                <span className="rounded-full bg-lime/10 px-4 py-2 text-sm font-bold text-lime">
-                  {product.inStock ? "В наличии" : "Под заказ"}
-                </span>
+
+            {product.shortDescription ? (
+              <div className="mt-5">
+                <p className="text-base leading-7 text-muted">{product.shortDescription}</p>
+                <a href="#description" className="mt-2 inline-flex text-sm font-bold text-petrol hover:text-lime">
+                  Полное описание
+                </a>
               </div>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <AddToCartButton productId={product.id} />
-                <QuickOrderButton productId={product.id} productName={product.name} />
-              </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {product.brand ? (
-                  <Link
-                    href={`/catalog?brand=${product.brand.slug}`}
-                    className="flex items-center gap-3 rounded-2xl bg-background p-4 transition hover:bg-white hover:shadow-sm"
-                  >
-                    {product.brand.logoUrl ? (
-                      <ProductImage src={normalizeImageSrc(product.brand.logoUrl)} alt={product.brand.name} width={64} height={32} className="object-contain" />
-                    ) : null}
-                    <span className="text-sm font-semibold text-graphite hover:text-petrol">{product.brand.name}</span>
-                  </Link>
+            ) : (
+              <a href="#description" className="mt-5 inline-flex text-sm font-bold text-petrol hover:text-lime">
+                Полное описание
+              </a>
+            )}
+
+            <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="text-3xl font-black text-petrol sm:text-4xl">{formatPrice(product.price)}</div>
+                {hasDiscount(product.oldPrice, product.price) ? (
+                  <div className="text-muted line-through">{formatPrice(product.oldPrice!)}</div>
                 ) : null}
-                <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
-                  <Truck className="h-5 w-5 shrink-0 text-lime" />
-                  <span className="text-sm font-semibold text-graphite">Доставка до транспортной компании</span>
-                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <AddToCartButton productId={product.id} />
+              <QuickOrderButton productId={product.id} productName={product.name} />
+            </div>
+
+            {previewSpecs.length ? (
+              <div className="mt-6">
+                <div className="text-sm font-black text-graphite">Характеристики</div>
+                <dl className="mt-3 space-y-2">
+                  {previewSpecs.map((item) => (
+                    <div key={item.id} className="grid grid-cols-[1fr_auto] gap-3 border-b border-border/70 py-2 text-sm last:border-b-0">
+                      <dt className="text-muted">{item.name}</dt>
+                      <dd className="text-right font-bold text-graphite">{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <a href="#specs" className="mt-3 inline-flex text-sm font-bold text-petrol hover:text-lime">
+                  Полные характеристики
+                </a>
+              </div>
+            ) : null}
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {product.brand ? (
+                <Link
+                  href={`/catalog?brand=${product.brand.slug}`}
+                  className="flex items-center gap-3 rounded-2xl bg-background p-4 transition hover:bg-white hover:shadow-sm"
+                >
+                  {product.brand.logoUrl ? (
+                    <ProductImage src={normalizeImageSrc(product.brand.logoUrl)} alt={product.brand.name} width={64} height={32} className="object-contain" />
+                  ) : null}
+                  <span className="text-sm font-semibold text-graphite hover:text-petrol">{product.brand.name}</span>
+                </Link>
+              ) : null}
+              <div className="flex items-center gap-3 rounded-2xl bg-background p-4">
+                <Truck className="h-5 w-5 shrink-0 text-lime" />
+                <span className="text-sm font-semibold text-graphite">Доставка до транспортной компании</span>
               </div>
             </div>
           </div>
         </section>
-        <section className="mt-10 sm:mt-14">
+        <section id="description" className="mt-10 scroll-mt-24 sm:mt-14">
           <div className="rounded-[24px] border border-border bg-white p-5 sm:rounded-[30px] sm:p-6">
             <h2 className="text-2xl font-black text-graphite">Описание</h2>
             <div className="rich-text mt-5" dangerouslySetInnerHTML={{ __html: absolutizeImportedHtml(product.fullDescription) }} />
-            <div className="mt-8 space-y-6">
-              {groups.map((group) => (
-                <div key={group.name}>
-                  <h3 className="text-lg font-black text-petrol">{group.name}</h3>
-                  <dl className="mt-3 grid gap-2">
-                    {group.items.map((item) => (
-                      <div key={item.id} className="grid gap-2 rounded-2xl bg-background p-4 sm:grid-cols-[220px_1fr]">
-                        <dt className="font-semibold text-muted">{item.name}</dt>
-                        <dd className="font-bold text-graphite">{item.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              ))}
-            </div>
+            {groups.length ? (
+              <div id="specs" className="mt-8 scroll-mt-24 space-y-6">
+                <h2 className="text-2xl font-black text-graphite">Характеристики</h2>
+                {groups.map((group) => (
+                  <div key={group.name}>
+                    <h3 className="text-lg font-black text-petrol">{group.name}</h3>
+                    <dl className="mt-3 grid gap-2">
+                      {group.items.map((item) => (
+                        <div key={item.id} className="grid gap-2 rounded-2xl bg-background p-4 sm:grid-cols-[220px_1fr]">
+                          <dt className="font-semibold text-muted">{item.name}</dt>
+                          <dd className="font-bold text-graphite">{item.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         </section>
         {product.documents.length || product.fieldValues.some((value) => value.valueFileUrl) ? (
