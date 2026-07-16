@@ -36,6 +36,27 @@ body {
   font-family: var(--font-sans-custom), Arial, Helvetica, sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes scroll-target-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(126, 173, 22, 0.35);
+  }
+  40% {
+    box-shadow: 0 0 0 8px rgba(126, 173, 22, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(126, 173, 22, 0);
+  }
+}
+
+.scroll-target-flash {
+  border-radius: 24px;
+  animation: scroll-target-flash 0.9s ease-out;
+}
+
 ::selection {
   background: rgba(126, 173, 22, 0.24);
 }

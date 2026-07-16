@@ -7,6 +7,7 @@ import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductImage } from "@/components/product-image";
+import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
@@ -88,14 +89,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {product.shortDescription ? (
                 <div>
                   <p className="line-clamp-2 text-sm leading-5 text-muted">{product.shortDescription}</p>
-                  <a href="#description" className="mt-0.5 inline-flex text-xs font-bold text-petrol hover:text-lime">
+                  <SmoothScrollLink targetId="description" className="mt-0.5 inline-flex text-xs font-bold text-petrol transition hover:text-lime">
                     Полное описание
-                  </a>
+                  </SmoothScrollLink>
                 </div>
               ) : (
-                <a href="#description" className="inline-flex text-xs font-bold text-petrol hover:text-lime">
+                <SmoothScrollLink targetId="description" className="inline-flex text-xs font-bold text-petrol transition hover:text-lime">
                   Полное описание
-                </a>
+                </SmoothScrollLink>
               )}
 
               <div className="flex flex-wrap items-end gap-x-3 gap-y-0.5">
@@ -121,9 +122,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                       </div>
                     ))}
                   </dl>
-                  <a href="#specs" className="mt-1 inline-flex text-xs font-bold text-petrol hover:text-lime">
+                  <SmoothScrollLink targetId="specs" className="mt-1 inline-flex text-xs font-bold text-petrol transition hover:text-lime">
                     Полные характеристики
-                  </a>
+                  </SmoothScrollLink>
                 </div>
               ) : null}
 
@@ -147,12 +148,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           </ProductGallery>
         </section>
-        <section id="description" className="mt-10 scroll-mt-24 sm:mt-14">
+        <section id="description" className="mt-10 scroll-mt-28 sm:mt-14">
           <div className="rounded-[24px] border border-border bg-white p-5 sm:rounded-[30px] sm:p-6">
             <h2 className="text-2xl font-black text-graphite">Описание</h2>
             <div className="rich-text mt-5" dangerouslySetInnerHTML={{ __html: absolutizeImportedHtml(product.fullDescription) }} />
             {groups.length ? (
-              <div id="specs" className="mt-8 scroll-mt-24 space-y-6">
+              <div id="specs" className="mt-8 scroll-mt-28 space-y-6">
                 <h2 className="text-2xl font-black text-graphite">Характеристики</h2>
                 {groups.map((group) => (
                   <div key={group.name}>
