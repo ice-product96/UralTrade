@@ -289,6 +289,33 @@ model FaqItem {
   updatedAt DateTime @updatedAt
 }
 
+model Service {
+  id              String           @id @default(cuid())
+  title           String
+  slug            String           @unique
+  shortDescription String
+  body            String           @default("")
+  imageUrl        String?
+  sortOrder       Int              @default(0)
+  published       Boolean          @default(true)
+  metaTitle       String?
+  metaDescription String?
+  h1              String?
+  examples        ServiceExample[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ServiceExample {
+  id          String  @id @default(cuid())
+  serviceId   String
+  service     Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  imageUrl    String
+  sortOrder   Int     @default(0)
+}
+
 model SiteContact {
   id           String   @id @default("default")
   phone        String?

@@ -1058,3 +1058,31 @@ export async function getSiteContacts() {
     maxMessenger: contacts.maxMessenger,
   };
 }
+
+export async function getPublishedServices() {
+  return prisma.service.findMany({
+    where: { published: true },
+    orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
+    include: {
+      examples: { orderBy: { sortOrder: "asc" }, take: 1 },
+      _count: { select: { examples: true } },
+    },
+  });
+}
+
+export async function getServiceBySlug(slug: string) {
+  return prisma.service.findFirst({
+    where: { slug, published: true },
+    include: { examples: { orderBy: { sortOrder: "asc" } } },
+  });
+}
+
+export async function getAdminServices() {
+  return prisma.service.findMany({
+    orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
+    include: {
+      examples: { orderBy: { sortOrder: "asc" } },
+      _count: { select: { examples: true } },
+    },
+  });
+}

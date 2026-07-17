@@ -1,5 +1,6 @@
 export const mainNavLinks = [
   { href: "/brands", label: "Бренды" },
+  { href: "/services", label: "Услуги" },
   { href: "/page/faq", label: "Вопрос ответ" },
   { href: "/page/contacts", label: "Контакты" },
   { href: "/page/delivery", label: "Доставка и оплата" },

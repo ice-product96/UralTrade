@@ -394,6 +394,40 @@ async function main() {
       maxMessenger: null,
     },
   });
+
+  const servicesCount = await prisma.service.count();
+  if (servicesCount === 0) {
+    const service = await prisma.service.create({
+      data: {
+        title: "Подбор гидравлического оборудования",
+        slug: "podbor-oborudovaniya",
+        shortDescription: "Подберём насосы, гидромоторы и комплектующие по артикулу, бренду и техническим параметрам.",
+        body: "Анализируем исходные данные, подбираем совместимые решения, готовим коммерческое предложение и сопровождаем заказ до поставки.",
+        imageUrl: "/demo/pump-1.svg",
+        sortOrder: 10,
+        published: true,
+      },
+    });
+
+    await prisma.serviceExample.createMany({
+      data: [
+        {
+          serviceId: service.id,
+          title: "Подбор насосной станции",
+          description: "Подобрали и поставили насосную группу для промышленного пресса.",
+          imageUrl: "/demo/pump-1.svg",
+          sortOrder: 10,
+        },
+        {
+          serviceId: service.id,
+          title: "Замена гидромотора",
+          description: "Подобрали аналог и выполнили замену без остановки линии.",
+          imageUrl: "/demo/pump-1.svg",
+          sortOrder: 20,
+        },
+      ],
+    });
+  }
 }
 
 main()

@@ -769,3 +769,116 @@ export async function deleteRedirect(formData: FormData) {
   await prisma.redirect.delete({ where: { id } });
   revalidatePath("/admin/seo");
 }
+
+// --- Services ---
+
+type ServiceExamplePayload = { title: string; description?: string; imageUrl: string };
+
+function parseServiceExamples(raw: string): ServiceExamplePayload[] {
+  if (!raw.trim()) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) throw new Error();
+
+    return parsed
+      .filter(
+        (item): item is ServiceExamplePayload =>
+          Boolean(item && typeof item === "object" && "title" in item && "imageUrl" in item && typeof item.title === "string" && typeof item.imageUrl === "string"),
+      )
+      .map((item) => ({
+        title: item.title.trim(),
+        description: typeof item.description === "string" ? item.description.trim() || undefined : undefined,
+        imageUrl: item.imageUrl.trim(),
+      }))
+      .filter((item) => item.title && item.imageUrl);
+  } catch {
+    throw new Error("Некорректный список примеров работ");
+  }
+}
+
+async function saveServiceExamples(tx: Tx, serviceId: string, formData: FormData) {
+  const examples = parseServiceExamples(String(formData.get("examplesJson") ?? ""));
+
+  await tx.serviceExample.deleteMany({ where: { serviceId } });
+
+  if (examples.length) {
+    await tx.serviceExample.createMany({
+      data: examples.map((example, index) => ({
+        serviceId,
+        title: example.title,
+        description: example.description ?? null,
+        imageUrl: example.imageUrl,
+        sortOrder: index * 10,
+      })),
+    });
+  }
+}
+
+export async function createService(formData: FormData) {
+  const title = required(formData, "title");
+  const slug = optional(formData, "slug") ?? slugify(title);
+
+  await prisma.$transaction(async (tx) => {
+    const service = await tx.service.create({
+      data: {
+        title,
+        slug,
+        shortDescription: required(formData, "shortDescription"),
+        body: optional(formData, "body") ?? "",
+        imageUrl: optional(formData, "imageUrl"),
+        sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
+        published: formData.get("published") === "on",
+        h1: optional(formData, "h1") ?? title,
+        metaTitle: optional(formData, "metaTitle"),
+        metaDescription: optional(formData, "metaDescription"),
+      },
+    });
+
+    await saveServiceExamples(tx, service.id, formData);
+  });
+
+  revalidatePath("/admin/services");
+  revalidatePath("/services");
+  revalidatePath(`/services/${slug}`);
+  revalidatePath("/sitemap.xml");
+}
+
+export async function updateService(formData: FormData) {
+  const id = required(formData, "id");
+  const title = required(formData, "title");
+  const slug = optional(formData, "slug") ?? slugify(title);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.service.update({
+      where: { id },
+      data: {
+        title,
+        slug,
+        shortDescription: required(formData, "shortDescription"),
+        body: optional(formData, "body") ?? "",
+        imageUrl: optional(formData, "imageUrl") ?? null,
+        sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
+        published: formData.get("published") === "on",
+        h1: optional(formData, "h1") ?? title,
+        metaTitle: optional(formData, "metaTitle"),
+        metaDescription: optional(formData, "metaDescription"),
+      },
+    });
+
+    await saveServiceExamples(tx, id, formData);
+  });
+
+  revalidatePath("/admin/services");
+  revalidatePath("/services");
+  revalidatePath(`/services/${slug}`);
+  revalidatePath("/sitemap.xml");
+}
+
+export async function deleteService(formData: FormData) {
+  const id = required(formData, "id");
+  await prisma.service.delete({ where: { id } });
+  revalidatePath("/admin/services");
+  revalidatePath("/services");
+  revalidatePath("/sitemap.xml");
+}
