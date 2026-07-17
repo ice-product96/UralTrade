@@ -99,18 +99,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </SmoothScrollLink>
               )}
 
-              <div className="flex flex-wrap items-end gap-x-3 gap-y-0.5">
-                <div className="text-2xl font-black text-petrol sm:text-3xl">{formatPrice(product.price)}</div>
-                {hasDiscount(product.oldPrice, product.price) ? (
-                  <div className="pb-0.5 text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div>
-                ) : null}
-              </div>
-
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <AddToCartButton productId={product.id} className="h-10 text-sm" />
-                <QuickOrderButton productId={product.id} productName={product.name} />
-              </div>
-
               {previewSpecs.length ? (
                 <div className="min-h-0">
                   <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Характеристики</div>
@@ -128,7 +116,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
               ) : null}
 
-              <div className="mt-auto grid shrink-0 gap-1.5 sm:grid-cols-2">
+              <div className="grid gap-1.5 sm:grid-cols-2">
                 {product.brand ? (
                   <Link
                     href={`/catalog?brand=${product.brand.slug}`}
@@ -143,6 +131,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <div className="flex items-center gap-2 rounded-xl bg-background px-2.5 py-2">
                   <Truck className="h-4 w-4 shrink-0 text-lime" />
                   <span className="text-xs font-semibold leading-snug text-graphite">Доставка до транспортной компании</span>
+                </div>
+              </div>
+
+              <div className="mt-auto shrink-0 space-y-2.5 border-t border-border/70 pt-2.5">
+                <div className="flex flex-wrap items-end gap-x-3 gap-y-0.5">
+                  <div className="text-2xl font-black text-petrol sm:text-3xl">{formatPrice(product.price)}</div>
+                  {hasDiscount(product.oldPrice, product.price) ? (
+                    <div className="pb-0.5 text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div>
+                  ) : null}
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <AddToCartButton productId={product.id} className="h-10 text-sm" />
+                  <QuickOrderButton productId={product.id} productName={product.name} />
                 </div>
               </div>
             </div>
