@@ -17,7 +17,7 @@ export function ProductCard({ product }: { product: ProductCardItem | Serialized
           <span className={`rounded-full px-3 py-1 text-xs font-bold ${product.inStock ? "bg-lime text-white" : "bg-white text-muted"}`}>
             {product.inStock ? "В наличии" : "Под заказ"}
           </span>
-          {discount ? <span className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">Скидка</span> : null}
+          {discount ? <span className="rounded-full bg-sale px-3 py-1 text-xs font-bold text-white">Скидка</span> : null}
         </div>
         <div className="relative aspect-square overflow-hidden rounded-[22px]">
           <ProductImage
@@ -52,7 +52,7 @@ export function ProductCard({ product }: { product: ProductCardItem | Serialized
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="text-lg font-black text-petrol sm:text-xl">{formatPrice(product.price)}</div>
-            {discount ? <div className="text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div> : null}
+            {discount ? <div className="text-sm text-sale line-through">{formatPrice(product.oldPrice!)}</div> : null}
           </div>
           <ProductCardCart productId={product.id} productName={product.name} />
         </div>

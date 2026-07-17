@@ -138,7 +138,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <div className="flex flex-wrap items-end gap-x-3 gap-y-0.5">
                   <div className="text-2xl font-black text-petrol sm:text-3xl">{formatPrice(product.price)}</div>
                   {hasDiscount(product.oldPrice, product.price) ? (
-                    <div className="pb-0.5 text-sm text-muted line-through">{formatPrice(product.oldPrice!)}</div>
+                    <div className="pb-0.5 text-sm text-sale line-through">{formatPrice(product.oldPrice!)}</div>
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">

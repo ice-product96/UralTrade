@@ -71,7 +71,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
 export function FaqPageIntro({ title, description }: { title: string; description?: string | null }) {
   return (
     <div className="relative overflow-hidden rounded-[28px] bg-petrol px-5 py-8 text-white sm:rounded-[34px] sm:px-8 sm:py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(126,173,22,0.22),transparent_42%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,125,116,0.22),transparent_42%)]" />
       <div className="relative">
         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-lime sm:text-sm">
           <MessageCircleQuestion className="h-4 w-4" />

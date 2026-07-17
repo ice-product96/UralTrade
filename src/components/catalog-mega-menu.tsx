@@ -103,14 +103,14 @@ export function CatalogMegaMenu({ categories }: { categories: NavCategory[] }) {
 
   return (
     <div className="relative hidden lg:block" onMouseEnter={() => setOpen(true)} onMouseLeave={handleMenuLeave}>
-      <button
-        type="button"
+      <Link
+        href="/catalog"
         className="inline-flex items-center gap-2 rounded-full px-4 py-2 font-semibold text-petrol hover:bg-background"
         aria-expanded={open}
       >
         Каталог
         <ChevronDown className={cn("h-4 w-4 transition", open && "rotate-180")} />
-      </button>
+      </Link>
       {open ? (
         <div className="absolute left-0 top-full z-50 w-[min(92vw,980px)] pt-3">
           <div className="grid max-h-[70vh] gap-4 overflow-y-auto rounded-[28px] border border-border bg-white p-5 shadow-2xl shadow-petrol/10 md:grid-cols-2 xl:grid-cols-3">

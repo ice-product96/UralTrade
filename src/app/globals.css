@@ -4,10 +4,13 @@
   --background: #f5fafb;
   --foreground: #181c20;
   --graphite: #181c20;
-  --petrol: #083653;
-  --petrol-soft: #0b4a68;
-  --lime: #7ead16;
-  --lime-hover: #6fa300;
+  --petrol: #1a365d;
+  --petrol-soft: #234e85;
+  --lime: #257d74;
+  --lime-hover: #1e6a62;
+  --sale: #7a4a2f;
+  --sale-hover: #664020;
+  --sale-soft: #f4ece6;
   --border: #dce8ea;
   --surface: #ffffff;
   --muted: #63737a;
@@ -23,6 +26,9 @@
   --color-petrol-soft: var(--petrol-soft);
   --color-lime: var(--lime);
   --color-lime-hover: var(--lime-hover);
+  --color-sale: var(--sale);
+  --color-sale-hover: var(--sale-hover);
+  --color-sale-soft: var(--sale-soft);
   --color-border: var(--border);
   --color-surface: var(--surface);
   --color-muted: var(--muted);
@@ -42,13 +48,13 @@ html {
 
 @keyframes scroll-target-flash {
   0% {
-    box-shadow: 0 0 0 0 rgba(126, 173, 22, 0.35);
+    box-shadow: 0 0 0 0 rgba(37, 125, 116, 0.35);
   }
   40% {
-    box-shadow: 0 0 0 8px rgba(126, 173, 22, 0.18);
+    box-shadow: 0 0 0 8px rgba(37, 125, 116, 0.18);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(126, 173, 22, 0);
+    box-shadow: 0 0 0 0 rgba(37, 125, 116, 0);
   }
 }
 
@@ -58,13 +64,13 @@ html {
 }
 
 ::selection {
-  background: rgba(126, 173, 22, 0.24);
+  background: rgba(37, 125, 116, 0.24);
 }
 
 .glass-panel {
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(220, 232, 234, 0.9);
-  box-shadow: 0 24px 80px rgba(8, 54, 83, 0.08);
+  box-shadow: 0 24px 80px rgba(26, 54, 93, 0.08);
   backdrop-filter: blur(18px);
 }
 
@@ -121,7 +127,7 @@ html {
 
 .admin-input:focus,
 .admin-textarea:focus {
-  box-shadow: 0 0 0 4px rgba(126, 173, 22, 0.16);
+  box-shadow: 0 0 0 4px rgba(37, 125, 116, 0.16);
 }
 
 .admin-textarea {
