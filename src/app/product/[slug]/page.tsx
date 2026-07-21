@@ -78,7 +78,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <div className="flex min-h-0 flex-1 flex-col gap-2.5 lg:overflow-y-auto">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex min-w-0 items-baseline gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Артикул</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Артикул:</span>
                   <span className="truncate text-sm font-bold text-lime">{product.sku}</span>
                 </div>
                 <span className="rounded-full bg-lime/10 px-3 py-1 text-xs font-bold text-lime">

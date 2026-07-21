@@ -131,7 +131,7 @@ function resolveSortOrder(sort?: string): Prisma.ProductOrderByWithRelationInput
 }
 
 export async function getHomeData() {
-  const [homePage, features, categories, products, brands] = await Promise.all([
+  const [homePage, features, categories, products, brands, services] = await Promise.all([
     safeQuery(
       "homePage",
       () => prisma.homePage.findUnique({ where: { id: "default" } }),
@@ -143,7 +143,7 @@ export async function getHomeData() {
       "homeProducts",
       () =>
         prisma.product.findMany({
-          take: 8,
+          take: 10,
           include: { brand: true, category: true, images: { orderBy: { sortOrder: "asc" } } },
           orderBy: { createdAt: "desc" },
         }),
@@ -159,9 +159,19 @@ export async function getHomeData() {
         }),
       [],
     ),
+    safeQuery(
+      "homeServices",
+      () =>
+        prisma.service.findMany({
+          where: { published: true },
+          orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
+          take: 10,
+        }),
+      [],
+    ),
   ]);
 
-  return { homePage, features, categories, products, brands };
+  return { homePage, features, categories, products, brands, services };
 }
 
 export async function getHomePageSettings() {
