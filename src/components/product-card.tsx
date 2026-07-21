@@ -61,7 +61,6 @@ export function ProductCard({
           >
             {product.name}
           </Link>
-          <p className="line-clamp-2 text-sm text-muted">{product.shortDescription}</p>
         </div>
         <div className="mt-auto flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
