@@ -254,7 +254,7 @@ export function ProductsCrud({
   const activeTemplateName = templates.find((template) => template.id === activeTemplateId)?.name;
   const hasFilters = Boolean(query.trim() || filterCategory || filterBrand);
 
-  function submit(action: (fd: FormData) => Promise<void>) {
+  function submit(action: (fd: FormData) => Promise<{ error: string | null }>) {
     return (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const formData = new FormData(event.currentTarget);
@@ -269,7 +269,11 @@ export function ProductsCrud({
       startTransition(async () => {
         try {
           setError(null);
-          await action(formData);
+          const result = await action(formData);
+          if (result.error) {
+            setError(result.error);
+            return;
+          }
           router.refresh();
           modal.close();
         } catch (caught) {

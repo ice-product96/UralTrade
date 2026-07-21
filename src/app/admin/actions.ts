@@ -462,44 +462,62 @@ export async function deleteBrand(formData: FormData) {
 
 // --- Products ---
 
+function publicProductSaveError(error: unknown) {
+  const formatted = formatPrismaError(error, "Товар");
+  if (error instanceof Prisma.PrismaClientKnownRequestError) return formatted.message;
+  if (
+    /^(Не найдены товары|Некоррект|Выберите значение|Поле .+ обязательно|Товар с таким|Нарушено ограничение)/.test(
+      formatted.message,
+    )
+  ) {
+    return formatted.message;
+  }
+  return "Не удалось сохранить товар. Проверьте данные и повторите попытку.";
+}
+
 export async function createProduct(formData: FormData) {
   const name = required(formData, "name");
   const slug = optional(formData, "slug") ?? slugify(name);
   const templateId = await resolveProductTemplateId(formData);
 
   try {
-    await prisma.$transaction(async (tx) => {
-      const product = await tx.product.create({
-        data: {
-          name,
-          slug,
-          sku: required(formData, "sku"),
-          price: parseDecimal(formData, "price", true)!,
-          oldPrice: parseDecimal(formData, "oldPrice"),
-          inStock: formData.get("inStock") === "on",
-          categoryId: required(formData, "categoryId"),
-          brandId: optional(formData, "brandId"),
-          templateId,
-          shortDescription: required(formData, "shortDescription"),
-          fullDescription: required(formData, "fullDescription"),
-          h1: optional(formData, "h1") ?? name,
-          metaTitle: optional(formData, "metaTitle"),
-          metaDescription: optional(formData, "metaDescription"),
-        },
-      });
+    await prisma.$transaction(
+      async (tx) => {
+        const product = await tx.product.create({
+          data: {
+            name,
+            slug,
+            sku: required(formData, "sku"),
+            price: parseDecimal(formData, "price", true)!,
+            oldPrice: parseDecimal(formData, "oldPrice"),
+            inStock: formData.get("inStock") === "on",
+            categoryId: required(formData, "categoryId"),
+            brandId: optional(formData, "brandId"),
+            templateId,
+            shortDescription: required(formData, "shortDescription"),
+            fullDescription: required(formData, "fullDescription"),
+            h1: optional(formData, "h1") ?? name,
+            metaTitle: optional(formData, "metaTitle"),
+            metaDescription: optional(formData, "metaDescription"),
+          },
+        });
 
-      await saveProductImages(tx, product.id, name, formData);
-      await saveProductDocuments(tx, product.id, formData);
-      await saveProductFieldValues(tx, product.id, templateId, formData);
-      await saveProductAnalogs(tx, product.id, formData);
-    });
+        await saveProductImages(tx, product.id, name, formData);
+        await saveProductDocuments(tx, product.id, formData);
+        await saveProductFieldValues(tx, product.id, templateId, formData);
+        await saveProductAnalogs(tx, product.id, formData);
+      },
+      { maxWait: 10_000, timeout: 30_000 },
+    );
   } catch (error) {
-    throw formatPrismaError(error, "Товар");
+    console.error("Failed to create product", error);
+    return { error: publicProductSaveError(error) };
   }
 
   revalidatePath("/admin/products");
   revalidatePath("/catalog");
   revalidatePath(`/product/${slug}`);
+  return { error: null };
 }
 
 export async function updateProduct(formData: FormData) {
@@ -509,39 +527,44 @@ export async function updateProduct(formData: FormData) {
   const templateId = await resolveProductTemplateId(formData);
 
   try {
-    await prisma.$transaction(async (tx) => {
-      await tx.product.update({
-        where: { id },
-        data: {
-          name,
-          slug,
-          sku: required(formData, "sku"),
-          price: parseDecimal(formData, "price", true)!,
-          oldPrice: parseDecimal(formData, "oldPrice"),
-          inStock: formData.get("inStock") === "on",
-          categoryId: required(formData, "categoryId"),
-          brandId: optional(formData, "brandId") ?? null,
-          templateId,
-          shortDescription: required(formData, "shortDescription"),
-          fullDescription: required(formData, "fullDescription"),
-          h1: optional(formData, "h1") ?? name,
-          metaTitle: optional(formData, "metaTitle"),
-          metaDescription: optional(formData, "metaDescription"),
-        },
-      });
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.product.update({
+          where: { id },
+          data: {
+            name,
+            slug,
+            sku: required(formData, "sku"),
+            price: parseDecimal(formData, "price", true)!,
+            oldPrice: parseDecimal(formData, "oldPrice"),
+            inStock: formData.get("inStock") === "on",
+            categoryId: required(formData, "categoryId"),
+            brandId: optional(formData, "brandId") ?? null,
+            templateId,
+            shortDescription: required(formData, "shortDescription"),
+            fullDescription: required(formData, "fullDescription"),
+            h1: optional(formData, "h1") ?? name,
+            metaTitle: optional(formData, "metaTitle"),
+            metaDescription: optional(formData, "metaDescription"),
+          },
+        });
 
-      await saveProductImages(tx, id, name, formData);
-      await saveProductDocuments(tx, id, formData);
-      await saveProductFieldValues(tx, id, templateId, formData);
-      await saveProductAnalogs(tx, id, formData);
-    });
+        await saveProductImages(tx, id, name, formData);
+        await saveProductDocuments(tx, id, formData);
+        await saveProductFieldValues(tx, id, templateId, formData);
+        await saveProductAnalogs(tx, id, formData);
+      },
+      { maxWait: 10_000, timeout: 30_000 },
+    );
   } catch (error) {
-    throw formatPrismaError(error, "Товар");
+    console.error("Failed to update product", error);
+    return { error: publicProductSaveError(error) };
   }
 
   revalidatePath("/admin/products");
   revalidatePath("/catalog");
   revalidatePath(`/product/${slug}`);
+  return { error: null };
 }
 
 export async function deleteProduct(formData: FormData) {
