@@ -93,9 +93,20 @@ export async function CatalogView({
               </Link>
             ) : null}
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div
+            className={
+              data.category
+                ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+                : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            }
+          >
             {categoriesToShow.map((category) => (
-              <CategoryCard key={category.id} category={category} size="md" />
+              <CategoryCard
+                key={category.id}
+                category={category}
+                size={data.category ? "sm" : "md"}
+                showDescription={!data.category}
+              />
             ))}
           </div>
         </section>

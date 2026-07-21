@@ -7,6 +7,7 @@ import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductImage } from "@/components/product-image";
+import { ProductPageScrollReset } from "@/components/product-page-scroll-reset";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -56,6 +57,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+      <ProductPageScrollReset productSlug={product.slug} />
       <SiteHeader />
       <main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }} />
@@ -116,22 +118,27 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
               ) : null}
 
-              <div className="grid gap-1.5 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {product.brand ? (
                   <Link
                     href={`/catalog?brand=${product.brand.slug}`}
-                    className="flex items-center gap-2 rounded-xl bg-background px-2.5 py-2 transition hover:bg-white hover:shadow-sm"
+                    className="flex min-h-20 items-center gap-4 rounded-2xl bg-background px-5 py-4 transition hover:bg-white hover:shadow-sm"
                   >
                     {product.brand.logoUrl ? (
-                      <ProductImage src={normalizeImageSrc(product.brand.logoUrl)} alt={product.brand.name} width={40} height={20} className="object-contain" />
+                      <ProductImage src={normalizeImageSrc(product.brand.logoUrl)} alt={product.brand.name} width={80} height={40} className="object-contain" />
                     ) : null}
-                    <span className="truncate text-xs font-semibold text-graphite hover:text-petrol">{product.brand.name}</span>
+                    <span className="truncate text-sm font-semibold text-graphite hover:text-petrol">{product.brand.name}</span>
                   </Link>
                 ) : null}
-                <div className="flex items-center gap-2 rounded-xl bg-background px-2.5 py-2">
-                  <Truck className="h-4 w-4 shrink-0 text-lime" />
-                  <span className="text-xs font-semibold leading-snug text-graphite">Доставка до транспортной компании</span>
-                </div>
+                <Link
+                  href="/page/delivery"
+                  className="flex min-h-20 items-center gap-4 rounded-2xl bg-background px-5 py-4 transition hover:bg-white hover:shadow-sm"
+                >
+                  <Truck className="h-8 w-8 shrink-0 text-lime" />
+                  <span className="text-sm font-semibold leading-snug text-graphite hover:text-petrol">
+                    Доставка до транспортной компании
+                  </span>
+                </Link>
               </div>
 
               <div className="mt-auto shrink-0 space-y-2.5 border-t border-border/70 pt-2.5">
