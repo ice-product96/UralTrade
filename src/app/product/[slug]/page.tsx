@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductImage } from "@/components/product-image";
 import { ProductPageScrollReset } from "@/components/product-page-scroll-reset";
+import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -271,6 +272,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </section>
         ) : null}
       </main>
+      <ScrollToTopButton />
       <SiteFooter />
     </>
   );
