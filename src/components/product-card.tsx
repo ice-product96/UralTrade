@@ -22,7 +22,7 @@ export function ProductCard({
         compact ? "rounded-[24px]" : "rounded-[28px]"
       }`}
     >
-      <Link href={`/product/${product.slug}`} className={`relative block bg-background ${compact ? "p-3" : "p-4"}`}>
+      <Link href={`/product/${product.slug}`} scroll className={`relative block bg-background ${compact ? "p-3" : "p-4"}`}>
         <div className={`absolute z-10 flex flex-col gap-2 ${compact ? "left-4 top-4" : "left-6 top-6"}`}>
           <span className={`rounded-full px-3 py-1 text-xs font-bold ${product.inStock ? "bg-lime text-white" : "bg-white text-muted"}`}>
             {product.inStock ? "В наличии" : "Под заказ"}
@@ -56,6 +56,7 @@ export function ProductCard({
           </div>
           <Link
             href={`/product/${product.slug}`}
+            scroll
             className={`block font-bold text-graphite transition-colors hover:text-petrol ${compact ? "text-base" : "text-base sm:text-lg"}`}
           >
             {product.name}
