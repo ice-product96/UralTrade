@@ -43,6 +43,7 @@ type ProductRow = {
   brand: { name: string } | null;
   images: Array<{ url: string; alt?: string | null }>;
   documents: Array<{ title: string; url: string; fileName: string | null }>;
+  analogSkus: string[];
   fieldValues: Array<{
     fieldId: string;
     field: { name: string };
@@ -496,6 +497,19 @@ export function ProductsCrud({
                 </option>
               ))}
             </select>
+          </Section>
+
+          <Section title="Аналоги">
+            <p className="text-sm leading-6 text-muted">
+              Укажите артикулы товаров-аналогов — по одному в строке или через запятую. Связь работает в обе стороны.
+            </p>
+            <textarea
+              name="analogSkus"
+              defaultValue={current?.analogSkus.join("\n") ?? ""}
+              rows={5}
+              placeholder={"P0860UF431\nP0860SF131\nP0852UF431"}
+              className="admin-textarea"
+            />
           </Section>
 
           <Section title="Фото">

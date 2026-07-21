@@ -1028,6 +1028,14 @@ export async function getAdminCatalog(filters?: {
         images: { orderBy: { sortOrder: "asc" } },
         documents: { orderBy: { sortOrder: "asc" } },
         fieldValues: { include: { field: true, option: true } },
+        relatedFrom: {
+          include: { related: { select: { id: true, sku: true, name: true } } },
+          orderBy: { sortOrder: "asc" },
+        },
+        relatedTo: {
+          include: { product: { select: { id: true, sku: true, name: true } } },
+          orderBy: { sortOrder: "asc" },
+        },
       },
       orderBy: { updatedAt: "desc" },
       skip: (page - 1) * perPage,
