@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { updateSiteContacts } from "@/app/admin/actions";
+import { ContactLocationsEditor, type ContactLocationRow } from "@/components/admin/contact-locations-editor";
 
 type ContactRow = {
   phone: string | null;
@@ -11,6 +12,7 @@ type ContactRow = {
   telegram: string | null;
   whatsapp: string | null;
   maxMessenger: string | null;
+  locations: ContactLocationRow[];
 };
 
 export function ContactsCrud({ contacts }: { contacts: ContactRow }) {
@@ -33,7 +35,7 @@ export function ContactsCrud({ contacts }: { contacts: ContactRow }) {
         <p className="mt-2 text-sm text-muted">Телефон, адрес, почта и мессенджеры отображаются на странице «Контакты», в шапке и подвале сайта.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 max-w-2xl space-y-4">
+      <form onSubmit={handleSubmit} className="mt-6 max-w-4xl space-y-4">
         <label className="block">
           <span className="mb-1 block text-xs font-bold uppercase tracking-[0.16em] text-muted">Телефон</span>
           <input name="phone" defaultValue={contacts.phone ?? ""} placeholder="+7 (343) 000-00-00" className="admin-input" />
@@ -66,6 +68,8 @@ export function ContactsCrud({ contacts }: { contacts: ContactRow }) {
             </label>
           </div>
         </div>
+
+        <ContactLocationsEditor initialLocations={contacts.locations} />
 
         <button
           type="submit"

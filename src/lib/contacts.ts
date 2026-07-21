@@ -5,6 +5,19 @@ export type SiteContactData = {
   telegram: string | null;
   whatsapp: string | null;
   maxMessenger: string | null;
+  locations: ContactLocationData[];
+};
+
+export type ContactLocationData = {
+  id: string;
+  name: string;
+  kind: string;
+  address: string;
+  phone: string | null;
+  workingHours: string | null;
+  mapUrl: string | null;
+  published: boolean;
+  sortOrder: number;
 };
 
 export function buildTelHref(phone: string) {
@@ -66,4 +79,20 @@ export function maxLabel(value: string) {
 export function buildMapsHref(address: string) {
   const trimmed = address.trim();
   return trimmed ? `https://yandex.ru/maps/?text=${encodeURIComponent(trimmed)}` : "";
+}
+
+export function buildMapEmbedHref(address: string, mapUrl?: string | null) {
+  const customUrl = mapUrl?.trim();
+  if (customUrl) {
+    const iframeSrc = (customUrl.match(/src=["']([^"']+)["']/i)?.[1] ?? customUrl).replaceAll("&amp;", "&");
+    try {
+      const parsed = new URL(iframeSrc);
+      if (parsed.protocol === "https:" || parsed.protocol === "http:") return parsed.toString();
+    } catch {
+      // Используем автоматически сформированную карту ниже.
+    }
+  }
+
+  const trimmed = address.trim();
+  return trimmed ? `https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(trimmed)}&z=15` : "";
 }

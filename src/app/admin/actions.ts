@@ -679,26 +679,75 @@ function nullableField(formData: FormData, name: string) {
   return value || null;
 }
 
+type ContactLocationPayload = {
+  name: string;
+  kind: "OFFICE" | "WAREHOUSE" | "OTHER";
+  address: string;
+  phone: string | null;
+  workingHours: string | null;
+  mapUrl: string | null;
+  published: boolean;
+};
+
+function parseContactLocations(raw: string): ContactLocationPayload[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.slice(0, 50).flatMap((item) => {
+      if (!item || typeof item !== "object") return [];
+      const row = item as Record<string, unknown>;
+      const name = String(row.name ?? "").trim();
+      const address = String(row.address ?? "").trim();
+      if (!name || !address) return [];
+
+      const rawKind = String(row.kind ?? "OFFICE");
+      const kind = rawKind === "WAREHOUSE" || rawKind === "OTHER" ? rawKind : "OFFICE";
+      const optional = (value: unknown) => String(value ?? "").trim() || null;
+
+      return [{
+        name,
+        kind,
+        address,
+        phone: optional(row.phone),
+        workingHours: optional(row.workingHours),
+        mapUrl: optional(row.mapUrl),
+        published: row.published !== false,
+      }];
+    });
+  } catch {
+    return [];
+  }
+}
+
 export async function updateSiteContacts(formData: FormData) {
-  await prisma.siteContact.upsert({
-    where: { id: "default" },
-    update: {
-      phone: nullableField(formData, "phone"),
-      email: nullableField(formData, "email"),
-      address: nullableField(formData, "address"),
-      telegram: nullableField(formData, "telegram"),
-      whatsapp: nullableField(formData, "whatsapp"),
-      maxMessenger: nullableField(formData, "maxMessenger"),
-    },
-    create: {
-      id: "default",
-      phone: nullableField(formData, "phone"),
-      email: nullableField(formData, "email"),
-      address: nullableField(formData, "address"),
-      telegram: nullableField(formData, "telegram"),
-      whatsapp: nullableField(formData, "whatsapp"),
-      maxMessenger: nullableField(formData, "maxMessenger"),
-    },
+  const contacts = {
+    phone: nullableField(formData, "phone"),
+    email: nullableField(formData, "email"),
+    address: nullableField(formData, "address"),
+    telegram: nullableField(formData, "telegram"),
+    whatsapp: nullableField(formData, "whatsapp"),
+    maxMessenger: nullableField(formData, "maxMessenger"),
+  };
+  const locations = parseContactLocations(String(formData.get("locationsJson") ?? "[]"));
+
+  await prisma.$transaction(async (tx) => {
+    await tx.siteContact.upsert({
+      where: { id: "default" },
+      update: contacts,
+      create: { id: "default", ...contacts },
+    });
+
+    await tx.contactLocation.deleteMany({ where: { siteContactId: "default" } });
+    if (locations.length) {
+      await tx.contactLocation.createMany({
+        data: locations.map((location, index) => ({
+          siteContactId: "default",
+          ...location,
+          sortOrder: index * 10,
+        })),
+      });
+    }
   });
 
   revalidatePath("/admin/contacts");

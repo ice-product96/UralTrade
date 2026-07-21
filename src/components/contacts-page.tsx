@@ -1,5 +1,6 @@
 import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
+import { ContactLocationsMap } from "@/components/contact-locations-map";
 import { MessengerIcon, MESSENGER_ICONS, type MessengerKey } from "@/components/messenger-icon";
 import {
   buildEmailHref,
@@ -89,10 +90,11 @@ export function ContactsPage({ title = "Контакты", description, contacts
       : null,
   ].filter((item): item is { key: MessengerKey; href: string; label: string } => item !== null);
 
-  const hasAny = Boolean(contacts.phone || contacts.email || contacts.address || messengers.length);
+  const hasContactCards = Boolean(contacts.phone || contacts.email || contacts.address || messengers.length);
+  const hasAny = hasContactCards || contacts.locations.length > 0;
 
   return (
-    <div className="mx-auto max-w-5xl px-3 py-10 sm:px-4 sm:py-14 lg:px-8">
+    <div className="mx-auto max-w-7xl px-3 py-10 sm:px-4 sm:py-14 lg:px-8">
       <div className="relative overflow-hidden rounded-[28px] bg-petrol px-5 py-8 text-white sm:rounded-[34px] sm:px-8 sm:py-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,125,116,0.22),transparent_42%)]" />
         <div className="relative">
@@ -111,7 +113,7 @@ export function ContactsPage({ title = "Контакты", description, contacts
         <div className="mt-8 rounded-[28px] border border-dashed border-border bg-white p-10 text-center text-muted">
           Контактные данные пока не заполнены.
         </div>
-      ) : (
+      ) : hasContactCards ? (
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {contacts.phone ? (
             <ContactCard icon={Phone} label="Телефон" value={contacts.phone} href={buildTelHref(contacts.phone)} accent="lime" />
@@ -160,7 +162,9 @@ export function ContactsPage({ title = "Контакты", description, contacts
             </article>
           ) : null}
         </div>
-      )}
+      ) : null}
+
+      {contacts.locations.length ? <ContactLocationsMap locations={contacts.locations} /> : null}
 
       <div className="mt-10 rounded-[28px] border border-border bg-white p-6 text-center shadow-sm sm:p-8">
         <h2 className="text-xl font-black text-graphite">Нужен подбор по характеристикам?</h2>

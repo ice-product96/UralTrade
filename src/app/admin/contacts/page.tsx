@@ -2,7 +2,7 @@ import { ContactsCrud } from "@/components/admin/contacts-crud";
 import { getSiteContacts } from "@/lib/data";
 
 export default async function AdminContactsPage() {
-  const contacts = await getSiteContacts();
+  const contacts = await getSiteContacts(true);
 
   return <ContactsCrud contacts={contacts} />;
 }

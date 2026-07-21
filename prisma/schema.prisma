@@ -317,14 +317,33 @@ model ServiceExample {
 }
 
 model SiteContact {
-  id           String   @id @default("default")
+  id           String            @id @default("default")
   phone        String?
   email        String?
   address      String?
   telegram     String?
   whatsapp     String?
   maxMessenger String?
-  updatedAt    DateTime @updatedAt
+  locations    ContactLocation[]
+  updatedAt    DateTime          @updatedAt
+}
+
+model ContactLocation {
+  id           String      @id @default(cuid())
+  siteContactId String      @default("default")
+  siteContact   SiteContact @relation(fields: [siteContactId], references: [id], onDelete: Cascade)
+  name          String
+  kind          String      @default("OFFICE")
+  address       String
+  phone         String?
+  workingHours  String?
+  mapUrl        String?
+  published     Boolean     @default(true)
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([siteContactId, published, sortOrder])
 }
 
 model SeoTemplate {

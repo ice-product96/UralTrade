@@ -17,6 +17,7 @@ import { hasActiveCatalogFilters, multiParam, singleParam } from "@/lib/catalog-
 import { contentPageSeeds } from "@/lib/site-nav";
 import { parseFaqHtml } from "@/lib/faq";
 import type { CatalogFilterGroup } from "@/lib/catalog-types";
+import type { SiteContactData } from "@/lib/contacts";
 
 export { multiParam, singleParam, buildCatalogQuery } from "@/lib/catalog-params";
 
@@ -1046,17 +1047,26 @@ export async function getSeoData() {
   return { templates, redirects };
 }
 
-const defaultSiteContacts = {
+const defaultSiteContacts: SiteContactData = {
   phone: null,
   email: null,
   address: null,
   telegram: null,
   whatsapp: null,
   maxMessenger: null,
-} as const;
+  locations: [],
+};
 
-export async function getSiteContacts() {
-  const contacts = await prisma.siteContact.findUnique({ where: { id: "default" } });
+export async function getSiteContacts(includeUnpublishedLocations = false) {
+  const contacts = await prisma.siteContact.findUnique({
+    where: { id: "default" },
+    include: {
+      locations: {
+        where: includeUnpublishedLocations ? undefined : { published: true },
+        orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      },
+    },
+  });
   if (!contacts) return { ...defaultSiteContacts };
 
   return {
@@ -1066,6 +1076,7 @@ export async function getSiteContacts() {
     telegram: contacts.telegram,
     whatsapp: contacts.whatsapp,
     maxMessenger: contacts.maxMessenger,
+    locations: contacts.locations,
   };
 }
 
