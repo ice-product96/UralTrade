@@ -11,7 +11,7 @@ import { ProductPageScrollReset } from "@/components/product-page-scroll-reset";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getProductAnalogs, getProductBySlug, getRelatedProducts } from "@/lib/data";
+import { getProductBySlug, getRelatedProducts } from "@/lib/data";
 import { formatPrice, hasDiscount } from "@/lib/format";
 import { absolutizeImportedHtml, normalizeImageSrc } from "@/lib/image-url";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
@@ -44,7 +44,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound();
 
   const related = await getRelatedProducts(product);
-  const analogs = getProductAnalogs(product);
+  const analogs = product.analogSkus;
   const groups = groupValues(product);
   const allSpecs = groups.flatMap((group) => group.items);
   const previewSpecs = allSpecs.slice(0, 4);
@@ -132,8 +132,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {analogs.slice(0, 3).map((analog) => (
-                      <span key={analog.id} className="rounded-lg border border-lime/20 bg-white px-2.5 py-1 text-xs font-bold text-petrol">
-                        {analog.sku}
+                      <span key={analog} className="rounded-lg border border-lime/20 bg-white px-2.5 py-1 text-xs font-bold text-petrol">
+                        {analog}
                       </span>
                     ))}
                   </div>
@@ -214,10 +214,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <div className="mt-5 flex flex-wrap gap-2">
                   {analogs.map((analog) => (
                     <span
-                      key={analog.id}
+                      key={analog}
                       className="rounded-xl border border-lime/25 bg-lime/5 px-4 py-2 text-sm font-black text-petrol"
                     >
-                      {analog.sku}
+                      {analog}
                     </span>
                   ))}
                 </div>

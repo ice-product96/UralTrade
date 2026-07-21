@@ -53,12 +53,6 @@ export default async function AdminProductsPage({
       url: document.url,
       fileName: document.fileName,
     })),
-    analogSkus: Array.from(
-      new Set([
-        ...product.relatedFrom.map((relation) => relation.related.sku),
-        ...product.relatedTo.map((relation) => relation.product.sku),
-      ]),
-    ),
   }));
 
   const categoryOptions = buildCategoryOptions(categories, categoryCounts);

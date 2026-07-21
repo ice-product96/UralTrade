@@ -157,6 +157,7 @@ model Product {
   h1               String?
   metaTitle        String?
   metaDescription  String?
+  analogSkus       String[]            @default([])
   images           ProductImage[]
   documents        ProductDocument[]
   fieldValues      ProductFieldValue[]

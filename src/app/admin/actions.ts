@@ -194,8 +194,8 @@ async function saveProductDocuments(tx: Tx, productId: string, formData: FormDat
   }
 }
 
-async function saveProductAnalogs(tx: Tx, productId: string, formData: FormData) {
-  const analogSkus = Array.from(
+function parseAnalogSkus(formData: FormData) {
+  return Array.from(
     new Set(
       String(formData.get("analogSkus") ?? "")
         .split(/[\n,;]+/)
@@ -203,37 +203,6 @@ async function saveProductAnalogs(tx: Tx, productId: string, formData: FormData)
         .filter(Boolean),
     ),
   ).slice(0, 100);
-
-  const analogs = analogSkus.length
-    ? await tx.product.findMany({
-        where: {
-          id: { not: productId },
-          OR: analogSkus.map((sku) => ({ sku: { equals: sku, mode: "insensitive" as const } })),
-        },
-        select: { id: true, sku: true },
-      })
-    : [];
-
-  const foundSkus = new Set(analogs.map((analog) => analog.sku.toLocaleLowerCase("ru")));
-  const missingSkus = analogSkus.filter((sku) => !foundSkus.has(sku.toLocaleLowerCase("ru")));
-  if (missingSkus.length) {
-    throw new Error(`Не найдены товары с артикулами: ${missingSkus.join(", ")}`);
-  }
-
-  await tx.productRelation.deleteMany({
-    where: { OR: [{ productId }, { relatedId: productId }] },
-  });
-
-  if (analogs.length) {
-    await tx.productRelation.createMany({
-      data: analogs.map((analog, index) => ({
-        productId,
-        relatedId: analog.id,
-        sortOrder: index * 10,
-      })),
-      skipDuplicates: true,
-    });
-  }
 }
 
 // --- Categories ---
@@ -499,13 +468,13 @@ export async function createProduct(formData: FormData) {
             h1: optional(formData, "h1") ?? name,
             metaTitle: optional(formData, "metaTitle"),
             metaDescription: optional(formData, "metaDescription"),
+            analogSkus: parseAnalogSkus(formData),
           },
         });
 
         await saveProductImages(tx, product.id, name, formData);
         await saveProductDocuments(tx, product.id, formData);
         await saveProductFieldValues(tx, product.id, templateId, formData);
-        await saveProductAnalogs(tx, product.id, formData);
       },
       { maxWait: 10_000, timeout: 30_000 },
     );
@@ -546,13 +515,13 @@ export async function updateProduct(formData: FormData) {
             h1: optional(formData, "h1") ?? name,
             metaTitle: optional(formData, "metaTitle"),
             metaDescription: optional(formData, "metaDescription"),
+            analogSkus: parseAnalogSkus(formData),
           },
         });
 
         await saveProductImages(tx, id, name, formData);
         await saveProductDocuments(tx, id, formData);
         await saveProductFieldValues(tx, id, templateId, formData);
-        await saveProductAnalogs(tx, id, formData);
       },
       { maxWait: 10_000, timeout: 30_000 },
     );
