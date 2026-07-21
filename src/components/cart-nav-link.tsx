@@ -20,7 +20,7 @@ export function CartNavLink({ className }: { className?: string }) {
     <Link
       href="/cart"
       className={cn(
-        "relative inline-flex h-11 items-center gap-2 rounded-full bg-petrol px-3 text-sm font-semibold text-white transition hover:bg-petrol-soft sm:px-4",
+        "relative inline-flex h-11 items-center gap-2 rounded-full bg-petrol px-3 text-sm font-semibold text-white transition hover:bg-lime sm:px-4",
         className,
       )}
       aria-label={count > 0 ? `Корзина: ${count} ${pluralItems(count)}` : "Корзина"}

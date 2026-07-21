@@ -79,7 +79,7 @@ export default async function Home() {
                 <h2 className="text-2xl font-black text-graphite sm:text-3xl">Каталог</h2>
                 <p className="mt-2 text-sm text-muted sm:text-base">Основные разделы магазина</p>
               </div>
-              <Link href="/catalog" className="inline-flex items-center gap-2 text-sm font-bold text-petrol sm:text-base">
+              <Link href="/catalog" className="inline-flex items-center gap-2 text-sm font-bold text-petrol transition hover:text-lime sm:text-base">
                 Весь каталог <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -135,7 +135,7 @@ export default async function Home() {
                 <h2 className="text-2xl font-black text-graphite sm:text-3xl">Популярные товары</h2>
                 <p className="mt-2 text-sm text-muted sm:text-base">Актуальные позиции из каталога</p>
               </div>
-              <Link href="/catalog?all=1" className="inline-flex items-center gap-2 text-sm font-bold text-petrol sm:text-base">
+              <Link href="/catalog?all=1" className="inline-flex items-center gap-2 text-sm font-bold text-petrol transition hover:text-lime sm:text-base">
                 Смотреть все <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -159,7 +159,7 @@ export default async function Home() {
                   <h2 className="text-2xl font-black text-graphite sm:text-3xl">Популярные услуги</h2>
                   <p className="mt-2 text-sm text-muted sm:text-base">Подбор, монтаж и сервисное сопровождение</p>
                 </div>
-                <Link href="/services" className="inline-flex items-center gap-2 text-sm font-bold text-petrol sm:text-base">
+                <Link href="/services" className="inline-flex items-center gap-2 text-sm font-bold text-petrol transition hover:text-lime sm:text-base">
                   Все услуги <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
