@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -14,7 +14,8 @@ export default function CartSuccessPage() {
           <CheckCircle2 className="mx-auto h-14 w-14 text-lime" />
           <h1 className="mt-6 text-4xl font-black text-graphite">Заявка отправлена</h1>
           <p className="mt-3 text-muted">Менеджер увидит заказ в админке и свяжется с клиентом для подтверждения.</p>
-          <Link href="/catalog" className="mt-8 inline-flex h-12 items-center rounded-full bg-petrol px-6 font-bold text-white hover:bg-petrol-soft">
+          <Link href="/catalog" className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-petrol px-6 font-bold text-white hover:bg-petrol-soft">
+            <ArrowLeft className="h-4 w-4" />
             Вернуться в каталог
           </Link>
         </div>

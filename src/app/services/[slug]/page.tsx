@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Briefcase } from "lucide-react";
+import { ArrowLeft, ArrowRight, Briefcase } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -61,9 +61,10 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             <p className="mt-4 text-base leading-7 text-muted">{service.shortDescription}</p>
             <Link
               href="/page/contacts"
-              className="mt-auto inline-flex h-11 items-center justify-center rounded-full bg-petrol px-6 text-sm font-bold text-white transition hover:bg-petrol-soft"
+              className="mt-auto inline-flex h-11 items-center justify-center gap-2 rounded-full bg-petrol px-6 text-sm font-bold text-white transition hover:bg-petrol-soft"
             >
               Обсудить проект
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </section>

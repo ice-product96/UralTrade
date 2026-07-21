@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FileText, Truck } from "lucide-react";
+import { ArrowRight, FileText, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
@@ -91,13 +91,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {product.shortDescription ? (
                 <div>
                   <p className="line-clamp-2 text-sm leading-5 text-muted">{product.shortDescription}</p>
-                  <SmoothScrollLink targetId="description" className="mt-0.5 inline-flex text-xs font-bold text-petrol transition hover:text-lime">
+                  <SmoothScrollLink targetId="description" className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime">
                     Полное описание
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </SmoothScrollLink>
                 </div>
               ) : (
-                <SmoothScrollLink targetId="description" className="inline-flex text-xs font-bold text-petrol transition hover:text-lime">
+                <SmoothScrollLink targetId="description" className="inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime">
                   Полное описание
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </SmoothScrollLink>
               )}
 
@@ -112,8 +114,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                       </div>
                     ))}
                   </dl>
-                  <SmoothScrollLink targetId="specs" className="mt-1 inline-flex text-xs font-bold text-petrol transition hover:text-lime">
+                  <SmoothScrollLink targetId="specs" className="mt-1 inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime">
                     Полные характеристики
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </SmoothScrollLink>
                 </div>
               ) : null}

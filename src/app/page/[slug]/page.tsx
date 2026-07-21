@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { ContactsPage } from "@/components/contacts-page";
 import { FaqAccordion, FaqPageIntro } from "@/components/faq-accordion";
 import { SiteFooter } from "@/components/site-footer";
@@ -59,9 +60,10 @@ export default async function InfoPage({ params }: { params: Promise<{ slug: str
             <p className="mt-2 text-sm text-muted">Напишите или позвоните — поможем подобрать оборудование и оформить заказ.</p>
             <Link
               href="/page/contacts"
-              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-petrol px-6 text-sm font-bold text-white hover:bg-petrol-soft"
+              className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-petrol px-6 text-sm font-bold text-white hover:bg-petrol-soft"
             >
               Связаться с нами
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </main>

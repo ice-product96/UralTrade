@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useEffect } from "react";
 
 export default function CatalogError({
@@ -23,8 +24,9 @@ export default function CatalogError({
         <button type="button" onClick={reset} className="h-11 rounded-full bg-petrol px-6 text-sm font-bold text-white">
           Повторить
         </button>
-        <Link href="/" className="inline-flex h-11 items-center rounded-full border border-border px-6 text-sm font-bold text-petrol">
+        <Link href="/" className="inline-flex h-11 items-center gap-2 rounded-full border border-border px-6 text-sm font-bold text-petrol">
           На главную
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

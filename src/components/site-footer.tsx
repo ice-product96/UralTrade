@@ -1,4 +1,4 @@
-import { Mail, Phone } from "lucide-react";
+import { ArrowRight, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { MessengerIcon, MESSENGER_ICONS } from "@/components/messenger-icon";
 import { SiteLogo } from "@/components/site-logo";
@@ -34,8 +34,9 @@ export async function SiteFooter() {
         </div>
         <div className="space-y-3 text-sm">
           <div className="font-bold text-graphite">Каталог</div>
-          <Link href="/catalog" className="block text-muted hover:text-petrol">
+          <Link href="/catalog" className="inline-flex items-center gap-1.5 text-muted hover:text-petrol">
             Все товары
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link href="/brands" className="block text-muted hover:text-petrol">
             Бренды
@@ -90,8 +91,9 @@ export async function SiteFooter() {
                 ))}
               </div>
             ) : null}
-            <Link href="/page/contacts" className="inline-block pt-1 text-muted hover:text-petrol">
+            <Link href="/page/contacts" className="inline-flex items-center gap-1.5 pt-1 text-muted hover:text-petrol">
               Все контакты
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         ) : null}

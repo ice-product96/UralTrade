@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { CatalogFilter } from "@/components/catalog-filter";
 import { CatalogProductGrid } from "@/components/catalog-product-grid";
 import { CatalogToolbar } from "@/components/catalog-toolbar";
@@ -88,8 +89,9 @@ export async function CatalogView({
           <div className="mb-5 flex items-end justify-between gap-4">
             <h2 className="text-2xl font-black text-graphite">{data.category ? "Подкатегории" : "Популярные категории"}</h2>
             {!data.category ? (
-              <Link href="/catalog?all=1" className="text-sm font-bold text-petrol hover:text-lime">
+              <Link href="/catalog?all=1" className="inline-flex items-center gap-2 text-sm font-bold text-petrol hover:text-lime">
                 Смотреть все товары
+                <ArrowRight className="h-4 w-4" />
               </Link>
             ) : null}
           </div>
@@ -134,8 +136,9 @@ export async function CatalogView({
                 <Link href={basePath} className="inline-flex h-11 items-center rounded-full border border-border px-5 text-sm font-bold text-petrol">
                   Сбросить фильтры
                 </Link>
-                <Link href="/catalog" className="inline-flex h-11 items-center rounded-full bg-petrol px-5 text-sm font-bold text-white">
+                <Link href="/catalog" className="inline-flex h-11 items-center gap-2 rounded-full bg-petrol px-5 text-sm font-bold text-white">
                   Весь каталог
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>

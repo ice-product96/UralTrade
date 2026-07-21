@@ -15,7 +15,7 @@ export type NavCategory = {
   children: Array<{ id: string; name: string; slug: string }>;
 };
 
-const SUBCATEGORY_LIMIT = 8;
+export const SUBCATEGORY_LIMIT = 3;
 
 function CategoryMenuItem({
   category,

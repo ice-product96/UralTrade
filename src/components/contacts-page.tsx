@@ -1,4 +1,4 @@
-import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
 import { ContactLocationsMap } from "@/components/contact-locations-map";
 import { MessengerIcon, MESSENGER_ICONS, type MessengerKey } from "@/components/messenger-icon";
@@ -172,9 +172,10 @@ export function ContactsPage({ title = "Контакты", description, contacts
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Link
             href="/catalog"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-petrol px-6 text-sm font-bold text-white hover:bg-petrol-soft"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-petrol px-6 text-sm font-bold text-white hover:bg-petrol-soft"
           >
             Перейти в каталог
+            <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href="/cart"

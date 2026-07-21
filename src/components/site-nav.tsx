@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { CatalogMegaMenu } from "@/components/catalog-mega-menu";
+import { CatalogMegaMenu, SUBCATEGORY_LIMIT } from "@/components/catalog-mega-menu";
 import { MobileMenuContacts } from "@/components/header-contacts";
 import { mainNavLinks } from "@/lib/site-nav";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
@@ -52,7 +52,7 @@ function MobileCategoryItem({
       </div>
       {hasChildren && expanded ? (
         <div className="space-y-0.5 border-t border-border/70 px-2 pb-2 pt-1">
-          {category.children.map((child) => (
+          {category.children.slice(0, SUBCATEGORY_LIMIT).map((child) => (
             <Link
               key={child.id}
               href={`/catalog/${child.slug}`}
