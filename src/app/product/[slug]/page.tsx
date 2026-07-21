@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, FileText, Truck } from "lucide-react";
+import { ArrowRight, FileText, RefreshCw, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
@@ -11,7 +11,7 @@ import { ProductPageScrollReset } from "@/components/product-page-scroll-reset";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getProductBySlug, getRelatedProducts } from "@/lib/data";
+import { getProductAnalogs, getProductBySlug, getRelatedProducts } from "@/lib/data";
 import { formatPrice, hasDiscount } from "@/lib/format";
 import { absolutizeImportedHtml, normalizeImageSrc } from "@/lib/image-url";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
@@ -44,6 +44,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound();
 
   const related = await getRelatedProducts(product);
+  const analogs = getProductAnalogs(product);
   const groups = groupValues(product);
   const allSpecs = groups.flatMap((group) => group.items);
   const previewSpecs = allSpecs.slice(0, 4);
@@ -121,6 +122,31 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
               ) : null}
 
+              {analogs.length ? (
+                <div className="rounded-2xl border border-lime/25 bg-lime/5 p-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-lime text-white">
+                      <RefreshCw className="h-4 w-4" />
+                    </div>
+                    <div className="text-xs font-black uppercase tracking-[0.14em] text-graphite">Аналоги</div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {analogs.slice(0, 3).map((analog) => (
+                      <span key={analog.id} className="rounded-lg border border-lime/20 bg-white px-2.5 py-1 text-xs font-bold text-petrol">
+                        {analog.sku}
+                      </span>
+                    ))}
+                  </div>
+                  <SmoothScrollLink
+                    targetId="analogs"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime"
+                  >
+                    Все аналоги
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </SmoothScrollLink>
+                </div>
+              ) : null}
+
               <div className="grid gap-3 sm:grid-cols-2">
                 {product.brand ? (
                   <Link
@@ -179,6 +205,22 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     </dl>
                   </div>
                 ))}
+              </div>
+            ) : null}
+            {analogs.length ? (
+              <div id="analogs" className="mt-8 scroll-mt-28 border-t border-border pt-8">
+                <h2 className="text-2xl font-black text-graphite">Аналоги</h2>
+                <p className="mt-2 text-sm text-muted">Артикулы аналогичных товаров</p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {analogs.map((analog) => (
+                    <span
+                      key={analog.id}
+                      className="rounded-xl border border-lime/25 bg-lime/5 px-4 py-2 text-sm font-black text-petrol"
+                    >
+                      {analog.sku}
+                    </span>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>

@@ -38,6 +38,18 @@ export const productDetailsInclude = {
     },
     orderBy: { sortOrder: "asc" as const },
   },
+  relatedTo: {
+    include: {
+      product: {
+        include: {
+          brand: true,
+          images: { orderBy: { sortOrder: "asc" as const } },
+          category: true,
+        },
+      },
+    },
+    orderBy: { sortOrder: "asc" as const },
+  },
   fieldValues: {
     include: {
       field: { include: { group: true, options: { orderBy: { sortOrder: "asc" as const } } } },
@@ -919,7 +931,7 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getRelatedProducts(product: ProductWithDetails) {
-  const manual = product.relatedFrom.map((relation) => relation.related);
+  const manual = getProductAnalogs(product);
   if (manual.length >= 4) return manual.slice(0, 4);
 
   const automatic = await prisma.product.findMany({
@@ -932,6 +944,15 @@ export async function getRelatedProducts(product: ProductWithDetails) {
   });
 
   return [...manual, ...automatic];
+}
+
+export function getProductAnalogs(product: ProductWithDetails) {
+  const analogs = [
+    ...product.relatedFrom.map((relation) => relation.related),
+    ...product.relatedTo.map((relation) => relation.product),
+  ];
+
+  return Array.from(new Map(analogs.map((analog) => [analog.id, analog])).values());
 }
 
 export async function searchProducts(query: string) {
