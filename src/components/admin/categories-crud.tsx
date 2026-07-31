@@ -9,6 +9,7 @@ import { AdminImageUpload } from "@/components/admin/admin-file-upload";
 import { ProductImage } from "@/components/product-image";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
+import { SlugField } from "@/components/admin/slug-field";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
 
 type CategoryRow = {
@@ -140,7 +141,7 @@ export function CategoriesCrud({ categories, templates }: { categories: Category
         <form onSubmit={submit(modal.isEdit ? updateCategory : createCategory)} className="space-y-3">
           {current ? <input type="hidden" name="id" value={current.id} /> : null}
           <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
-          <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
+          <SlugField sourceName="name" defaultValue={current?.slug} prefix="/catalog/" />
           <AdminImageUpload name="imageUrl" defaultValue={current?.imageUrl ?? ""} label="Изображение категории" />
           <select name="parentId" defaultValue={current?.parentId ?? ""} className="admin-input">
             <option value="">Без родителя</option>

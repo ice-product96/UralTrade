@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { FieldType, FilterWidget, OrderStatus, Prisma } from "@/generated/prisma/client";
 import { formatPrismaError } from "@/lib/admin-errors";
+import { NEW_FILTER_GROUP } from "@/lib/filter-groups";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 
@@ -17,6 +18,12 @@ function required(formData: FormData, name: string) {
 function optional(formData: FormData, name: string) {
   const value = String(formData.get(name) ?? "").trim();
   return value || undefined;
+}
+
+function resolveSlug(formData: FormData, source: string) {
+  const slug = slugify(optional(formData, "slug") ?? source);
+  if (!slug) throw new Error("Не удалось сформировать адрес (slug) — задайте его вручную латиницей");
+  return slug;
 }
 
 function parseDecimal(formData: FormData, name: string, requiredField = false) {
@@ -213,7 +220,7 @@ export async function createCategory(formData: FormData) {
     await prisma.category.create({
       data: {
         name,
-        slug: optional(formData, "slug") ?? slugify(name),
+        slug: resolveSlug(formData, name),
         description: optional(formData, "description"),
         imageUrl: optional(formData, "imageUrl"),
         parentId: optional(formData, "parentId"),
@@ -233,12 +240,13 @@ export async function createCategory(formData: FormData) {
 export async function updateCategory(formData: FormData) {
   const id = required(formData, "id");
   const name = required(formData, "name");
+  const slug = resolveSlug(formData, name);
   try {
     await prisma.category.update({
       where: { id },
       data: {
         name,
-        slug: optional(formData, "slug") ?? slugify(name),
+        slug,
         description: optional(formData, "description"),
         imageUrl: optional(formData, "imageUrl") ?? null,
         parentId: optional(formData, "parentId") ?? null,
@@ -253,7 +261,7 @@ export async function updateCategory(formData: FormData) {
   }
   revalidatePath("/admin/categories");
   revalidatePath("/catalog");
-  revalidatePath(`/catalog/${optional(formData, "slug") ?? slugify(name)}`);
+  revalidatePath(`/catalog/${slug}`);
 }
 
 export async function deleteCategory(formData: FormData) {
@@ -293,24 +301,61 @@ export async function deleteFieldTemplate(formData: FormData) {
   revalidatePath("/admin/fields");
 }
 
+async function mergeDuplicateFilterGroups(group: { id: string; name: string; categoryId: string | null }) {
+  const duplicates = await prisma.filterGroup.findMany({
+    where: { name: group.name, categoryId: group.categoryId, id: { not: group.id } },
+    select: { id: true },
+  });
+  if (!duplicates.length) return;
+
+  const ids = duplicates.map((item) => item.id);
+  await prisma.fieldDefinition.updateMany({ where: { groupId: { in: ids } }, data: { groupId: group.id } });
+  await prisma.filterGroup.deleteMany({ where: { id: { in: ids } } });
+}
+
+async function resolveFilterGroupId(formData: FormData) {
+  const selectedId = optional(formData, "groupId");
+  const newName = optional(formData, "groupName");
+
+  let group =
+    selectedId && selectedId !== NEW_FILTER_GROUP
+      ? await prisma.filterGroup.findUnique({ where: { id: selectedId } })
+      : null;
+
+  if (!group) {
+    if (!newName) return null;
+    const existing = await prisma.filterGroup.findFirst({
+      where: { name: newName, categoryId: null },
+      orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+    });
+    if (existing) {
+      group = existing;
+    } else {
+      const last = await prisma.filterGroup.aggregate({ _max: { sortOrder: true } });
+      group = await prisma.filterGroup.create({
+        data: { name: newName, sortOrder: (last._max.sortOrder ?? 0) + 10 },
+      });
+    }
+  }
+
+  // Одноимённые группы в фильтре выглядят как разные блоки, поэтому склеиваем их в одну.
+  await mergeDuplicateFilterGroups(group);
+  return group.id;
+}
+
 export async function createFieldDefinition(formData: FormData) {
   const name = required(formData, "name");
   const templateId = required(formData, "templateId");
-  const groupName = optional(formData, "groupName");
   const type = required(formData, "type") as FieldType;
   const isFilterable = formData.get("isFilterable") === "on";
-  const group = groupName
-    ? await prisma.filterGroup.create({
-        data: { name: groupName, sortOrder: Number(formData.get("groupSortOrder") ?? 0) },
-      })
-    : null;
+  const groupId = await resolveFilterGroupId(formData);
 
   const field = await prisma.fieldDefinition.create({
     data: {
       templateId,
-      groupId: group?.id,
+      groupId,
       name,
-      slug: optional(formData, "slug") ?? slugify(name),
+      slug: resolveSlug(formData, name),
       type,
       unit: optional(formData, "unit"),
       isFilterable,
@@ -337,6 +382,7 @@ export async function createFieldDefinition(formData: FormData) {
   }
 
   revalidatePath("/admin/fields");
+  revalidatePath("/catalog");
 }
 
 export async function updateFieldDefinition(formData: FormData) {
@@ -344,12 +390,14 @@ export async function updateFieldDefinition(formData: FormData) {
   const name = required(formData, "name");
   const type = required(formData, "type") as FieldType;
   const isFilterable = formData.get("isFilterable") === "on";
+  const groupId = await resolveFilterGroupId(formData);
 
   await prisma.fieldDefinition.update({
     where: { id },
     data: {
       name,
-      slug: optional(formData, "slug") ?? slugify(name),
+      groupId,
+      slug: resolveSlug(formData, name),
       type,
       unit: optional(formData, "unit"),
       isFilterable,
@@ -378,12 +426,14 @@ export async function updateFieldDefinition(formData: FormData) {
   }
 
   revalidatePath("/admin/fields");
+  revalidatePath("/catalog");
 }
 
 export async function deleteFieldDefinition(formData: FormData) {
   const id = required(formData, "id");
   await prisma.fieldDefinition.delete({ where: { id } });
   revalidatePath("/admin/fields");
+  revalidatePath("/catalog");
 }
 
 // --- Brands ---
@@ -393,7 +443,7 @@ export async function createBrand(formData: FormData) {
   await prisma.brand.create({
     data: {
       name,
-      slug: optional(formData, "slug") ?? slugify(name),
+      slug: resolveSlug(formData, name),
       logoUrl: optional(formData, "logoUrl"),
       description: optional(formData, "description"),
       metaTitle: optional(formData, "metaTitle"),
@@ -411,7 +461,7 @@ export async function updateBrand(formData: FormData) {
     where: { id },
     data: {
       name,
-      slug: optional(formData, "slug") ?? slugify(name),
+      slug: resolveSlug(formData, name),
       logoUrl: optional(formData, "logoUrl"),
       description: optional(formData, "description"),
       metaTitle: optional(formData, "metaTitle"),
@@ -446,7 +496,7 @@ function publicProductSaveError(error: unknown) {
 
 export async function createProduct(formData: FormData) {
   const name = required(formData, "name");
-  const slug = optional(formData, "slug") ?? slugify(name);
+  const slug = resolveSlug(formData, name);
   const templateId = await resolveProductTemplateId(formData);
 
   try {
@@ -492,7 +542,7 @@ export async function createProduct(formData: FormData) {
 export async function updateProduct(formData: FormData) {
   const id = required(formData, "id");
   const name = required(formData, "name");
-  const slug = optional(formData, "slug") ?? slugify(name);
+  const slug = resolveSlug(formData, name);
   const templateId = await resolveProductTemplateId(formData);
 
   try {
@@ -902,7 +952,7 @@ async function saveServiceExamples(tx: Tx, serviceId: string, formData: FormData
 
 export async function createService(formData: FormData) {
   const title = required(formData, "title");
-  const slug = optional(formData, "slug") ?? slugify(title);
+  const slug = resolveSlug(formData, title);
 
   await prisma.$transaction(async (tx) => {
     const service = await tx.service.create({
@@ -932,7 +982,7 @@ export async function createService(formData: FormData) {
 export async function updateService(formData: FormData) {
   const id = required(formData, "id");
   const title = required(formData, "title");
-  const slug = optional(formData, "slug") ?? slugify(title);
+  const slug = resolveSlug(formData, title);
 
   await prisma.$transaction(async (tx) => {
     await tx.service.update({

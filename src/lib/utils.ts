@@ -11,6 +11,7 @@ export function slugify(input: string) {
     .trim()
     .replace(/ё/g, "e")
     .replace(/й/g, "i")
+    .replace(/[ъь]/g, "")
     .replace(/[а]/g, "a")
     .replace(/[б]/g, "b")
     .replace(/[в]/g, "v")

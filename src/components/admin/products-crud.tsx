@@ -8,6 +8,7 @@ import { createProduct, deleteProduct, updateProduct } from "@/app/admin/actions
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { ProductDocumentsManager, ProductFileFieldInput, ProductImagesManager } from "@/components/admin/product-media-manager";
+import { SlugField } from "@/components/admin/slug-field";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
 import { ProductImage } from "@/components/product-image";
 import { formatPrice } from "@/lib/format";
@@ -447,7 +448,7 @@ export function ProductsCrud({
 
           <Section title="Основное">
             <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
-            <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
+            <SlugField sourceName="name" defaultValue={current?.slug} prefix="/product/" />
             <input name="sku" required defaultValue={current?.sku} placeholder="Артикул" className="admin-input" />
             <textarea name="shortDescription" required defaultValue={current?.shortDescription} rows={3} placeholder="Краткое описание" className="admin-textarea" />
             <textarea name="fullDescription" required defaultValue={current?.fullDescription} rows={5} placeholder="Полное описание (HTML)" className="admin-textarea" />

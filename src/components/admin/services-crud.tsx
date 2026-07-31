@@ -9,6 +9,7 @@ import { AdminImageUpload } from "@/components/admin/admin-file-upload";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { ServiceExamplesManager, type ServiceExampleItem } from "@/components/admin/service-examples-manager";
+import { SlugField } from "@/components/admin/slug-field";
 import { ProductImage } from "@/components/product-image";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
 import { normalizeImageSrc } from "@/lib/image-url";
@@ -150,7 +151,7 @@ export function ServicesCrud({ services }: { services: ServiceRow[] }) {
 
           <Section title="Основное">
             <input name="title" required defaultValue={current?.title} placeholder="Название услуги" className="admin-input bg-white" />
-            <input name="slug" defaultValue={current?.slug} placeholder="slug (необязательно)" className="admin-input bg-white" />
+            <SlugField sourceName="title" defaultValue={current?.slug} className="bg-white" prefix="/services/" />
             <textarea
               name="shortDescription"
               required

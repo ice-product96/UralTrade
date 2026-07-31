@@ -13,6 +13,8 @@ import {
 } from "@/app/admin/actions";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
+import { FilterGroupSelect, type FilterGroupOption } from "@/components/admin/filter-group-select";
+import { SlugField } from "@/components/admin/slug-field";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
 
 const FIELD_TYPES = ["TEXT", "NUMBER", "SELECT", "MULTISELECT", "BOOLEAN", "FILE", "BRAND_REF", "KEY_VALUE", "RANGE"];
@@ -28,6 +30,7 @@ type FieldRow = {
   isFilterable: boolean;
   filterWidget: string | null;
   sortOrder: number;
+  groupId: string | null;
   group: { name: string } | null;
   options: FieldOption[];
 };
@@ -39,7 +42,7 @@ type TemplateRow = {
   fields: FieldRow[];
 };
 
-export function FieldsCrud({ templates }: { templates: TemplateRow[] }) {
+export function FieldsCrud({ templates, filterGroups }: { templates: TemplateRow[]; filterGroups: FilterGroupOption[] }) {
   const router = useRouter();
   const templateModal = useCrudModal<TemplateRow>();
   const fieldModal = useCrudModal<FieldRow & { templateId: string }>();
@@ -201,7 +204,7 @@ export function FieldsCrud({ templates }: { templates: TemplateRow[] }) {
             ))}
           </select>
           <input name="name" required defaultValue={fieldModal.item?.name} placeholder="Название поля" className="admin-input" />
-          <input name="slug" defaultValue={fieldModal.item?.slug} placeholder="slug" className="admin-input" />
+          <SlugField sourceName="name" defaultValue={fieldModal.item?.slug} />
           <select name="type" required defaultValue={fieldModal.item?.type ?? "TEXT"} className="admin-input">
             {FIELD_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -210,7 +213,7 @@ export function FieldsCrud({ templates }: { templates: TemplateRow[] }) {
             ))}
           </select>
           <input name="unit" defaultValue={fieldModal.item?.unit ?? ""} placeholder="Единица измерения" className="admin-input" />
-          <input name="groupName" placeholder="Группа фильтра" className="admin-input" />
+          <FilterGroupSelect groups={filterGroups} defaultGroupId={fieldModal.item?.groupId} />
           <input name="sortOrder" type="number" defaultValue={fieldModal.item?.sortOrder ?? 0} placeholder="Порядок" className="admin-input" />
           <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold">
             <input name="isFilterable" type="checkbox" defaultChecked={fieldModal.item?.isFilterable} className="accent-lime" />

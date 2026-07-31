@@ -9,6 +9,7 @@ import { ProductImage } from "@/components/product-image";
 import { normalizeImageSrc } from "@/lib/image-url";
 import { AdminFormActions } from "@/components/admin/admin-form-footer";
 import { AdminModal } from "@/components/admin/admin-modal";
+import { SlugField } from "@/components/admin/slug-field";
 import { useCrudModal } from "@/components/admin/use-crud-modal";
 
 type BrandRow = {
@@ -84,7 +85,7 @@ export function BrandsCrud({ brands }: { brands: BrandRow[] }) {
         <form onSubmit={submit(modal.isEdit ? updateBrand : createBrand)} className="space-y-3">
           {current ? <input type="hidden" name="id" value={current.id} /> : null}
           <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
-          <input name="slug" defaultValue={current?.slug} placeholder="slug" className="admin-input" />
+          <SlugField sourceName="name" defaultValue={current?.slug} />
           <AdminImageUpload
             name="logoUrl"
             defaultValue={current?.logoUrl ?? ""}
