@@ -4,12 +4,10 @@ import { CatalogFilter } from "@/components/catalog-filter";
 import { CatalogProductGrid } from "@/components/catalog-product-grid";
 import { CatalogToolbar } from "@/components/catalog-toolbar";
 import { CategoryCard } from "@/components/category-card";
-import { ProductImage } from "@/components/product-image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getCatalogData } from "@/lib/data";
 import { serializeProductCard } from "@/lib/catalog-serialize";
-import { normalizeImageSrc } from "@/lib/image-url";
 
 export async function CatalogView({
   slug,
@@ -69,19 +67,10 @@ export async function CatalogView({
         ))}
       </nav>
 
-      <div className="mb-8 overflow-hidden rounded-[28px] bg-petrol text-white sm:rounded-[34px]">
-        <div className="grid lg:grid-cols-[1fr_280px]">
-          <div className="p-5 sm:p-8">
-            <div className="text-xs font-bold uppercase tracking-[0.24em] text-lime sm:text-sm">{heroLabel}</div>
-            <h1 className="mt-3 text-2xl font-black sm:text-3xl lg:text-4xl">{heroTitle}</h1>
-            <p className="mt-3 max-w-3xl text-sm text-white/75 sm:text-base">{heroDescription}</p>
-          </div>
-          {data.category?.imageUrl ? (
-            <div className="relative min-h-[160px] bg-petrol-soft/40 sm:min-h-[200px] lg:min-h-[220px]">
-              <ProductImage src={normalizeImageSrc(data.category.imageUrl)} alt={data.category.name} fill sizes="(min-width: 1024px) 280px, 100vw" className="object-cover opacity-90" />
-            </div>
-          ) : null}
-        </div>
+      <div className="mb-8 overflow-hidden rounded-[28px] bg-petrol p-5 text-white sm:rounded-[34px] sm:p-8">
+        <div className="text-xs font-bold uppercase tracking-[0.24em] text-lime sm:text-sm">{heroLabel}</div>
+        <h1 className="mt-3 text-2xl font-black sm:text-3xl lg:text-4xl">{heroTitle}</h1>
+        <p className="mt-3 max-w-3xl text-sm text-white/75 sm:text-base">{heroDescription}</p>
       </div>
 
       {showCategoryGrid ? (
