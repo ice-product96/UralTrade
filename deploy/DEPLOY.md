@@ -62,6 +62,22 @@ docker compose -f docker-compose.prod.yml exec app npm run db:seed
 
 Админка: `https://ваш-домен/admin`
 
+### Пароль администратора
+
+Пароль хранится в БД как bcrypt-хеш, поэтому правка `ADMIN_PASSWORD` в `.env` сама по себе ничего не меняет. Чтобы применить новое значение, не трогая остальные данные:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app npm run db:admin
+```
+
+Можно задать email и пароль явно, минуя `.env`:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app npm run db:admin -- admin@ut-gk.ru НовыйПароль
+```
+
+Скрипт выводит email для входа и список остальных учётных записей — по нему видно, если вход выполнялся под другим адресом.
+
 ### Ошибка «An error occurred in the Server Components render»
 
 После обновления кода без миграции БД Prisma не находит новые поля (например `Category.imageUrl`). Решение:

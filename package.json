@@ -11,6 +11,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
+    "db:admin": "tsx prisma/reset-admin.ts",
     "db:import": "tsx prisma/import-ural-trade.ts",
     "db:import:reset": "tsx prisma/import-ural-trade.ts --reset",
     "db:studio": "prisma studio",
