@@ -1,10 +1,17 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
+# Host/curl до registry часто живы, а npm внутри build всё равно рвётся на CDN-tarball'ах.
+# IPv4 + мало сокетов + длинный timeout обычно хватает; при необходимости:
+#   docker compose ... build --build-arg NPM_REGISTRY=https://registry.npmmirror.com
+ARG NPM_REGISTRY=https://registry.npmjs.org/
+ENV NODE_OPTIONS=--dns-result-order=ipv4first
 COPY package*.json ./
-# Нестабильный канал до registry.npmjs.org на сервере часто даёт ETIMEDOUT на npm ci.
-RUN npm config set fetch-retries 5 \
+RUN npm config set registry "$NPM_REGISTRY" \
+  && npm config set fetch-retries 8 \
   && npm config set fetch-retry-mintimeout 20000 \
-  && npm config set fetch-retry-maxtimeout 120000 \
+  && npm config set fetch-retry-maxtimeout 180000 \
+  && npm config set fetch-timeout 600000 \
+  && npm config set maxsockets 3 \
   && npm ci
 
 FROM node:22-alpine AS builder
@@ -12,6 +19,7 @@ WORKDIR /app
 # Must be set at build time so Server Action IDs stay stable across redeploys.
 ARG NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
 ENV NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=$NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+ENV NODE_OPTIONS=--dns-result-order=ipv4first
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run db:generate && npm run build

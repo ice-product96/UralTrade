@@ -41,6 +41,7 @@ services:
       network: host
       args:
         NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:?Set NEXT_SERVER_ACTIONS_ENCRYPTION_KEY in .env}
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
     container_name: uraltrade-app
     restart: unless-stopped
     env_file: .env
