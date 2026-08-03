@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SiteThemeStyles } from "@/components/site-theme-styles";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -29,7 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" className="h-full antialiased">
-      <body className="flex min-h-full flex-col overflow-x-hidden">{children}</body>
+      <body className="flex min-h-full flex-col overflow-x-hidden">
+        <SiteThemeStyles />
+        {children}
+      </body>
     </html>
   );
 }

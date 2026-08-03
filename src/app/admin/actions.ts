@@ -5,6 +5,7 @@ import { FieldType, FilterWidget, OrderStatus, Prisma } from "@/generated/prisma
 import { formatPrismaError } from "@/lib/admin-errors";
 import { NEW_FILTER_GROUP } from "@/lib/filter-groups";
 import { prisma } from "@/lib/prisma";
+import { parseSiteThemeForm, SITE_THEME_DEFAULTS } from "@/lib/site-theme";
 import { slugify } from "@/lib/utils";
 
 type Tx = Prisma.TransactionClient;
@@ -839,6 +840,42 @@ export async function updateSiteContacts(formData: FormData) {
   revalidatePath("/admin/contacts");
   revalidatePath("/page/contacts");
   revalidatePath("/", "layout");
+}
+
+// --- Theme ---
+
+export async function updateSiteTheme(formData: FormData) {
+  try {
+    const colors = parseSiteThemeForm(formData);
+
+    await prisma.siteTheme.upsert({
+      where: { id: "default" },
+      update: { colors },
+      create: { id: "default", colors },
+    });
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Не удалось сохранить цвета" };
+  }
+
+  revalidatePath("/admin/theme");
+  revalidatePath("/", "layout");
+  return { error: null };
+}
+
+export async function resetSiteTheme() {
+  try {
+    await prisma.siteTheme.upsert({
+      where: { id: "default" },
+      update: { colors: SITE_THEME_DEFAULTS },
+      create: { id: "default", colors: SITE_THEME_DEFAULTS },
+    });
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Не удалось сбросить цвета" };
+  }
+
+  revalidatePath("/admin/theme");
+  revalidatePath("/", "layout");
+  return { error: null };
 }
 
 // --- SEO ---

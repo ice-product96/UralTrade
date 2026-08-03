@@ -329,6 +329,12 @@ model SiteContact {
   updatedAt    DateTime          @updatedAt
 }
 
+model SiteTheme {
+  id        String   @id @default("default")
+  colors    Json
+  updatedAt DateTime @updatedAt
+}
+
 model ContactLocation {
   id           String      @id @default(cuid())
   siteContactId String      @default("default")
