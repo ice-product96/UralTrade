@@ -1,7 +1,11 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# Нестабильный канал до registry.npmjs.org на сервере часто даёт ETIMEDOUT на npm ci.
+RUN npm config set fetch-retries 5 \
+  && npm config set fetch-retry-mintimeout 20000 \
+  && npm config set fetch-retry-maxtimeout 120000 \
+  && npm ci
 
 FROM node:22-alpine AS builder
 WORKDIR /app
