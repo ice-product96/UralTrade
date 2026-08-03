@@ -169,10 +169,14 @@ export function SiteMobileNav({
 
 export function SiteDesktopNav({ categories }: { categories: NavCategory[] }) {
   return (
-    <nav className="hidden items-center gap-1 rounded-full bg-white p-1 text-sm font-semibold shadow-sm lg:flex">
+    <nav className="hidden min-w-0 flex-nowrap items-center gap-0.5 overflow-x-auto rounded-full bg-white p-1 text-sm font-semibold shadow-sm [scrollbar-width:none] lg:flex xl:gap-1 [&::-webkit-scrollbar]:hidden">
       <CatalogMegaMenu categories={categories} />
       {mainNavLinks.map((item) => (
-        <Link key={item.href} href={item.href} className="rounded-full px-3 py-2 text-muted hover:bg-background hover:text-petrol xl:px-4">
+        <Link
+          key={item.href}
+          href={item.href}
+          className="shrink-0 whitespace-nowrap rounded-full px-2.5 py-2 text-muted hover:bg-background hover:text-petrol xl:px-3.5"
+        >
           {item.label}
         </Link>
       ))}

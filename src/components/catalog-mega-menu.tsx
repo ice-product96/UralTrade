@@ -105,7 +105,7 @@ export function CatalogMegaMenu({ categories }: { categories: NavCategory[] }) {
     <div className="relative hidden lg:block" onMouseEnter={() => setOpen(true)} onMouseLeave={handleMenuLeave}>
       <Link
         href="/catalog"
-        className="inline-flex items-center gap-2 rounded-full px-4 py-2 font-semibold text-petrol hover:bg-background"
+        className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 font-semibold text-petrol hover:bg-background xl:gap-2 xl:px-3.5"
         aria-expanded={open}
       >
         Каталог
