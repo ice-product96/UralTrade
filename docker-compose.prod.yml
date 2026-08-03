@@ -36,6 +36,9 @@ services:
   app:
     build:
       context: .
+      # Host network: на VPS bridge/BuildKit часто ловит ETIMEDOUT до registry.npmjs.org,
+      # хотя с самого сервера curl до npm проходит нормально.
+      network: host
       args:
         NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:?Set NEXT_SERVER_ACTIONS_ENCRYPTION_KEY in .env}
     container_name: uraltrade-app
