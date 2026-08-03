@@ -7,6 +7,7 @@ import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductImage } from "@/components/product-image";
+import { ProductPageActions } from "@/components/product-list-buttons";
 import { ProductPageScrollReset } from "@/components/product-page-scroll-reset";
 import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
@@ -15,6 +16,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
 import { formatPrice, hasDiscount } from "@/lib/format";
 import { absolutizeImportedHtml, normalizeImageSrc } from "@/lib/image-url";
+import { formatFieldValue } from "@/lib/product-specs";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -180,6 +182,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <AddToCartButton productId={product.id} className="h-10 text-sm" />
+                  <ProductPageActions productId={product.id} />
                   <QuickOrderButton productId={product.id} productName={product.name} />
                 </div>
               </div>
@@ -296,22 +299,4 @@ function groupValues(product: Awaited<ReturnType<typeof getProductBySlug>> & {})
   }
 
   return Array.from(groups.entries()).map(([name, items]) => ({ name, items }));
-}
-
-function formatFieldValue(value: NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>["fieldValues"][number]) {
-  if (value.option) return value.option.label;
-  if (value.brandRef) return value.brandRef.name;
-  if (value.valueNumber != null) return `${value.valueNumber}${value.field.unit ? ` ${value.field.unit}` : ""}`;
-  if (value.valueBoolean != null) return value.valueBoolean ? "Да" : "Нет";
-  if (value.valueText) return value.valueText;
-  if (Array.isArray(value.valueJson)) {
-    return value.valueJson
-      .map((item) => {
-        if (!item || typeof item !== "object" || !("key" in item) || !("value" in item)) return null;
-        return `${String(item.key)}: ${String(item.value)}`;
-      })
-      .filter(Boolean)
-      .join(", ");
-  }
-  return "Заполнено";
 }

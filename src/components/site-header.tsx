@@ -1,5 +1,5 @@
 import { SiteDesktopNav, SiteMobileNav } from "@/components/site-nav";
-import { CartNavLink } from "@/components/cart-nav-link";
+import { HeaderActions } from "@/components/header-actions";
 import { HeaderContactIcons } from "@/components/header-contacts";
 import { getNavigationCategories, getSiteContacts } from "@/lib/data";
 import { SearchBox } from "@/components/search-box";
@@ -38,7 +38,7 @@ export async function SiteHeader() {
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <CartNavLink />
+            <HeaderActions />
             <SiteMobileNav categories={navCategories} contacts={headerContacts} />
           </div>
         </div>

@@ -1,18 +1,12 @@
 import Link from "next/link";
+import { ProductCardActions } from "@/components/product-list-buttons";
 import { ProductCardCart } from "@/components/product-card-cart";
 import { ProductImage } from "@/components/product-image";
-import type { ProductCardItem } from "@/lib/data";
-import type { SerializedProductCard } from "@/lib/catalog-serialize";
+import type { ProductCardData } from "@/lib/catalog-serialize";
 import { formatPrice, hasDiscount } from "@/lib/format";
 import { normalizeImageSrc } from "@/lib/image-url";
 
-export function ProductCard({
-  product,
-  compact = false,
-}: {
-  product: ProductCardItem | SerializedProductCard;
-  compact?: boolean;
-}) {
+export function ProductCard({ product, compact = false }: { product: ProductCardData; compact?: boolean }) {
   const image = normalizeImageSrc(product.images[0]?.url ?? "/demo/pump-1.svg");
   const discount = hasDiscount(product.oldPrice, product.price);
 
@@ -22,23 +16,26 @@ export function ProductCard({
         compact ? "rounded-[24px]" : "rounded-[28px]"
       }`}
     >
-      <Link href={`/product/${product.slug}`} scroll className={`relative block bg-background ${compact ? "p-3" : "p-4"}`}>
-        <div className={`absolute z-10 flex flex-col gap-2 ${compact ? "left-4 top-4" : "left-6 top-6"}`}>
-          <span className={`rounded-full px-3 py-1 text-xs font-bold ${product.inStock ? "bg-lime text-white" : "bg-white text-muted"}`}>
-            {product.inStock ? "В наличии" : "Под заказ"}
-          </span>
-          {discount ? <span className="rounded-full bg-sale px-3 py-1 text-xs font-bold text-white">Скидка</span> : null}
-        </div>
-        <div className="relative aspect-square overflow-hidden rounded-[22px]">
-          <ProductImage
-            src={image}
-            alt={product.images[0]?.alt ?? product.name}
-            fill
-            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        </div>
-      </Link>
+      <div className="relative">
+        <Link href={`/product/${product.slug}`} scroll className={`relative block bg-background ${compact ? "p-3" : "p-4"}`}>
+          <div className={`absolute z-10 flex flex-col gap-2 ${compact ? "left-4 top-4" : "left-6 top-6"}`}>
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${product.inStock ? "bg-lime text-white" : "bg-white text-muted"}`}>
+              {product.inStock ? "В наличии" : "Под заказ"}
+            </span>
+            {discount ? <span className="rounded-full bg-sale px-3 py-1 text-xs font-bold text-white">Скидка</span> : null}
+          </div>
+          <div className="relative aspect-square overflow-hidden rounded-[22px]">
+            <ProductImage
+              src={image}
+              alt={product.images[0]?.alt ?? product.name}
+              fill
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+        </Link>
+        <ProductCardActions productId={product.id} className={`absolute z-20 ${compact ? "right-4 top-4" : "right-6 top-6"}`} />
+      </div>
       <div className={`flex flex-1 flex-col ${compact ? "space-y-3 p-4" : "space-y-4 p-5"}`}>
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted sm:tracking-[0.2em]">
