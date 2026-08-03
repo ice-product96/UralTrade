@@ -36,13 +36,24 @@ export function ProductCardActions({ productId, className }: { productId: string
   return (
     <div className={cn("flex flex-col items-end gap-2", className)}>
       {ACTIONS.map((action) => (
-        <ProductCardActionButton key={action.kind} action={action} productId={productId} />
+        <ExpandableListButton key={action.kind} action={action} productId={productId} />
       ))}
     </div>
   );
 }
 
-function ProductCardActionButton({ action, productId }: { action: ActionConfig; productId: string }) {
+/** Те же иконки в блоке покупки на странице товара. */
+export function ProductPageActions({ productId, className }: { productId: string; className?: string }) {
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      {ACTIONS.map((action) => (
+        <ExpandableListButton key={action.kind} action={action} productId={productId} />
+      ))}
+    </div>
+  );
+}
+
+function ExpandableListButton({ action, productId }: { action: ActionConfig; productId: string }) {
   const { active, limitReached, toggle } = useToggle(action.kind, productId);
   const Icon = action.icon;
   const label = limitReached ? `Максимум ${COMPARE_LIMIT}` : active ? action.activeLabel : action.idleLabel;
@@ -63,38 +74,6 @@ function ProductCardActionButton({ action, productId }: { action: ActionConfig; 
         {label}
       </span>
       <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-200", active && "fill-current")} />
-    </button>
-  );
-}
-
-/** Кнопки в блоке покупки на странице товара. */
-export function ProductPageActions({ productId, className }: { productId: string; className?: string }) {
-  return (
-    <div className={cn("flex gap-2", className)}>
-      {ACTIONS.map((action) => (
-        <ProductPageActionButton key={action.kind} action={action} productId={productId} />
-      ))}
-    </div>
-  );
-}
-
-function ProductPageActionButton({ action, productId }: { action: ActionConfig; productId: string }) {
-  const { active, limitReached, toggle } = useToggle(action.kind, productId);
-  const Icon = action.icon;
-  const label = limitReached ? `Максимум ${COMPARE_LIMIT}` : active ? action.activeLabel : action.idleLabel;
-
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-pressed={active}
-      className={cn(
-        "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors hover:border-lime hover:text-lime sm:flex-none",
-        active ? "border-lime bg-lime/5 text-lime" : "border-border bg-white text-graphite",
-      )}
-    >
-      <Icon className={cn("h-4 w-4 shrink-0", active && "fill-current")} />
-      <span className="truncate">{label}</span>
     </button>
   );
 }
