@@ -34,6 +34,9 @@
   --color-muted: var(--muted);
   --font-sans: var(--font-sans-custom);
   --font-mono: var(--font-mono-custom);
+  /* Ближе к стилю витрин вроде vseinstrumenti: без сверхжирного 900. */
+  --font-weight-black: 600;
+  --font-weight-extrabold: 600;
 }
 
 body {

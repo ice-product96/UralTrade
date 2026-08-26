@@ -8,7 +8,7 @@ import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductImage } from "@/components/product-image";
 import { ProductPageActions } from "@/components/product-list-buttons";
-import { ProductPageScrollReset } from "@/components/product-page-scroll-reset";
+import { RouteScrollReset } from "@/components/route-scroll-reset";
 import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import { SiteFooter } from "@/components/site-footer";
@@ -61,7 +61,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      <ProductPageScrollReset productSlug={product.slug} />
+      <RouteScrollReset resetKey={product.slug} />
       <SiteHeader />
       <main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }} />

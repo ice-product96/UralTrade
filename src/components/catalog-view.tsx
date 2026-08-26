@@ -4,6 +4,7 @@ import { CatalogFilter } from "@/components/catalog-filter";
 import { CatalogProductGrid } from "@/components/catalog-product-grid";
 import { CatalogToolbar } from "@/components/catalog-toolbar";
 import { CategoryCard } from "@/components/category-card";
+import { RouteScrollReset } from "@/components/route-scroll-reset";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getCatalogData } from "@/lib/data";
@@ -152,6 +153,7 @@ export async function CatalogView({
 
   return (
     <>
+      <RouteScrollReset resetKey={slug ?? basePath} />
       <SiteHeader />
       {content}
       <SiteFooter />
