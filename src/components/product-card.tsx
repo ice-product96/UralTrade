@@ -54,7 +54,7 @@ export function ProductCard({ product, compact = false }: { product: ProductCard
           <Link
             href={`/product/${product.slug}`}
             scroll
-            className={`block font-bold text-graphite transition-colors hover:text-petrol ${compact ? "text-base" : "text-base sm:text-lg"}`}
+            className={`block w-full break-words font-bold leading-snug text-graphite transition-colors hover:text-petrol ${compact ? "text-base" : "text-base sm:text-lg"}`}
           >
             {product.name}
           </Link>

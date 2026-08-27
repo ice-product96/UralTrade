@@ -4,6 +4,7 @@ import { CatalogFilter } from "@/components/catalog-filter";
 import { CatalogProductGrid } from "@/components/catalog-product-grid";
 import { CatalogToolbar } from "@/components/catalog-toolbar";
 import { CategoryCard } from "@/components/category-card";
+import { CategoryRowCarousel } from "@/components/category-row-carousel";
 import { RouteScrollReset } from "@/components/route-scroll-reset";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -68,15 +69,15 @@ export async function CatalogView({
         ))}
       </nav>
 
-      <div className="mb-8 overflow-hidden rounded-[28px] bg-petrol p-5 text-white sm:rounded-[34px] sm:p-8">
+      <div className="mb-8 overflow-hidden rounded-[28px] bg-petrol p-5 text-center text-white sm:rounded-[34px] sm:p-8">
         <div className="text-xs font-bold uppercase tracking-[0.24em] text-lime sm:text-sm">{heroLabel}</div>
         <h1 className="mt-3 text-2xl font-black sm:text-3xl lg:text-4xl">{heroTitle}</h1>
-        <p className="mt-3 max-w-3xl text-sm text-white/75 sm:text-base">{heroDescription}</p>
+        <p className="mx-auto mt-3 max-w-3xl text-sm text-white/75 sm:text-base">{heroDescription}</p>
       </div>
 
       {showCategoryGrid ? (
         <section className="mb-10">
-          <div className="mb-5 flex items-end justify-between gap-4">
+          <div className={`mb-5 flex items-end gap-4 ${data.category ? "justify-center" : "justify-between"}`}>
             <h2 className="text-2xl font-black text-graphite">{data.category ? "Подкатегории" : "Популярные категории"}</h2>
             {!data.category ? (
               <Link href="/catalog?all=1" className="inline-flex items-center gap-2 text-sm font-bold text-petrol hover:text-lime">
@@ -85,22 +86,19 @@ export async function CatalogView({
               </Link>
             ) : null}
           </div>
-          <div
-            className={
-              data.category
-                ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
-                : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            }
-          >
-            {categoriesToShow.map((category) => (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                size={data.category ? "sm" : "md"}
-                showDescription={!data.category}
-              />
-            ))}
-          </div>
+          {data.category ? (
+            <CategoryRowCarousel>
+              {categoriesToShow.map((category) => (
+                <CategoryCard key={category.id} category={category} size="sm" showDescription={false} />
+              ))}
+            </CategoryRowCarousel>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {categoriesToShow.map((category) => (
+                <CategoryCard key={category.id} category={category} size="md" showDescription />
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
 

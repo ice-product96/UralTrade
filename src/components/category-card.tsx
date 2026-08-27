@@ -50,8 +50,10 @@ export function CategoryCard({
           className="object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
-      <div className="mt-4">
-        <div className="text-lg font-black text-graphite transition-colors group-hover:text-petrol">{category.name}</div>
+      <div className="mt-4 text-center">
+        <div className="text-base font-black leading-snug text-graphite transition-colors group-hover:text-petrol sm:text-lg">
+          {category.name}
+        </div>
         {showDescription && category.description ? (
           <p className="mt-2 line-clamp-2 text-sm text-muted">{category.description}</p>
         ) : null}

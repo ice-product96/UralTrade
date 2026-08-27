@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, FileText, RefreshCw, Truck } from "lucide-react";
+import { ArrowRight, FileText, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
@@ -110,43 +110,30 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {previewSpecs.length ? (
                 <div className="min-h-0">
                   <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Характеристики</div>
-                  <dl className="mt-1">
+                  <div className="mt-2 flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
                     {previewSpecs.map((item) => (
-                      <div key={item.id} className="grid grid-cols-[1fr_auto] gap-2 border-b border-border/60 py-1 text-xs last:border-b-0">
-                        <dt className="truncate text-muted">{item.name}</dt>
-                        <dd className="font-bold text-graphite">{item.value}</dd>
-                      </div>
+                      <span
+                        key={item.id}
+                        className="inline-flex shrink-0 items-baseline gap-1.5 rounded-lg bg-background px-2.5 py-1 text-xs"
+                      >
+                        <span className="text-muted">{item.name}</span>
+                        <span className="font-bold text-graphite">{item.value}</span>
+                      </span>
                     ))}
-                  </dl>
-                  <SmoothScrollLink targetId="specs" className="mt-1 inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime">
-                    Полные характеристики
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </SmoothScrollLink>
+                  </div>
                 </div>
               ) : null}
 
               {analogs.length ? (
-                <div className="rounded-2xl border border-lime/25 bg-lime/5 p-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-lime text-white">
-                      <RefreshCw className="h-4 w-4" />
-                    </div>
-                    <div className="text-xs font-black uppercase tracking-[0.14em] text-graphite">Аналоги</div>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {analogs.slice(0, 3).map((analog) => (
-                      <span key={analog} className="rounded-lg border border-lime/20 bg-white px-2.5 py-1 text-xs font-bold text-petrol">
+                <div className="min-h-0">
+                  <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Аналоги</div>
+                  <div className="mt-2 flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                    {analogs.map((analog) => (
+                      <span key={analog} className="inline-flex shrink-0 rounded-lg bg-background px-2.5 py-1 text-xs font-bold text-petrol">
                         {analog}
                       </span>
                     ))}
                   </div>
-                  <SmoothScrollLink
-                    targetId="analogs"
-                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime"
-                  >
-                    Все аналоги
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </SmoothScrollLink>
                 </div>
               ) : null}
 
@@ -215,12 +202,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <div id="analogs" className="mt-8 scroll-mt-28 border-t border-border pt-8">
                 <h2 className="text-2xl font-black text-graphite">Аналоги</h2>
                 <p className="mt-2 text-sm text-muted">Артикулы аналогичных товаров</p>
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-nowrap gap-2 overflow-x-auto pb-1 scrollbar-thin">
                   {analogs.map((analog) => (
-                    <span
-                      key={analog}
-                      className="rounded-xl border border-lime/25 bg-lime/5 px-4 py-2 text-sm font-black text-petrol"
-                    >
+                    <span key={analog} className="inline-flex shrink-0 rounded-xl bg-background px-4 py-2 text-sm font-black text-petrol">
                       {analog}
                     </span>
                   ))}
