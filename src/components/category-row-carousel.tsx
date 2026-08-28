@@ -16,13 +16,18 @@ export function CategoryRowCarousel({ children }: { children: ReactNode }) {
   if (items.length === 0) return null;
 
   return (
-    <div ref={emblaRef} className="overflow-hidden">
-      <div className="-ml-3 flex items-stretch">
-        {items.map((child, index) => (
-          <div key={index} className="min-w-0 shrink-0 basis-[42%] pl-3 sm:basis-[28%] md:basis-[22%] lg:basis-[18%] xl:basis-[15%]">
-            {child}
-          </div>
-        ))}
+    <div className="w-full min-w-0 overflow-hidden">
+      <div ref={emblaRef} className="w-full overflow-hidden">
+        <div className="-ml-3 flex items-stretch">
+          {items.map((child, index) => (
+            <div
+              key={index}
+              className="min-w-0 shrink-0 basis-[46%] pl-3 sm:basis-[28%] md:basis-[22%] lg:basis-[18%] xl:basis-[15%]"
+            >
+              {child}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

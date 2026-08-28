@@ -11,7 +11,7 @@ type CategoryCardItem = {
 };
 
 const sizeClasses = {
-  sm: "rounded-[22px] p-3",
+  sm: "rounded-[18px] p-2 sm:rounded-[22px] sm:p-3",
   md: "rounded-[28px] p-4",
   lg: "rounded-[32px] p-5",
 };
@@ -50,8 +50,8 @@ export function CategoryCard({
           className="object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
-      <div className="mt-4 text-center">
-        <div className="text-base font-black leading-snug text-graphite transition-colors group-hover:text-petrol sm:text-lg">
+      <div className="mt-2 text-center sm:mt-4">
+        <div className="text-sm font-black leading-snug text-graphite transition-colors group-hover:text-petrol sm:text-base lg:text-lg">
           {category.name}
         </div>
         {showDescription && category.description ? (

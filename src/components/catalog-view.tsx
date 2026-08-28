@@ -59,7 +59,7 @@ export async function CatalogView({
     : data.filterGroups;
 
   const content = (
-    <main className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
+    <main className="mx-auto w-full min-w-0 max-w-7xl overflow-x-clip px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
       <nav className="mb-4 flex flex-wrap gap-2 text-sm text-muted">
         {breadcrumbs.map((item, index) => (
           <Link key={item.href} href={item.href} className="hover:text-petrol">
@@ -76,7 +76,7 @@ export async function CatalogView({
       </div>
 
       {showCategoryGrid ? (
-        <section className="mb-10">
+        <section className="mb-10 w-full min-w-0 overflow-hidden">
           <div className={`mb-5 flex items-end gap-4 ${data.category ? "justify-center" : "justify-between"}`}>
             <h2 className="text-2xl font-black text-graphite">{data.category ? "Подкатегории" : "Популярные категории"}</h2>
             {!data.category ? (
@@ -102,7 +102,7 @@ export async function CatalogView({
         </section>
       ) : null}
 
-      <div className={`grid gap-8 ${data.showFilterPanel ? "lg:grid-cols-[320px_1fr]" : ""}`}>
+      <div className={`grid w-full min-w-0 gap-8 ${data.showFilterPanel ? "lg:grid-cols-[320px_1fr]" : ""}`}>
         {data.showFilterPanel ? (
           <CatalogFilter
             groups={filterGroups}
@@ -113,7 +113,7 @@ export async function CatalogView({
             hiddenFields={lockSaleFilter ? ["sale"] : undefined}
           />
         ) : null}
-        <section>
+        <section className="min-w-0">
           <CatalogToolbar basePath={basePath} selected={data.selected} sort={data.sort} perPage={data.perPage} total={data.total} />
           {data.products.length === 0 ? (
             <div className="rounded-[30px] border border-border bg-white p-10 text-center">
