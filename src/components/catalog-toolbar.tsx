@@ -32,9 +32,9 @@ export function CatalogToolbar({
   }
 
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
       <div className="text-sm font-bold text-muted sm:text-base">Найдено товаров: {total}</div>
-      <label className="grid min-w-[140px] gap-1.5 text-sm font-semibold text-graphite">
+      <label className="grid w-full gap-1.5 text-sm font-semibold text-graphite sm:w-auto sm:min-w-[140px]">
         <span>На странице</span>
         <select
           value={String(perPage)}

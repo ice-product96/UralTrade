@@ -32,11 +32,19 @@ function useToggle(kind: ProductListKind, productId: string) {
 }
 
 /** Иконки поверх карточки: по наведению раскрываются вместе с подписью. */
-export function ProductCardActions({ productId, className }: { productId: string; className?: string }) {
+export function ProductCardActions({
+  productId,
+  className,
+  compact = false,
+}: {
+  productId: string;
+  className?: string;
+  compact?: boolean;
+}) {
   return (
-    <div className={cn("flex flex-col items-end gap-2", className)}>
+    <div className={cn("flex flex-col items-end gap-1.5 sm:gap-2", className)}>
       {ACTIONS.map((action) => (
-        <ExpandableListButton key={action.kind} action={action} productId={productId} />
+        <ExpandableListButton key={action.kind} action={action} productId={productId} compact={compact} />
       ))}
     </div>
   );
@@ -53,7 +61,15 @@ export function ProductPageActions({ productId, className }: { productId: string
   );
 }
 
-function ExpandableListButton({ action, productId }: { action: ActionConfig; productId: string }) {
+function ExpandableListButton({
+  action,
+  productId,
+  compact = false,
+}: {
+  action: ActionConfig;
+  productId: string;
+  compact?: boolean;
+}) {
   const { active, limitReached, toggle } = useToggle(action.kind, productId);
   const Icon = action.icon;
   const label = limitReached ? `Максимум ${COMPARE_LIMIT}` : active ? action.activeLabel : action.idleLabel;
@@ -66,7 +82,8 @@ function ExpandableListButton({ action, productId }: { action: ActionConfig; pro
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "group/action inline-flex h-10 items-center justify-end rounded-full border bg-white/95 px-3 text-xs font-bold shadow-sm backdrop-blur transition-colors duration-200 hover:border-lime hover:text-lime",
+        "group/action inline-flex items-center justify-center rounded-full border bg-white/95 text-xs font-bold shadow-sm backdrop-blur transition-colors duration-200 hover:border-lime hover:text-lime sm:justify-end sm:px-3",
+        compact ? "h-8 w-8" : "h-8 w-8 sm:h-10",
         active ? "border-lime text-lime" : "border-border text-graphite",
       )}
     >
