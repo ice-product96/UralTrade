@@ -119,11 +119,11 @@ export function CartClient() {
             })
           )}
         </div>
-        <div className="hidden lg:block">{checkoutForm}</div>
+        <div className="hidden lg:sticky lg:top-32 lg:block lg:self-start">{checkoutForm}</div>
       </div>
 
       {products.length > 0 ? (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-white/95 p-3 shadow-[0_-12px_40px_rgba(8,54,83,0.12)] backdrop-blur lg:hidden pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="fixed inset-x-0 bottom-[calc(var(--mobile-bottom-nav,0px)+0.75rem)] z-40 border-t border-border bg-white/95 p-3 shadow-[0_-12px_40px_rgba(8,54,83,0.12)] backdrop-blur lg:hidden pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="mx-auto flex max-w-7xl items-center gap-3">
             <div className="min-w-0 flex-1">
               <div className="text-xs text-muted">Итого</div>
@@ -154,7 +154,7 @@ export function CartClient() {
         </div>
       ) : null}
 
-      {products.length > 0 ? <div className="h-24 lg:hidden" aria-hidden /> : null}
+      {products.length > 0 ? <div className="h-[calc(5.5rem+var(--mobile-bottom-nav,0px)+0.75rem)] lg:hidden" aria-hidden /> : null}
     </>
   );
 }
