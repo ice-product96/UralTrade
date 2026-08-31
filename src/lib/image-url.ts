@@ -17,14 +17,9 @@ export function shouldUnoptimizeImage(src: string) {
   return isExternalProductImage(normalizeImageSrc(src));
 }
 
-/** Абсолютный URL для next/image (uploads лежат вне public, отдаются через route). */
+/** Путь для next/image: uploads остаются относительными (localPatterns в next.config). */
 export function resolveImageSrc(src: string) {
-  const normalized = normalizeImageSrc(src);
-  if (normalized.startsWith("/uploads/")) {
-    const base = (process.env.SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-    return `${base}${normalized}`;
-  }
-  return normalized;
+  return normalizeImageSrc(src);
 }
 
 /** Пути /uploadedFiles/... в HTML описания → абсолютные URL источника. */

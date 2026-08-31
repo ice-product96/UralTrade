@@ -2,26 +2,22 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    localPatterns: [
+      {
+        pathname: "/uploads/**",
+      },
+      {
+        pathname: "/logo.png",
+      },
+      {
+        pathname: "/demo/**",
+      },
+    ],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "ural-trade96.ru",
         pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "ut-gk.ru",
-        pathname: "/uploads/**",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        pathname: "/uploads/**",
-      },
-      {
-        protocol: "http",
-        hostname: "127.0.0.1",
-        pathname: "/uploads/**",
       },
     ],
   },
