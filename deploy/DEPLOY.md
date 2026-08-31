@@ -152,6 +152,15 @@ sudo certbot --nginx -d uraltrade.ice-product.ru
 
 ```bash
 git pull
+bash scripts/deploy-prod.sh
+```
+
+Скрипт `scripts/deploy-prod.sh` сначала собирает образ, затем перезапускает только `app` с `--wait` (healthcheck), чтобы сократить окно 502 при деплое.
+
+Ручной вариант:
+
+```bash
+git pull
 docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml exec app npm run db:deploy
 ```

@@ -12,11 +12,19 @@ export function isExternalProductImage(src: string) {
   return normalized.startsWith("http://") || normalized.startsWith("https://");
 }
 
-/** Загруженные и внешние изображения отдаём напрямую, без /_next/image (ограничения Next.js 16 в production). */
+/** Только внешний каталог ural-trade96.ru — без next/image. Локальные /uploads/ оптимизируются. */
 export function shouldUnoptimizeImage(src: string) {
+  return isExternalProductImage(normalizeImageSrc(src));
+}
+
+/** Абсолютный URL для next/image (uploads лежат вне public, отдаются через route). */
+export function resolveImageSrc(src: string) {
   const normalized = normalizeImageSrc(src);
-  if (normalized.includes("/uploads/")) return true;
-  return isExternalProductImage(normalized);
+  if (normalized.startsWith("/uploads/")) {
+    const base = (process.env.SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    return `${base}${normalized}`;
+  }
+  return normalized;
 }
 
 /** Пути /uploadedFiles/... в HTML описания → абсолютные URL источника. */

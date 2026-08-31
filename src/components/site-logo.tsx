@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-const LOGO_INTRINSIC_WIDTH = 2172;
-const LOGO_INTRINSIC_HEIGHT = 724;
+const LOGO_WIDTH = 256;
+const LOGO_HEIGHT = 85;
 
 type SiteLogoProps = {
   href?: string | null;
@@ -24,8 +24,9 @@ export function SiteLogo({
     <Image
       src="/logo.png"
       alt="УралТрейд — запчасти, гидравлика, сервис"
-      width={LOGO_INTRINSIC_WIDTH}
-      height={LOGO_INTRINSIC_HEIGHT}
+      width={LOGO_WIDTH}
+      height={LOGO_HEIGHT}
+      sizes="(max-width: 1023px) 140px, 184px"
       priority={priority}
       className={cn("block w-auto max-w-none object-contain object-left", imageClassName ?? "h-11")}
       style={height != null ? { height: `${height}px`, width: "auto" } : undefined}

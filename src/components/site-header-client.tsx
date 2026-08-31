@@ -62,7 +62,7 @@ export function SiteHeaderClient({
 
   return (
     <>
-      <header className="sticky top-0 z-40 overflow-visible border-b border-border/80 bg-background/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 overflow-visible border-b border-border/80 bg-background/95">
         <div
           className={cn(
             "mx-auto max-w-7xl px-3 transition-[padding] duration-300 ease-out sm:px-4 lg:px-8 lg:py-3",

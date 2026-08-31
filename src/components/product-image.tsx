@@ -1,10 +1,11 @@
 import Image, { type ImageProps } from "next/image";
-import { normalizeImageSrc, shouldUnoptimizeImage } from "@/lib/image-url";
+import { normalizeImageSrc, resolveImageSrc, shouldUnoptimizeImage } from "@/lib/image-url";
 import { cn } from "@/lib/utils";
 
-/** Внешние и загруженные фото — через <img>, остальное через next/image. */
+/** Внешний каталог — через <img>, локальные uploads и статика — через next/image. */
 export function ProductImage({ src, alt, className, fill, priority, width, height, style, ...props }: ImageProps) {
   const normalized = normalizeImageSrc(String(src));
+  const optimizedSrc = resolveImageSrc(String(src));
 
   if (shouldUnoptimizeImage(normalized)) {
     if (fill) {
@@ -38,7 +39,7 @@ export function ProductImage({ src, alt, className, fill, priority, width, heigh
   return (
     <Image
       {...props}
-      src={normalized}
+      src={optimizedSrc}
       alt={alt}
       className={className}
       fill={fill}

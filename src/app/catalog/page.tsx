@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { CatalogView } from "@/components/catalog-view";
+import { PUBLIC_PAGE_REVALIDATE } from "@/lib/cache-config";
 
 export const metadata: Metadata = {
   title: "Каталог",
   description: "Каталог инженерного оборудования UralTrade с поиском по артикулу и фасетным фильтром.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = PUBLIC_PAGE_REVALIDATE;
 
 export default async function CatalogPage({
   searchParams,

@@ -73,10 +73,9 @@ html {
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(220, 232, 234, 0.9);
   box-shadow: 0 24px 80px rgba(26, 54, 93, 0.08);
-  backdrop-filter: blur(18px);
 }
 
 .rich-text p {

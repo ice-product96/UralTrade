@@ -10,9 +10,10 @@ import { SiteHeader } from "@/components/site-header";
 import { getHomeData } from "@/lib/data";
 import { normalizeImageSrc } from "@/lib/image-url";
 import { resolveHomeFeatureIcon } from "@/lib/home-features";
+import { PUBLIC_PAGE_REVALIDATE } from "@/lib/cache-config";
 import { organizationJsonLd } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = PUBLIC_PAGE_REVALIDATE;
 
 export default async function Home() {
   const { homePage, features, categories, products, brands, services } = await getHomeData();
@@ -63,7 +64,7 @@ export default async function Home() {
                     alt={hero.title}
                     width={1024}
                     height={341}
-                    priority
+                    sizes="(min-width: 1024px) 480px, 100vw"
                     className="h-auto w-full rounded-[32px] object-cover"
                   />
                 </div>

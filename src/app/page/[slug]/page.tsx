@@ -8,8 +8,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getContentPage, getPublishedFaqItems, getSiteContacts } from "@/lib/data";
 import { absolutizeImportedHtml } from "@/lib/image-url";
+import { PUBLIC_PAGE_REVALIDATE } from "@/lib/cache-config";
 
-export const dynamic = "force-dynamic";
+export const revalidate = PUBLIC_PAGE_REVALIDATE;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

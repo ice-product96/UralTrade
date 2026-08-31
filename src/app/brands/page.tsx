@@ -4,8 +4,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicBrands } from "@/lib/data";
 import { normalizeImageSrc } from "@/lib/image-url";
+import { PUBLIC_PAGE_REVALIDATE } from "@/lib/cache-config";
 
-export const dynamic = "force-dynamic";
+export const revalidate = PUBLIC_PAGE_REVALIDATE;
 
 export const metadata = {
   title: "Бренды",
