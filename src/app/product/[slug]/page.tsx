@@ -18,9 +18,8 @@ import { formatPrice, hasDiscount } from "@/lib/format";
 import { absolutizeImportedHtml, normalizeImageSrc } from "@/lib/image-url";
 import { formatFieldValue } from "@/lib/product-specs";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
-import { PUBLIC_PAGE_REVALIDATE } from "@/lib/cache-config";
 
-export const revalidate = PUBLIC_PAGE_REVALIDATE;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

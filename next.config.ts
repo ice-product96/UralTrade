@@ -1,13 +1,5 @@
 import type { NextConfig } from "next";
 
-const siteHost = (() => {
-  try {
-    return new URL(process.env.SITE_URL ?? "http://localhost:3000").hostname;
-  } catch {
-    return "localhost";
-  }
-})();
-
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -18,7 +10,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: siteHost,
+        hostname: "ut-gk.ru",
         pathname: "/uploads/**",
       },
       {
