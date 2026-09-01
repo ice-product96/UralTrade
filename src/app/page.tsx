@@ -3,13 +3,13 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CategoryCard } from "@/components/category-card";
 import { HomeCarousel } from "@/components/home-carousel";
+import { HomeHero } from "@/components/home-hero";
 import { MotionReveal } from "@/components/motion-reveal";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getHomeData } from "@/lib/data";
 import { normalizeImageSrc } from "@/lib/image-url";
-import { resolveHomeFeatureIcon } from "@/lib/home-features";
 import { organizationJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -28,49 +28,18 @@ export default async function Home() {
       <SiteHeader />
       <main>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,125,116,0.16),transparent_38%),linear-gradient(135deg,#f5fafb_0%,#ffffff_48%,#edf6f7_100%)]" />
-          <div className="relative mx-auto grid max-w-7xl gap-8 px-3 py-12 sm:gap-10 sm:px-4 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:px-8 lg:py-24">
-            <MotionReveal className="h-full">
-              <div className="flex h-full flex-col lg:justify-end">
-                <h1 className="max-w-3xl text-balance text-3xl font-black leading-tight tracking-tight text-graphite sm:text-4xl md:text-5xl lg:text-7xl">
-                  {hero.title}
-                </h1>
-                {hero.subtitle ? (
-                  <p className="mt-4 max-w-2xl text-base leading-7 text-muted sm:mt-6 sm:text-lg sm:leading-8">{hero.subtitle}</p>
-                ) : null}
-                {features.length ? (
-                  <div className="mt-10 grid gap-3 sm:grid-cols-3 sm:items-stretch">
-                    {features.map((feature) => {
-                      const Icon = resolveHomeFeatureIcon(feature.icon);
-                      return (
-                        <div key={feature.id} className="flex h-full flex-col rounded-3xl border border-border bg-white/80 p-4">
-                          <Icon className="h-5 w-5 text-lime" />
-                          <div className="mt-3 font-bold text-graphite">{feature.title}</div>
-                          <div className="mt-1 flex-1 text-sm text-muted">{feature.text}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
-            </MotionReveal>
-            <MotionReveal delay={0.12} className="lg:self-end">
-              <div className="relative">
-                <div className="glass-panel overflow-hidden rounded-[42px] p-4">
-                  <ProductImage
-                    src={hero.imageUrl}
-                    alt={hero.title}
-                    width={1024}
-                    height={341}
-                    sizes="(min-width: 1024px) 480px, 100vw"
-                    className="h-auto w-full rounded-[32px] object-cover"
-                  />
-                </div>
-              </div>
-            </MotionReveal>
-          </div>
-        </section>
+        <HomeHero
+          title={hero.title}
+          subtitle={hero.subtitle}
+          imageUrl={hero.imageUrl}
+          features={features.map((feature) => ({
+            id: feature.id,
+            title: feature.title,
+            text: feature.text,
+            icon: feature.icon,
+            sortOrder: feature.sortOrder,
+          }))}
+        />
 
         <MotionReveal>
           <section className="mx-auto max-w-7xl px-3 py-12 sm:px-4 sm:py-16 lg:px-8">

@@ -286,14 +286,23 @@ async function main() {
     },
   });
 
-  const homeFeatureCount = await prisma.homeFeature.count();
-  if (homeFeatureCount === 0) {
-    await prisma.homeFeature.createMany({
-      data: [
-        { id: "seed-home-feature-1", title: "Подбор по параметрам", text: "Фильтры по характеристикам и брендам", icon: "wrench", sortOrder: 10 },
-        { id: "seed-home-feature-2", title: "Доставка по РФ", text: "Отправка до транспортной компании", icon: "truck", sortOrder: 20 },
-        { id: "seed-home-feature-3", title: "Консультация", text: "Поможем подобрать оборудование", icon: "shield", sortOrder: 30 },
-      ],
+  const homeFeatures = [
+    { id: "seed-home-feature-1", title: "Подбор по параметрам", text: "Фильтры по характеристикам и брендам", icon: "wrench", sortOrder: 10 },
+    { id: "seed-home-feature-2", title: "Доставка по РФ", text: "Отправка до транспортной компании", icon: "truck", sortOrder: 20 },
+    { id: "seed-home-feature-3", title: "Консультация", text: "Поможем подобрать оборудование", icon: "support", sortOrder: 30 },
+    { id: "seed-home-feature-4", title: "Оригинальные товары с гарантией", text: "Работаем с проверенными поставщиками", icon: "shield", sortOrder: 40 },
+  ] as const;
+
+  for (const feature of homeFeatures) {
+    await prisma.homeFeature.upsert({
+      where: { id: feature.id },
+      update: {
+        title: feature.title,
+        text: feature.text,
+        icon: feature.icon,
+        sortOrder: feature.sortOrder,
+      },
+      create: feature,
     });
   }
 
