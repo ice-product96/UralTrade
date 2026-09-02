@@ -1,6 +1,7 @@
 import { ProductImage } from "@/components/product-image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { BrandCard } from "@/components/brand-card";
 import { CategoryCard } from "@/components/category-card";
 import { HomeCarousel } from "@/components/home-carousel";
 import { HomeHero } from "@/components/home-hero";
@@ -42,8 +43,8 @@ export default async function Home() {
         />
 
         <MotionReveal>
-          <section className="mx-auto max-w-7xl px-3 py-12 sm:px-4 sm:py-16 lg:px-8">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8 sm:gap-4">
+          <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
               <div>
                 <h2 className="text-2xl font-black text-graphite sm:text-3xl">Каталог</h2>
                 <p className="mt-2 text-sm text-muted sm:text-base">Основные разделы магазина</p>
@@ -52,47 +53,39 @@ export default async function Home() {
                 Весь каталог <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <HomeCarousel
+              itemClassName="flex-[0_0_86%] sm:flex-[0_0_47%] lg:flex-[0_0_31%] xl:flex-[0_0_20%]"
+              previousLabel="Предыдущие разделы каталога"
+              nextLabel="Следующие разделы каталога"
+            >
               {categories.map((category) => (
-                <CategoryCard key={category.id} category={category} size="lg" />
+                <CategoryCard key={category.id} category={category} compact showDescription={false} />
               ))}
-            </div>
+            </HomeCarousel>
           </section>
         </MotionReveal>
 
         {brands.length ? (
           <MotionReveal>
-            <section className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-              <div className="mb-6 flex items-end justify-between gap-4">
-                <h2 className="text-3xl font-black text-graphite">Популярные бренды</h2>
-                <Link href="/brands" className="inline-flex items-center gap-2 font-bold text-petrol hover:text-lime">
+            <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
+                <div>
+                  <h2 className="text-2xl font-black text-graphite sm:text-3xl">Популярные бренды</h2>
+                  <p className="mt-2 text-sm text-muted sm:text-base">Проверенные производители из каталога</p>
+                </div>
+                <Link href="/brands" className="inline-flex items-center gap-2 text-sm font-bold text-petrol transition hover:text-lime sm:text-base">
                   Все бренды <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
-              <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              <HomeCarousel
+                itemClassName="flex-[0_0_86%] sm:flex-[0_0_47%] lg:flex-[0_0_31%] xl:flex-[0_0_20%]"
+                previousLabel="Предыдущие бренды"
+                nextLabel="Следующие бренды"
+              >
                 {brands.map((brand) => (
-                  <Link
-                    key={brand.id}
-                    href={`/catalog?brand=${brand.slug}`}
-                    className="group flex items-center justify-center rounded-2xl border border-border bg-white p-4 transition hover:border-lime hover:shadow-md hover:shadow-petrol/10"
-                    title={brand.name}
-                  >
-                    <div className="flex h-16 w-full items-center justify-center rounded-xl bg-background px-3">
-                      {brand.logoUrl ? (
-                        <ProductImage
-                          src={normalizeImageSrc(brand.logoUrl)}
-                          alt={brand.name}
-                          width={120}
-                          height={48}
-                          className="max-h-12 w-auto object-contain"
-                        />
-                      ) : (
-                        <span className="text-lg font-black text-petrol">{brand.name.slice(0, 2)}</span>
-                      )}
-                    </div>
-                  </Link>
+                  <BrandCard key={brand.id} brand={brand} />
                 ))}
-              </div>
+              </HomeCarousel>
             </section>
           </MotionReveal>
         ) : null}
