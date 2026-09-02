@@ -1,6 +1,6 @@
-import { HomeHeroFeatureCarousel } from "@/components/home-hero-feature-carousel";
 import { ProductImage } from "@/components/product-image";
-import { HERO_TAGLINE, resolveHomeHeroCarouselFeatures, type HomeHeroFeature } from "@/lib/home-hero-features";
+import { resolveHomeFeatureIcon } from "@/lib/home-features";
+import { HERO_TAGLINE, resolveHomeHeroFeatures, type HomeHeroFeature } from "@/lib/home-hero-features";
 import { cn } from "@/lib/utils";
 
 type HomeHeroProps = {
@@ -11,7 +11,7 @@ type HomeHeroProps = {
 };
 
 export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps) {
-  const carouselFeatures = resolveHomeHeroCarouselFeatures(features);
+  const heroFeatures = resolveHomeHeroFeatures(features);
 
   return (
     <section className="bg-background">
@@ -21,24 +21,56 @@ export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps)
           {subtitle ? <p>{subtitle}</p> : null}
         </div>
 
-        <p className="text-balance text-center text-lg font-bold leading-snug text-graphite sm:text-xl lg:text-left lg:text-2xl">
-          {HERO_TAGLINE}
-        </p>
-
-        <div className={cn("mt-3 flex flex-col gap-3 sm:mt-4 sm:gap-4", "lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-stretch lg:gap-6")}>
-          <HomeHeroFeatureCarousel features={carouselFeatures} />
-
-          <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm sm:rounded-3xl">
-            <ProductImage
-              src={imageUrl}
-              alt={title}
-              width={1320}
-              height={440}
-              sizes="(min-width: 1024px) 55vw, 100vw"
-              className="aspect-[21/9] w-full object-cover sm:aspect-[5/2] lg:h-full lg:min-h-[12.5rem] lg:object-cover"
-              priority
-            />
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-white shadow-sm sm:rounded-3xl">
+          <ProductImage
+            src={imageUrl}
+            alt={title}
+            width={1320}
+            height={440}
+            sizes="(min-width: 1280px) 1280px, 100vw"
+            className="aspect-[21/9] w-full object-cover sm:aspect-[5/2]"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-petrol/90 via-petrol/60 to-petrol/25" />
+          <div className="absolute inset-0 flex items-center px-5 sm:px-8 lg:px-10">
+            <p className="max-w-2xl text-balance text-xl font-bold leading-tight text-white sm:text-2xl lg:text-4xl">
+              {HERO_TAGLINE}
+            </p>
           </div>
+        </div>
+
+        <div
+          className={cn(
+            "mt-3 grid grid-cols-1 gap-2 sm:mt-4 sm:grid-cols-2 sm:gap-3",
+            "lg:mt-4 lg:grid-cols-4 lg:gap-0 lg:overflow-hidden lg:rounded-2xl lg:border lg:border-border lg:bg-white lg:shadow-sm",
+          )}
+        >
+          {heroFeatures.map((feature, index) => {
+            const Icon = resolveHomeFeatureIcon(feature.icon);
+
+            return (
+              <div
+                key={feature.id ?? feature.title}
+                className={cn(
+                  "flex min-w-0 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 sm:px-5 sm:py-4",
+                  "lg:rounded-none lg:border-0 lg:shadow-none",
+                  index > 0 && "lg:border-l lg:border-border",
+                )}
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lime/10 text-lime">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[13px] font-bold leading-snug text-graphite sm:text-sm">{feature.title}</div>
+                  {feature.text ? (
+                    <div className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted sm:text-xs sm:leading-5">
+                      {feature.text}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -10,13 +10,6 @@ export type HomeHeroFeature = {
 
 export const HERO_TAGLINE = "Онлайн-маркет гидравлического оборудования";
 
-export const CAROUSEL_FEATURE_TITLES = [
-  "Оригинальные товары с гарантией",
-  "Подбор по параметрам",
-  "Консультация",
-  "Доставка по РФ",
-] as const;
-
 export const DEFAULT_HOME_HERO_FEATURES: HomeHeroFeature[] = [
   {
     title: "Подбор по параметрам",
@@ -50,14 +43,6 @@ export function resolveHomeHeroFeatures(features: HomeHeroFeature[]): HomeHeroFe
   return REQUIRED_TITLES.map((title, index) => {
     const fromDb = features.find((feature) => feature.title.trim() === title);
     return fromDb ?? DEFAULT_HOME_HERO_FEATURES[index]!;
-  });
-}
-
-export function resolveHomeHeroCarouselFeatures(features: HomeHeroFeature[]): HomeHeroFeature[] {
-  return CAROUSEL_FEATURE_TITLES.map((title) => {
-    const fromDb = features.find((feature) => feature.title.trim() === title);
-    const fromDefault = DEFAULT_HOME_HERO_FEATURES.find((feature) => feature.title === title);
-    return fromDb ?? fromDefault!;
   });
 }
 
