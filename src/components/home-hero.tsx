@@ -1,5 +1,5 @@
 import { ProductImage } from "@/components/product-image";
-import { resolveHomeFeatureIcon } from "@/lib/home-features";
+import { HOME_FEATURE_ICONS, type HomeFeatureIcon } from "@/lib/home-features";
 import { HERO_TAGLINE, resolveHomeHeroFeatures, type HomeHeroFeature } from "@/lib/home-hero-features";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,39 @@ type HomeHeroProps = {
   imageUrl: string;
   features: HomeHeroFeature[];
 };
+
+function HomeFeatureIconGlyph({ icon }: { icon: string }) {
+  const key: HomeFeatureIcon = icon in HOME_FEATURE_ICONS ? (icon as HomeFeatureIcon) : "wrench";
+  const Icon = HOME_FEATURE_ICONS[key];
+  return <Icon className="h-5 w-5" aria-hidden />;
+}
+
+function HeroFeatureCard({
+  feature,
+  className,
+}: {
+  feature: HomeHeroFeature;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex h-full min-w-0 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3",
+        className,
+      )}
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lime/10 text-lime">
+        <HomeFeatureIconGlyph icon={feature.icon} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[13px] font-bold leading-snug text-graphite">{feature.title}</div>
+        {feature.text ? (
+          <div className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted">{feature.text}</div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps) {
   const heroFeatures = resolveHomeHeroFeatures(features);
@@ -40,37 +73,24 @@ export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps)
         </div>
 
         <div
-          className={cn(
-            "mt-3 grid grid-cols-1 gap-2 sm:mt-4 sm:grid-cols-2 sm:gap-3",
-            "lg:mt-4 lg:grid-cols-4 lg:gap-0 lg:overflow-hidden lg:rounded-2xl lg:border lg:border-border lg:bg-white lg:shadow-sm",
-          )}
+          className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
+          aria-label="Преимущества"
         >
-          {heroFeatures.map((feature, index) => {
-            const Icon = resolveHomeFeatureIcon(feature.icon);
+          {heroFeatures.map((feature) => (
+            <div key={feature.id ?? feature.title} className="w-[88%] shrink-0 snap-start sm:w-[70%]">
+              <HeroFeatureCard feature={feature} className="h-full" />
+            </div>
+          ))}
+        </div>
 
-            return (
-              <div
-                key={feature.id ?? feature.title}
-                className={cn(
-                  "flex min-w-0 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 sm:px-5 sm:py-4",
-                  "lg:rounded-none lg:border-0 lg:shadow-none",
-                  index > 0 && "lg:border-l lg:border-border",
-                )}
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lime/10 text-lime">
-                  <Icon className="h-5 w-5" aria-hidden />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[13px] font-bold leading-snug text-graphite sm:text-sm">{feature.title}</div>
-                  {feature.text ? (
-                    <div className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted sm:text-xs sm:leading-5">
-                      {feature.text}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
+        <div className="mt-4 hidden gap-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm lg:grid lg:grid-cols-4">
+          {heroFeatures.map((feature, index) => (
+            <HeroFeatureCard
+              key={feature.id ?? feature.title}
+              feature={feature}
+              className={cn("rounded-none border-0 py-4 sm:px-5", index > 0 && "border-l border-border")}
+            />
+          ))}
         </div>
       </div>
     </section>
