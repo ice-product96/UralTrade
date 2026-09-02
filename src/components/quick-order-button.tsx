@@ -13,7 +13,7 @@ export function QuickOrderButton({ productId, productName }: { productId: string
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-lime bg-lime/10 px-5 text-sm font-bold text-petrol transition hover:bg-lime/20 sm:flex-1"
+        className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-full border border-lime bg-lime/10 px-4 text-sm font-bold text-petrol transition hover:bg-lime/20 sm:h-10 sm:flex-1 sm:px-5"
       >
         Купить в 1 клик
       </button>

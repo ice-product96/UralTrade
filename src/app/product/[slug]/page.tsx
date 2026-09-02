@@ -64,7 +64,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     <>
       <RouteScrollReset resetKey={product.slug} />
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
+      <main className="mx-auto min-w-0 max-w-7xl overflow-x-clip px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbs)) }} />
         <nav className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted sm:mb-4 sm:text-sm">
@@ -82,7 +82,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </h1>
         <section>
           <ProductGallery images={product.images} productName={product.name}>
-            <div className="flex min-h-0 flex-1 flex-col gap-2.5 lg:overflow-y-auto">
+            <div className="flex min-h-0 flex-1 flex-col gap-2.5 min-w-0 lg:overflow-y-auto">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex min-w-0 items-baseline gap-2">
                   <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Артикул:</span>
@@ -160,15 +160,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
               <div className="mt-auto shrink-0 space-y-2.5 border-t border-border/70 pt-2.5">
                 <div className="flex flex-wrap items-end gap-x-3 gap-y-0.5">
-                  <div className="text-2xl font-black text-petrol sm:text-3xl">{formatPrice(product.price)}</div>
+                  <div className="min-w-0 text-2xl font-black text-petrol sm:text-3xl">{formatPrice(product.price)}</div>
                   {hasDiscount(product.oldPrice, product.price) ? (
                     <div className="pb-0.5 text-sm text-sale line-through">{formatPrice(product.oldPrice!)}</div>
                   ) : null}
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <AddToCartButton productId={product.id} className="h-10 shrink-0 text-sm" />
-                  <ProductPageActions productId={product.id} />
-                  <QuickOrderButton productId={product.id} productName={product.name} />
+                <div className="flex min-w-0 flex-col gap-2">
+                  <AddToCartButton productId={product.id} className="h-11 w-full text-sm" />
+                  <div className="flex min-w-0 items-center gap-2">
+                    <ProductPageActions productId={product.id} />
+                    <QuickOrderButton productId={product.id} productName={product.name} />
+                  </div>
                 </div>
               </div>
             </div>

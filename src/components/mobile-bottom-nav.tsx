@@ -11,6 +11,7 @@ type NavItem =
       kind: "link";
       href: string;
       label: string;
+      shortLabel?: string;
       icon: typeof Home;
       count?: number;
       active: boolean;
@@ -18,6 +19,7 @@ type NavItem =
   | {
       kind: "button";
       label: string;
+      shortLabel?: string;
       icon: typeof Home;
       active: boolean;
       onClick: () => void;
@@ -72,6 +74,7 @@ export function MobileBottomNav({
       kind: "link",
       href: "/favorites",
       label: "Избранное",
+      shortLabel: "Избр.",
       icon: Heart,
       count: favorites.length,
       active: pathname.startsWith("/favorites"),
@@ -80,6 +83,7 @@ export function MobileBottomNav({
       kind: "link",
       href: "/compare",
       label: "Сравнение",
+      shortLabel: "Сравн.",
       icon: BarChart3,
       count: compare.length,
       active: pathname.startsWith("/compare"),
@@ -90,31 +94,34 @@ export function MobileBottomNav({
     <nav
       aria-label="Мобильное меню"
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 border-t border-border bg-white lg:hidden",
+        "fixed inset-x-0 bottom-0 z-50 w-full max-w-[100vw] border-t border-border bg-white box-border lg:hidden",
         "transition-transform duration-300 ease-out",
         visible ? "translate-y-0" : "pointer-events-none translate-y-full",
       )}
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-stretch px-1">
+      <div className="mx-auto flex h-14 w-full min-w-0 max-w-7xl items-stretch px-0.5">
         {items.map((item) => {
           const Icon = item.icon;
           const className = cn(
-            "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 text-[10px] font-semibold leading-none transition-colors",
+            "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 text-[9px] font-semibold leading-none transition-colors sm:text-[10px]",
             item.active ? "text-lime" : "text-muted",
           );
 
           const content = (
             <>
-              <span className="relative">
-                <Icon className={cn("h-5 w-5", item.active && item.icon === Heart && "fill-current")} />
+              <span className="relative shrink-0">
+                <Icon className={cn("h-4 w-4 sm:h-5 sm:w-5", item.active && item.icon === Heart && "fill-current")} />
                 {"count" in item && item.count && item.count > 0 ? (
-                  <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-lime px-1 text-[9px] font-black leading-none text-white">
+                  <span className="absolute -right-2 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-lime px-0.5 text-[8px] font-black leading-none text-white sm:h-4 sm:min-w-4 sm:text-[9px]">
                     {item.count > 99 ? "99+" : item.count}
                   </span>
                 ) : null}
               </span>
-              <span className="max-w-full truncate">{item.label}</span>
+              <span className="max-w-full truncate">
+                <span className="sm:hidden">{item.shortLabel ?? item.label}</span>
+                <span className="hidden sm:inline">{item.label}</span>
+              </span>
             </>
           );
 

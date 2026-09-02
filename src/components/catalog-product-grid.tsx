@@ -92,7 +92,7 @@ export function CatalogProductGrid({
 
   return (
     <>
-      <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-5 xl:grid-cols-3">
+      <div className="grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:gap-5 xl:grid-cols-3">
         {products.map((product) => (
           <div key={product.id} className="min-w-0">
             <ProductCard product={product} />

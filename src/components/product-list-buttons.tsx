@@ -44,7 +44,7 @@ export function ProductCardActions({
   mini?: boolean;
 }) {
   return (
-    <div className={cn("flex items-end gap-1 sm:flex-col sm:gap-2", className)}>
+    <div className={cn("flex flex-col items-end gap-0.5 sm:gap-2", className)}>
       {ACTIONS.map((action) => (
         <ExpandableListButton key={action.kind} action={action} productId={productId} compact={compact} mini={mini} />
       ))}

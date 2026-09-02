@@ -40,9 +40,9 @@ export function ProductGallery({
   }, [emblaApi]);
 
   return (
-    <div>
-      <div className="grid gap-5 lg:grid-cols-2 lg:items-stretch">
-        <div className="relative overflow-hidden rounded-[22px] border border-border bg-white p-2.5 shadow-xl shadow-petrol/5 sm:p-3" ref={emblaRef}>
+    <div className="min-w-0">
+      <div className="grid min-w-0 gap-5 lg:grid-cols-2 lg:items-stretch">
+        <div className="relative min-w-0 overflow-hidden rounded-[22px] border border-border bg-white p-2.5 shadow-xl shadow-petrol/5 sm:p-3" ref={emblaRef}>
           <div className="flex">
             {safeImages.map((image) => (
               <div key={image.id} className="relative aspect-square min-w-0 flex-[0_0_100%] overflow-hidden rounded-[18px] bg-background">
@@ -75,7 +75,7 @@ export function ProductGallery({
           </button>
         </div>
 
-        <div className="flex min-h-0 flex-col rounded-[22px] border border-border bg-white p-3 shadow-xl shadow-petrol/5 sm:p-4 lg:h-0 lg:min-h-full lg:overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-col rounded-[22px] border border-border bg-white p-3 shadow-xl shadow-petrol/5 sm:p-4 lg:h-0 lg:min-h-full lg:overflow-hidden">
           {children}
         </div>
       </div>
