@@ -27,11 +27,13 @@ export function CategoryCard({
   size = "md",
   showDescription = true,
   compact = false,
+  mini = false,
 }: {
   category: CategoryCardItem;
   size?: keyof typeof sizeClasses;
   showDescription?: boolean;
   compact?: boolean;
+  mini?: boolean;
 }) {
   const image = normalizeImageSrc(category.imageUrl ?? "/demo/pump-1.svg");
 
@@ -40,13 +42,21 @@ export function CategoryCard({
       href={`/catalog/${category.slug}`}
       className={cn(
         "group flex h-full min-w-0 flex-col overflow-hidden border border-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-petrol/10",
-        compact ? "rounded-[24px] p-3" : sizeClasses[size],
+        compact
+          ? mini
+            ? "rounded-[12px] p-1.5 sm:rounded-[16px] sm:p-2"
+            : "rounded-[18px] p-2 sm:rounded-[24px] sm:p-3"
+          : sizeClasses[size],
       )}
     >
       <div
         className={cn(
           "relative overflow-hidden bg-background",
-          compact ? "aspect-square rounded-[16px]" : imageSizeClasses[size],
+          compact
+            ? mini
+              ? "aspect-square rounded-[8px] sm:rounded-[10px]"
+              : "aspect-square rounded-[12px] sm:rounded-[16px]"
+            : imageSizeClasses[size],
         )}
       >
         <ProductImage
@@ -57,11 +67,24 @@ export function CategoryCard({
           className="object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
-      <div className={cn("flex flex-1 flex-col", compact ? "space-y-1 p-4 pt-3" : "mt-2 text-center sm:mt-4")}>
+      <div
+        className={cn(
+          "flex flex-1 flex-col",
+          compact
+            ? mini
+              ? "space-y-0.5 p-1.5 pt-1 sm:space-y-1 sm:p-2.5 sm:pt-2"
+              : "space-y-0.5 p-2.5 pt-2 sm:space-y-1 sm:p-4 sm:pt-3"
+            : "mt-2 text-center sm:mt-4",
+        )}
+      >
         <div
           className={cn(
             "font-bold leading-snug text-graphite transition-colors group-hover:text-petrol",
-            compact ? "text-base" : "text-sm font-black sm:text-base lg:text-lg",
+            compact
+              ? mini
+                ? "text-xs sm:text-sm"
+                : "text-sm sm:text-base"
+              : "text-sm font-black sm:text-base lg:text-lg",
           )}
         >
           {category.name}

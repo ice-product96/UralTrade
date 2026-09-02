@@ -54,12 +54,13 @@ export default async function Home() {
               </Link>
             </div>
             <HomeCarousel
-              itemClassName="flex-[0_0_86%] sm:flex-[0_0_47%] lg:flex-[0_0_31%] xl:flex-[0_0_20%]"
+              itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
               previousLabel="Предыдущие разделы каталога"
               nextLabel="Следующие разделы каталога"
+              dense
             >
               {categories.map((category) => (
-                <CategoryCard key={category.id} category={category} compact showDescription={false} />
+                <CategoryCard key={category.id} category={category} compact mini showDescription={false} />
               ))}
             </HomeCarousel>
           </section>
@@ -78,12 +79,13 @@ export default async function Home() {
                 </Link>
               </div>
               <HomeCarousel
-                itemClassName="flex-[0_0_86%] sm:flex-[0_0_47%] lg:flex-[0_0_31%] xl:flex-[0_0_20%]"
+                itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
                 previousLabel="Предыдущие бренды"
                 nextLabel="Следующие бренды"
+                dense
               >
                 {brands.map((brand) => (
-                  <BrandCard key={brand.id} brand={brand} />
+                  <BrandCard key={brand.id} brand={brand} mini />
                 ))}
               </HomeCarousel>
             </section>
@@ -102,12 +104,13 @@ export default async function Home() {
               </Link>
             </div>
             <HomeCarousel
-              itemClassName="flex-[0_0_86%] sm:flex-[0_0_47%] lg:flex-[0_0_31%] xl:flex-[0_0_20%]"
+              itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
               previousLabel="Предыдущие товары"
               nextLabel="Следующие товары"
+              dense
             >
               {products.map((product) => (
-                <ProductCard key={product.id} product={product} compact />
+                <ProductCard key={product.id} product={product} compact mini />
               ))}
             </HomeCarousel>
           </section>

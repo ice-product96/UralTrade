@@ -78,11 +78,17 @@ function MobileCategoryItem({
 export function SiteMobileNav({
   categories,
   contacts,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   categories: NavCategory[];
   contacts: { phone: string | null; email: string | null };
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [mounted, setMounted] = useState(false);
 
   useBodyScrollLock(open);

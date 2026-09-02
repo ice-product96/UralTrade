@@ -2,75 +2,113 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, Home, LayoutGrid, Mail, Phone, ShoppingCart, Wrench } from "lucide-react";
-import { buildEmailHref, buildTelHref } from "@/lib/contacts";
+import { BarChart3, Heart, Home, LayoutGrid, ShoppingCart } from "lucide-react";
 import { useCartCount, useProductList } from "@/lib/use-shop-storage";
 import { cn } from "@/lib/utils";
 
-type Contacts = { phone: string | null; email: string | null };
+type NavItem =
+  | {
+      kind: "link";
+      href: string;
+      label: string;
+      icon: typeof Home;
+      count?: number;
+      active: boolean;
+    }
+  | {
+      kind: "button";
+      label: string;
+      icon: typeof Home;
+      active: boolean;
+      onClick: () => void;
+    };
 
-export function MobileBottomNav({ visible, contacts }: { visible: boolean; contacts: Contacts }) {
+export function MobileBottomNav({
+  visible,
+  onCatalogClick,
+  catalogActive = false,
+}: {
+  visible: boolean;
+  onCatalogClick?: () => void;
+  catalogActive?: boolean;
+}) {
   const pathname = usePathname();
   const favorites = useProductList("favorites");
+  const compare = useProductList("compare");
   const cartCount = useCartCount();
 
-  const items = [
-    { href: "/", label: "Домой", icon: Home, match: (path: string) => path === "/" },
-    { href: "/catalog", label: "Каталог", icon: LayoutGrid, match: (path: string) => path.startsWith("/catalog") || path.startsWith("/product") },
+  const items: NavItem[] = [
     {
-      href: "/favorites",
-      label: "Избранное",
-      icon: Heart,
-      count: favorites.length,
-      match: (path: string) => path.startsWith("/favorites"),
+      kind: "link",
+      href: "/",
+      label: "Домой",
+      icon: Home,
+      active: pathname === "/",
     },
-    { href: "/services", label: "Услуги", icon: Wrench, match: (path: string) => path.startsWith("/services") },
-    contacts.phone
-      ? { href: buildTelHref(contacts.phone), label: "Телефон", icon: Phone, external: true as const, match: () => false }
-      : null,
-    contacts.email
-      ? { href: buildEmailHref(contacts.email), label: "Почта", icon: Mail, external: true as const, match: () => false }
-      : null,
+    onCatalogClick
+      ? {
+          kind: "button",
+          label: "Каталог",
+          icon: LayoutGrid,
+          active: catalogActive,
+          onClick: onCatalogClick,
+        }
+      : {
+          kind: "link",
+          href: "/catalog",
+          label: "Каталог",
+          icon: LayoutGrid,
+          active: pathname.startsWith("/catalog") || pathname.startsWith("/product"),
+        },
     {
+      kind: "link",
       href: "/cart",
       label: "Корзина",
       icon: ShoppingCart,
       count: cartCount,
-      match: (path: string) => path.startsWith("/cart"),
+      active: pathname.startsWith("/cart"),
     },
-  ].filter(Boolean) as Array<{
-    href: string;
-    label: string;
-    icon: typeof Home;
-    count?: number;
-    external?: boolean;
-    match: (path: string) => boolean;
-  }>;
+    {
+      kind: "link",
+      href: "/favorites",
+      label: "Избранное",
+      icon: Heart,
+      count: favorites.length,
+      active: pathname.startsWith("/favorites"),
+    },
+    {
+      kind: "link",
+      href: "/compare",
+      label: "Сравнение",
+      icon: BarChart3,
+      count: compare.length,
+      active: pathname.startsWith("/compare"),
+    },
+  ];
 
   return (
     <nav
       aria-label="Мобильное меню"
       className={cn(
-        "fixed inset-x-3 bottom-3 z-50 lg:hidden",
-        "transition-all duration-300 ease-out",
-        visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-8 opacity-0",
+        "fixed inset-x-0 bottom-0 z-50 border-t border-border bg-white lg:hidden",
+        "transition-transform duration-300 ease-out",
+        visible ? "translate-y-0" : "pointer-events-none translate-y-full",
       )}
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="flex items-stretch justify-between gap-0.5 rounded-[28px] border border-border/80 bg-white/95 px-1.5 py-2 shadow-2xl shadow-graphite/15 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 max-w-7xl items-stretch px-1">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = item.match(pathname);
           const className = cn(
-            "relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-1.5 text-[10px] font-semibold leading-tight transition",
-            active ? "bg-lime/10 text-lime" : "text-muted hover:text-petrol",
+            "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 text-[10px] font-semibold leading-none transition-colors",
+            item.active ? "text-lime" : "text-muted",
           );
 
           const content = (
             <>
               <span className="relative">
-                <Icon className={cn("h-5 w-5", active && item.icon === Heart && "fill-current")} />
-                {item.count && item.count > 0 ? (
+                <Icon className={cn("h-5 w-5", item.active && item.icon === Heart && "fill-current")} />
+                {"count" in item && item.count && item.count > 0 ? (
                   <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-lime px-1 text-[9px] font-black leading-none text-white">
                     {item.count > 99 ? "99+" : item.count}
                   </span>
@@ -80,16 +118,29 @@ export function MobileBottomNav({ visible, contacts }: { visible: boolean; conta
             </>
           );
 
-          if (item.external) {
+          if (item.kind === "button") {
             return (
-              <a key={item.label} href={item.href} className={className} aria-label={item.label}>
+              <button
+                key={item.label}
+                type="button"
+                onClick={item.onClick}
+                className={className}
+                aria-label={item.label}
+                aria-expanded={item.active}
+              >
                 {content}
-              </a>
+              </button>
             );
           }
 
           return (
-            <Link key={item.href} href={item.href} className={className} aria-label={item.label} aria-current={active ? "page" : undefined}>
+            <Link
+              key={item.href}
+              href={item.href}
+              className={className}
+              aria-label={item.label}
+              aria-current={item.active ? "page" : undefined}
+            >
               {content}
             </Link>
           );

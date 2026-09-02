@@ -5,6 +5,7 @@ import { ArrowRight, FileText, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { QuickOrderButton } from "@/components/quick-order-button";
 import { ProductCard } from "@/components/product-card";
+import { ProductChipCarousel } from "@/components/product-chip-carousel";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductImage } from "@/components/product-image";
 import { ProductPageActions } from "@/components/product-list-buttons";
@@ -93,49 +94,46 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               </div>
 
               {product.shortDescription ? (
-                <div>
-                  <p className="line-clamp-2 text-sm leading-5 text-muted">{product.shortDescription}</p>
-                  <SmoothScrollLink targetId="description" className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime">
-                    Полное описание
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </SmoothScrollLink>
-                </div>
-              ) : (
-                <SmoothScrollLink targetId="description" className="inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime">
-                  Полное описание
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </SmoothScrollLink>
-              )}
+                <p className="line-clamp-2 text-sm leading-5 text-muted">{product.shortDescription}</p>
+              ) : null}
 
               {previewSpecs.length ? (
                 <div className="min-h-0">
                   <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Характеристики</div>
-                  <div className="mt-2 flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                  <ProductChipCarousel ariaLabel="Характеристики" className="mt-2">
                     {previewSpecs.map((item) => (
                       <span
                         key={item.id}
-                        className="inline-flex shrink-0 items-baseline gap-1.5 rounded-lg bg-background px-2.5 py-1 text-xs"
+                        className="inline-flex items-baseline gap-1.5 rounded-lg bg-background px-2.5 py-1 text-xs"
                       >
                         <span className="text-muted">{item.name}</span>
                         <span className="font-bold text-graphite">{item.value}</span>
                       </span>
                     ))}
-                  </div>
+                  </ProductChipCarousel>
                 </div>
               ) : null}
 
               {analogs.length ? (
                 <div className="min-h-0">
                   <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Аналоги</div>
-                  <div className="mt-2 flex flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                  <ProductChipCarousel ariaLabel="Аналоги" className="mt-2">
                     {analogs.map((analog) => (
-                      <span key={analog} className="inline-flex shrink-0 rounded-lg bg-background px-2.5 py-1 text-xs font-bold text-petrol">
+                      <span key={analog} className="inline-flex rounded-lg bg-background px-2.5 py-1 text-xs font-bold text-petrol">
                         {analog}
                       </span>
                     ))}
-                  </div>
+                  </ProductChipCarousel>
                 </div>
               ) : null}
+
+              <SmoothScrollLink
+                targetId="description"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime"
+              >
+                Полное описание
+                <ArrowRight className="h-3.5 w-3.5" />
+              </SmoothScrollLink>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 {product.brand ? (
@@ -167,8 +165,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <div className="pb-0.5 text-sm text-sale line-through">{formatPrice(product.oldPrice!)}</div>
                   ) : null}
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <AddToCartButton productId={product.id} className="h-10 text-sm" />
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <AddToCartButton productId={product.id} className="h-10 shrink-0 text-sm" />
                   <ProductPageActions productId={product.id} />
                   <QuickOrderButton productId={product.id} productName={product.name} />
                 </div>
@@ -185,7 +183,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <h2 className="text-2xl font-black text-graphite">Характеристики</h2>
                 {groups.map((group) => (
                   <div key={group.name}>
-                    <h3 className="text-lg font-black text-petrol">{group.name}</h3>
+                    {group.name === "Характеристики" ? (
+                      <p className="text-xs font-bold text-petrol sm:text-sm">Полные параметры товара</p>
+                    ) : (
+                      <h3 className="text-lg font-black text-petrol">{group.name}</h3>
+                    )}
                     <dl className="mt-3 grid gap-2">
                       {group.items.map((item) => (
                         <div key={item.id} className="grid gap-2 rounded-2xl bg-background p-4 sm:grid-cols-[220px_1fr]">
@@ -251,7 +253,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {related.length ? (
           <section className="mt-16">
             <h2 className="text-3xl font-black text-graphite">Похожие товары</h2>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-5 lg:grid-cols-4">
               {related.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}

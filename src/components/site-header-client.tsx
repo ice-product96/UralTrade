@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { HeaderActions } from "@/components/header-actions";
 import { HeaderContactIcons } from "@/components/header-contacts";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
@@ -26,7 +27,11 @@ export function SiteHeaderClient({
   categories: NavCategory[];
   contacts: Contacts;
 }) {
+  const pathname = usePathname();
   const [compact, setCompact] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const openMobileMenu = useCallback(() => setMobileMenuOpen(true), []);
 
   useEffect(() => {
     const mobile = window.matchMedia("(max-width: 1023px)");
@@ -55,10 +60,13 @@ export function SiteHeaderClient({
   }, []);
 
   useEffect(() => {
-    const value = compact ? "5.75rem" : "0px";
+    const value = compact ? "calc(3.5rem + env(safe-area-inset-bottom))" : "0px";
     document.documentElement.style.setProperty("--mobile-bottom-nav", value);
     return () => document.documentElement.style.setProperty("--mobile-bottom-nav", "0px");
   }, [compact]);
+
+  const catalogActive =
+    mobileMenuOpen || pathname.startsWith("/catalog") || pathname.startsWith("/product");
 
   return (
     <>
@@ -98,7 +106,12 @@ export function SiteHeaderClient({
                   <SiteLogo priority imageClassName="h-9 w-auto max-w-[140px] shrink-0" />
                   <div className="ml-auto flex shrink-0 items-center gap-1.5">
                     <HeaderActions />
-                    <SiteMobileNav categories={categories} contacts={contacts} />
+                    <SiteMobileNav
+                      categories={categories}
+                      contacts={contacts}
+                      open={mobileMenuOpen}
+                      onOpenChange={setMobileMenuOpen}
+                    />
                   </div>
                 </div>
               </div>
@@ -128,7 +141,7 @@ export function SiteHeaderClient({
         </div>
       </header>
 
-      <MobileBottomNav visible={compact} contacts={contacts} />
+      <MobileBottomNav visible={compact} onCatalogClick={openMobileMenu} catalogActive={catalogActive} />
     </>
   );
 }
