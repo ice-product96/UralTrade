@@ -52,14 +52,37 @@ export function ProductCardActions({
   );
 }
 
-/** Те же иконки в блоке покупки на странице товара. */
+/** Кнопки избранного и сравнения на странице товара — сразу с подписью. */
 export function ProductPageActions({ productId, className }: { productId: string; className?: string }) {
   return (
-    <div className={cn("flex shrink-0 items-center gap-2", className)}>
+    <div className={cn("flex min-w-0 flex-wrap items-center gap-2", className)}>
       {ACTIONS.map((action) => (
-        <ExpandableListButton key={action.kind} action={action} productId={productId} variant="page" />
+        <PageListButton key={action.kind} action={action} productId={productId} />
       ))}
     </div>
+  );
+}
+
+function PageListButton({ action, productId }: { action: ActionConfig; productId: string }) {
+  const { active, limitReached, toggle } = useToggle(action.kind, productId);
+  const Icon = action.icon;
+  const label = limitReached ? `Максимум ${COMPARE_LIMIT}` : active ? action.activeLabel : action.idleLabel;
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      title={label}
+      aria-label={label}
+      aria-pressed={active}
+      className={cn(
+        "inline-flex h-10 min-w-0 flex-1 items-center justify-center gap-2 rounded-full border bg-white px-3 text-xs font-bold shadow-sm transition-colors hover:border-lime hover:text-lime sm:flex-none sm:px-4",
+        active ? "border-lime text-lime" : "border-border text-graphite",
+      )}
+    >
+      <Icon className={cn("h-4 w-4 shrink-0", active && "fill-current")} />
+      <span className="truncate">{label}</span>
+    </button>
   );
 }
 
@@ -68,13 +91,11 @@ function ExpandableListButton({
   productId,
   compact = false,
   mini = false,
-  variant = compact ? "card" : "page",
 }: {
   action: ActionConfig;
   productId: string;
   compact?: boolean;
   mini?: boolean;
-  variant?: "card" | "page";
 }) {
   const { active, limitReached, toggle } = useToggle(action.kind, productId);
   const Icon = action.icon;
@@ -89,12 +110,9 @@ function ExpandableListButton({
       aria-pressed={active}
       className={cn(
         "group/action inline-flex items-center rounded-full border bg-white/95 text-xs font-bold shadow-sm backdrop-blur transition-colors duration-200 hover:border-lime hover:text-lime",
-        variant === "page" &&
-          "h-10 w-10 shrink-0 justify-center overflow-hidden transition-[max-width,padding] duration-300 ease-out hover:w-auto hover:max-w-[220px] hover:px-3 sm:justify-start",
-        variant === "card" &&
-          (mini
-            ? "h-6 w-6 shrink-0 justify-center sm:h-7 sm:w-7"
-            : "h-7 w-7 shrink-0 justify-center sm:h-8 sm:w-auto sm:min-w-8 sm:justify-end sm:px-3"),
+        mini
+          ? "h-6 w-6 shrink-0 justify-center sm:h-7 sm:w-7"
+          : "h-7 w-7 shrink-0 justify-center sm:h-8 sm:w-auto sm:min-w-8 sm:justify-end sm:px-3",
         active ? "border-lime text-lime" : "border-border text-graphite",
       )}
     >
@@ -104,7 +122,7 @@ function ExpandableListButton({
       <Icon
         className={cn(
           "shrink-0 transition-transform duration-200",
-          variant === "card" ? (mini ? "h-3 w-3 sm:h-3.5 sm:w-3.5" : "h-3.5 w-3.5 sm:h-4 sm:w-4") : "h-4 w-4",
+          mini ? "h-3 w-3 sm:h-3.5 sm:w-3.5" : "h-3.5 w-3.5 sm:h-4 sm:w-4",
           active && "fill-current",
         )}
       />

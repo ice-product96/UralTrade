@@ -166,9 +166,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   ) : null}
                 </div>
                 <div className="flex min-w-0 flex-col gap-2">
-                  <AddToCartButton productId={product.id} className="h-11 w-full text-sm" />
-                  <ProductPageActions productId={product.id} className="justify-center" />
-                  <QuickOrderButton productId={product.id} productName={product.name} />
+                  <ProductPageActions productId={product.id} />
+                  <div className="grid min-w-0 grid-cols-2 gap-2">
+                    <AddToCartButton productId={product.id} className="h-11 w-full min-w-0 text-sm" />
+                    <QuickOrderButton productId={product.id} productName={product.name} />
+                  </div>
                 </div>
               </div>
             </div>
