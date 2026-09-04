@@ -40,7 +40,7 @@ function HomeShelf({
         </Link>
       </div>
       <HomeCarousel
-        itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
+        itemClassName="flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc(100%/6.5)]"
         previousLabel={previousLabel}
         nextLabel={nextLabel}
         dense

@@ -2,24 +2,38 @@
 
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Children, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Children, cloneElement, isValidElement, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 /** Горизонтальный ряд категорий с круговой (loop) прокруткой. */
 export function CategoryRowCarousel({ children }: { children: ReactNode }) {
+  const slides = useMemo(() => {
+    const items = Children.toArray(children);
+    if (items.length <= 1) return items;
+    const result: ReactNode[] = [];
+    let copy = 0;
+    while (result.length < 14) {
+      items.forEach((child, index) => {
+        result.push(isValidElement(child) ? cloneElement(child, { key: `loop-${copy}-${child.key ?? index}` }) : child);
+      });
+      copy += 1;
+    }
+    return result;
+  }, [children]);
+  const loop = slides.length > 1;
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
-    loop: true,
+    loop,
     dragFree: true,
     containScroll: false,
   });
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
+  const [canScrollPrev, setCanScrollPrev] = useState(loop);
+  const [canScrollNext, setCanScrollNext] = useState(loop);
 
   const updateButtons = useCallback(() => {
     if (!emblaApi) return;
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
+    setCanScrollPrev(loop || emblaApi.canScrollPrev());
+    setCanScrollNext(loop || emblaApi.canScrollNext());
+  }, [emblaApi, loop]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -37,13 +51,13 @@ export function CategoryRowCarousel({ children }: { children: ReactNode }) {
   const items = Children.toArray(children);
   if (items.length === 0) return null;
 
-  const showArrows = items.length > 1;
+  const showArrows = slides.length > 1;
 
   return (
     <div className="relative w-full min-w-0">
       <div ref={emblaRef} className="w-full overflow-hidden">
         <div className="-ml-3 flex items-stretch">
-          {items.map((child, index) => (
+          {slides.map((child, index) => (
             <div
               key={index}
               className="min-w-0 shrink-0 basis-[46%] pl-3 sm:basis-[28%] md:basis-[22%] lg:basis-[18%] xl:basis-[15%]"

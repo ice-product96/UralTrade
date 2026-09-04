@@ -2,8 +2,25 @@
 
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Children, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Children, cloneElement, isValidElement, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+
+const MIN_LOOP_SLIDES = 14;
+
+function expandForLoop(children: ReactNode, minSlides = MIN_LOOP_SLIDES) {
+  const items = Children.toArray(children);
+  if (items.length <= 1) return items;
+
+  const slides: ReactNode[] = [];
+  let copy = 0;
+  while (slides.length < minSlides) {
+    items.forEach((child, index) => {
+      slides.push(isValidElement(child) ? cloneElement(child, { key: `loop-${copy}-${child.key ?? index}` }) : child);
+    });
+    copy += 1;
+  }
+  return slides;
+}
 
 export function HomeCarousel({
   children,
@@ -18,15 +35,21 @@ export function HomeCarousel({
   nextLabel: string;
   dense?: boolean;
 }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", containScroll: "trimSnaps" });
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
+  const slides = useMemo(() => expandForLoop(children), [children]);
+  const loop = slides.length > 1;
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    loop,
+    containScroll: loop ? false : "trimSnaps",
+  });
+  const [canScrollPrev, setCanScrollPrev] = useState(loop);
+  const [canScrollNext, setCanScrollNext] = useState(loop);
 
   const updateButtons = useCallback(() => {
     if (!emblaApi) return;
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
+    setCanScrollPrev(loop || emblaApi.canScrollPrev());
+    setCanScrollNext(loop || emblaApi.canScrollNext());
+  }, [emblaApi, loop]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -45,8 +68,10 @@ export function HomeCarousel({
     <div className="relative">
       <div ref={emblaRef} className="overflow-hidden">
         <div className={dense ? "-ml-1.5 flex items-stretch sm:-ml-2.5" : "-ml-2 flex items-stretch sm:-ml-4"}>
-          {Children.map(children, (child) => (
-            <div className={`min-w-0 ${dense ? "pl-1.5 sm:pl-2.5" : "pl-2 sm:pl-4"} ${itemClassName}`}>{child}</div>
+          {slides.map((child, index) => (
+            <div key={index} className={`min-w-0 ${dense ? "pl-1.5 sm:pl-2.5" : "pl-2 sm:pl-4"} ${itemClassName}`}>
+              {child}
+            </div>
           ))}
         </div>
       </div>
