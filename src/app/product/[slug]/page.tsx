@@ -96,7 +96,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               </div>
 
               {product.shortDescription ? (
-                <RichText html={product.shortDescription} className="line-clamp-2 text-sm leading-5 text-muted" />
+                <div className="min-h-0">
+                  <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Описание</div>
+                  <RichText html={product.shortDescription} className="mt-2 line-clamp-2 text-sm leading-5 text-muted" />
+                </div>
               ) : null}
 
               {previewSpecs.length ? (
