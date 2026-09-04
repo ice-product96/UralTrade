@@ -450,8 +450,35 @@ export function ProductsCrud({
             <input name="name" required defaultValue={current?.name} placeholder="Название" className="admin-input" />
             <SlugField sourceName="name" defaultValue={current?.slug} prefix="/product/" />
             <input name="sku" required defaultValue={current?.sku} placeholder="Артикул" className="admin-input" />
-            <textarea name="shortDescription" required defaultValue={current?.shortDescription} rows={3} placeholder="Краткое описание" className="admin-textarea" />
-            <textarea name="fullDescription" required defaultValue={current?.fullDescription} rows={5} placeholder="Полное описание (HTML)" className="admin-textarea" />
+            <textarea
+              name="shortDescription"
+              required
+              defaultValue={current?.shortDescription}
+              rows={3}
+              placeholder="Краткое описание. Можно HTML: <b>, <br>, <a>"
+              className="admin-textarea"
+            />
+            <textarea
+              name="fullDescription"
+              required
+              defaultValue={current?.fullDescription}
+              rows={10}
+              placeholder="Полное описание (HTML: p, br, h3, ul, ol, li, strong, em, a, img, table)"
+              className="admin-textarea font-mono text-xs"
+            />
+            <p className="text-xs leading-5 text-muted">
+              В описании можно использовать HTML-теги:{" "}
+              <code className="rounded bg-background px-1">&lt;p&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;br&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;b&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;i&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;ul&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;ol&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;li&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;h3&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;a href=&quot;...&quot;&gt;</code>,{" "}
+              <code className="rounded bg-background px-1">&lt;img&gt;</code>, таблица. Теги отобразятся на странице товара.
+            </p>
           </Section>
 
           <Section title="Цена и наличие">

@@ -1,5 +1,6 @@
 import type { ProductWithDetails } from "@/lib/data";
 import { getSiteUrl } from "@/lib/format";
+import { stripHtml } from "@/lib/rich-text";
 
 export function productJsonLd(product: ProductWithDetails) {
   const siteUrl = getSiteUrl();
@@ -10,7 +11,7 @@ export function productJsonLd(product: ProductWithDetails) {
     "@type": "Product",
     name: product.name,
     image: product.images.map((image) => new URL(image.url, siteUrl).toString()),
-    description: product.shortDescription,
+    description: stripHtml(product.shortDescription),
     sku: product.sku,
     brand: product.brand
       ? {

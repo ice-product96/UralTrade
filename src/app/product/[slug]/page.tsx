@@ -9,6 +9,7 @@ import { ProductChipCarousel } from "@/components/product-chip-carousel";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductImage } from "@/components/product-image";
 import { ProductPageActions } from "@/components/product-list-buttons";
+import { RichText } from "@/components/rich-text";
 import { RouteScrollReset } from "@/components/route-scroll-reset";
 import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
@@ -16,8 +17,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
 import { formatPrice, hasDiscount } from "@/lib/format";
-import { absolutizeImportedHtml, normalizeImageSrc } from "@/lib/image-url";
+import { normalizeImageSrc } from "@/lib/image-url";
 import { formatFieldValue } from "@/lib/product-specs";
+import { stripHtml } from "@/lib/rich-text";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -31,11 +33,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: product.metaTitle ?? `${product.name} купить`,
-    description: product.metaDescription ?? product.shortDescription,
+    description: product.metaDescription ?? (stripHtml(product.shortDescription) || undefined),
     alternates: { canonical: `/product/${product.slug}` },
     openGraph: {
       title: product.metaTitle ?? product.name,
-      description: product.metaDescription ?? product.shortDescription,
+      description: product.metaDescription ?? (stripHtml(product.shortDescription) || undefined),
       images: image ? [{ url: image }] : undefined,
       type: "website",
     },
@@ -94,7 +96,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               </div>
 
               {product.shortDescription ? (
-                <p className="line-clamp-2 text-sm leading-5 text-muted">{product.shortDescription}</p>
+                <RichText html={product.shortDescription} className="line-clamp-2 text-sm leading-5 text-muted" />
               ) : null}
 
               {previewSpecs.length ? (
@@ -179,7 +181,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section id="description" className="mt-10 scroll-mt-28 sm:mt-14">
           <div className="rounded-[24px] border border-border bg-white p-5 sm:rounded-[30px] sm:p-6">
             <h2 className="text-2xl font-black text-graphite">Описание</h2>
-            <div className="rich-text mt-5" dangerouslySetInnerHTML={{ __html: absolutizeImportedHtml(product.fullDescription) }} />
+            <RichText html={product.fullDescription} className="mt-5" />
             {groups.length ? (
               <div id="specs" className="mt-8 scroll-mt-28 space-y-6">
                 <h2 className="text-2xl font-black text-graphite">Характеристики</h2>
