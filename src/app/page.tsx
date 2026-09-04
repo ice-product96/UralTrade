@@ -8,6 +8,7 @@ import { HomeCarousel } from "@/components/home-carousel";
 import { HomeHero } from "@/components/home-hero";
 import { MotionReveal } from "@/components/motion-reveal";
 import { ProductCard } from "@/components/product-card";
+import { RichText } from "@/components/rich-text";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getHomeData } from "@/lib/data";
@@ -99,6 +100,14 @@ export default async function Home() {
             ))}
           </HomeShelf>
         </div>
+
+        {homePage?.textBlock?.trim() ? (
+          <section className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6 lg:px-8">
+            <div className="rounded-[24px] border border-border bg-white p-5 shadow-sm sm:rounded-[30px] sm:p-7">
+              <RichText html={homePage.textBlock} />
+            </div>
+          </section>
+        ) : null}
 
         {services.length ? (
           <MotionReveal>

@@ -186,6 +186,7 @@ export async function getHomePageSettings() {
       title: "Инженерное оборудование с умным подбором",
       subtitle: "Каталог UralTrade помогает быстро найти товар по артикулу, бренду и точным техническим параметрам.",
       imageUrl: "/demo/hero-equipment.jpg",
+      textBlock: "",
     },
     features,
   };

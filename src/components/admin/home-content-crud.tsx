@@ -18,6 +18,7 @@ type HomePageRow = {
   title: string;
   subtitle: string | null;
   imageUrl: string;
+  textBlock: string;
 };
 
 const ICON_OPTIONS = [
@@ -99,7 +100,7 @@ export function HomeContentCrud({ homePage, features }: { homePage: HomePageRow;
     <section className="rounded-[30px] border border-border bg-white p-6">
       <div>
         <h1 className="text-3xl font-black text-graphite">Главная страница</h1>
-        <p className="mt-2 text-sm text-muted">Заголовок, описание, фото и плашки в верхнем блоке сайта.</p>
+        <p className="mt-2 text-sm text-muted">Заголовок, описание, фото, плашки и текстовый блок под популярными товарами.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 max-w-3xl space-y-4">
@@ -110,6 +111,22 @@ export function HomeContentCrud({ homePage, features }: { homePage: HomePageRow;
 
         <Section title="Фото">
           <AdminImageUpload name="imageUrl" defaultValue={homePage.imageUrl} label="Изображение справа" required scope="site-image" />
+        </Section>
+
+        <Section title="Текстовый блок">
+          <p className="text-xs leading-5 text-muted">
+            Показывается на главной ниже блока «Популярные товары», в рамке. Можно использовать HTML:{" "}
+            <code className="rounded bg-white px-1">&lt;p&gt;</code>,{" "}
+            <code className="rounded bg-white px-1">&lt;b&gt;</code>,{" "}
+            <code className="rounded bg-white px-1">&lt;ul&gt;</code>. Если поле пустое — блок скрыт.
+          </p>
+          <textarea
+            name="textBlock"
+            defaultValue={homePage.textBlock}
+            rows={8}
+            placeholder="Текст на главной странице"
+            className="admin-textarea bg-white font-mono text-xs"
+          />
         </Section>
 
         <Section title="Плашки">

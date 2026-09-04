@@ -676,12 +676,14 @@ export async function updateHomePage(formData: FormData) {
         title,
         subtitle: optional(formData, "subtitle") ?? null,
         imageUrl,
+        textBlock: optional(formData, "textBlock") ?? "",
       },
       create: {
         id: "default",
         title,
         subtitle: optional(formData, "subtitle") ?? null,
         imageUrl,
+        textBlock: optional(formData, "textBlock") ?? "",
       },
     });
 

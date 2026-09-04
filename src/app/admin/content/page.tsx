@@ -10,6 +10,7 @@ export default async function AdminContentPage() {
         title: homePage.title,
         subtitle: homePage.subtitle,
         imageUrl: homePage.imageUrl,
+        textBlock: homePage.textBlock,
       }}
       features={features.map((feature) => ({
         id: feature.id,
