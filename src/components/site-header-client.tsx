@@ -70,7 +70,7 @@ export function SiteHeaderClient({
 
   return (
     <>
-      <header className="sticky top-0 z-40 overflow-visible border-b border-border/80 bg-background/95">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 supports-[backdrop-filter]:bg-background/90">
         <div
           className={cn(
             "mx-auto max-w-7xl px-3 transition-[padding] duration-300 ease-out sm:px-4 lg:px-8 lg:py-3",
@@ -117,23 +117,19 @@ export function SiteHeaderClient({
               </div>
             </div>
 
-            <div
-              className={cn(
-                "flex min-w-0 items-center gap-2 transition-all duration-300 ease-out",
-                compact ? "translate-y-0" : "",
-              )}
-            >
+            <div className="flex min-w-0 items-center gap-2">
               <div
                 className={cn(
-                  "grid transition-[grid-template-columns,opacity] duration-300 ease-out",
-                  compact ? "grid-cols-[0fr] opacity-0" : "grid-cols-[1fr] opacity-100",
+                  "grid shrink-0 transition-[grid-template-columns,opacity] duration-300 ease-out",
+                  compact ? "pointer-events-none grid-cols-[0fr] opacity-0" : "grid-cols-[1fr] opacity-100",
                 )}
+                aria-hidden={compact}
               >
-                <div className="overflow-hidden">
-                  <HeaderContactIcons contacts={contacts} className={cn(compact && "pointer-events-none")} />
+                <div className="min-w-0 overflow-hidden">
+                  <HeaderContactIcons contacts={contacts} />
                 </div>
               </div>
-              <div className="min-w-0 flex-1 transition-all duration-300">
+              <div className="min-w-0 flex-1">
                 <SearchBox />
               </div>
             </div>
