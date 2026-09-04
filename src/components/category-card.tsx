@@ -54,7 +54,7 @@ export function CategoryCard({
           "relative overflow-hidden bg-background",
           compact
             ? mini
-              ? "aspect-square rounded-[8px] sm:rounded-[10px]"
+              ? "aspect-[2/1] rounded-[8px] sm:rounded-[10px]"
               : "aspect-square rounded-[12px] sm:rounded-[16px]"
             : imageSizeClasses[size],
         )}
@@ -72,7 +72,7 @@ export function CategoryCard({
           "flex flex-1 flex-col",
           compact
             ? mini
-              ? "space-y-0.5 p-1.5 pt-1 sm:space-y-1 sm:p-2.5 sm:pt-2"
+              ? "space-y-0 p-1 pt-1 sm:p-1.5 sm:pt-1.5"
               : "space-y-0.5 p-2.5 pt-2 sm:space-y-1 sm:p-4 sm:pt-3"
             : "mt-2 text-center sm:mt-4",
         )}
@@ -82,7 +82,7 @@ export function CategoryCard({
             "font-bold leading-snug text-graphite transition-colors group-hover:text-petrol",
             compact
               ? mini
-                ? "text-xs sm:text-sm"
+                ? "line-clamp-1 text-[11px] sm:text-xs"
                 : "text-sm sm:text-base"
               : "text-sm font-black sm:text-base lg:text-lg",
           )}

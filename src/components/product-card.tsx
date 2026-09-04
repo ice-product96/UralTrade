@@ -71,12 +71,12 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
           </div>
           <div
             className={cn(
-              "relative aspect-square overflow-hidden",
+              "relative overflow-hidden",
               compact
                 ? mini
-                  ? "rounded-[8px] sm:rounded-[10px]"
-                  : "rounded-[12px] sm:rounded-[16px]"
-                : "rounded-[12px] sm:rounded-[22px]",
+                  ? "aspect-[2/1] rounded-[8px] sm:rounded-[10px]"
+                  : "aspect-square rounded-[12px] sm:rounded-[16px]"
+                : "aspect-square rounded-[12px] sm:rounded-[22px]",
             )}
           >
             <ProductImage
@@ -92,6 +92,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
             />
           </div>
         </Link>
+        {compact && mini ? null : (
         <ProductCardActions
           productId={product.id}
           compact={compact}
@@ -99,28 +100,27 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
           className={cn(
             "absolute z-20",
             compact
-              ? mini
-                ? "right-1.5 top-1.5 sm:right-2.5 sm:top-2.5"
-                : "right-2.5 top-2.5 sm:right-4 sm:top-4"
+              ? "right-2.5 top-2.5 sm:right-4 sm:top-4"
               : "right-2 top-2 sm:right-6 sm:top-6",
           )}
         />
+        )}
       </div>
       <div
         className={cn(
           "flex min-w-0 flex-1 flex-col",
           compact
             ? mini
-              ? "space-y-1 p-1.5 sm:space-y-2 sm:p-2.5"
+              ? "space-y-0.5 p-1.5 sm:p-2"
               : "space-y-2 p-2.5 sm:space-y-3 sm:p-4"
             : "space-y-1.5 p-2.5 sm:space-y-4 sm:p-5",
         )}
       >
-        <div className="min-w-0 space-y-1 sm:space-y-2">
+        <div className={cn("min-w-0", compact && mini ? "space-y-0.5" : "space-y-1 sm:space-y-2")}>
           <div
             className={cn(
               "flex min-w-0 items-center justify-between gap-1 font-semibold uppercase tracking-wide text-muted sm:gap-2 sm:tracking-[0.16em] lg:tracking-[0.2em]",
-              compact && mini ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs",
+              compact && mini ? "hidden" : "text-[9px] sm:text-xs",
             )}
           >
             {product.brand?.slug ? (
@@ -142,7 +142,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
               "block w-full min-w-0 break-words font-bold leading-snug text-graphite transition-colors hover:text-petrol",
               compact
                 ? mini
-                  ? "line-clamp-2 text-[11px] sm:text-xs"
+                  ? "line-clamp-1 text-[11px] sm:text-xs"
                   : "line-clamp-2 text-sm sm:line-clamp-none sm:text-base"
                 : "line-clamp-3 text-xs sm:line-clamp-none sm:text-base lg:text-lg",
             )}

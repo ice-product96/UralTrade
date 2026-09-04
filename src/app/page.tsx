@@ -1,5 +1,6 @@
 import { ProductImage } from "@/components/product-image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { BrandCard } from "@/components/brand-card";
 import { CategoryCard } from "@/components/category-card";
@@ -15,6 +16,41 @@ import { organizationJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
+function HomeShelf({
+  title,
+  href,
+  linkLabel,
+  previousLabel,
+  nextLabel,
+  children,
+}: {
+  title: string;
+  href: string;
+  linkLabel: string;
+  previousLabel: string;
+  nextLabel: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="mx-auto w-full max-w-7xl px-3 py-2 sm:px-4 lg:min-h-0 lg:flex-1 lg:px-8 lg:py-1.5">
+      <div className="mb-1.5 flex items-end justify-between gap-3 lg:mb-2">
+        <h2 className="text-lg font-black text-graphite sm:text-xl">{title}</h2>
+        <Link href={href} className="inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime sm:text-sm">
+          {linkLabel} <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+      <HomeCarousel
+        itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
+        previousLabel={previousLabel}
+        nextLabel={nextLabel}
+        dense
+      >
+        {children}
+      </HomeCarousel>
+    </section>
+  );
+}
+
 export default async function Home() {
   const { homePage, features, categories, products, brands, services } = await getHomeData();
 
@@ -29,92 +65,40 @@ export default async function Home() {
       <SiteHeader />
       <main>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
-        <HomeHero
-          title={hero.title}
-          subtitle={hero.subtitle}
-          imageUrl={hero.imageUrl}
-          features={features.map((feature) => ({
-            id: feature.id,
-            title: feature.title,
-            text: feature.text,
-            icon: feature.icon,
-            sortOrder: feature.sortOrder,
-          }))}
-        />
+        <div className="lg:flex lg:max-h-[calc(100svh-7.75rem)] lg:flex-col">
+          <HomeHero
+            title={hero.title}
+            subtitle={hero.subtitle}
+            imageUrl={hero.imageUrl}
+            features={features.map((feature) => ({
+              id: feature.id,
+              title: feature.title,
+              text: feature.text,
+              icon: feature.icon,
+              sortOrder: feature.sortOrder,
+            }))}
+          />
 
-        <MotionReveal>
-          <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
-              <div>
-                <h2 className="text-2xl font-black text-graphite sm:text-3xl">Каталог</h2>
-                <p className="mt-2 text-sm text-muted sm:text-base">Основные разделы магазина</p>
-              </div>
-              <Link href="/catalog" className="inline-flex items-center gap-2 text-sm font-bold text-petrol transition hover:text-lime sm:text-base">
-                Весь каталог <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <HomeCarousel
-              itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
-              previousLabel="Предыдущие разделы каталога"
-              nextLabel="Следующие разделы каталога"
-              dense
-            >
-              {categories.map((category) => (
-                <CategoryCard key={category.id} category={category} compact mini showDescription={false} />
+          <HomeShelf title="Каталог" href="/catalog" linkLabel="Весь каталог" previousLabel="Предыдущие разделы каталога" nextLabel="Следующие разделы каталога">
+            {categories.map((category) => (
+              <CategoryCard key={category.id} category={category} compact mini showDescription={false} />
+            ))}
+          </HomeShelf>
+
+          {brands.length ? (
+            <HomeShelf title="Популярные бренды" href="/brands" linkLabel="Все бренды" previousLabel="Предыдущие бренды" nextLabel="Следующие бренды">
+              {brands.map((brand) => (
+                <BrandCard key={brand.id} brand={brand} mini />
               ))}
-            </HomeCarousel>
-          </section>
-        </MotionReveal>
+            </HomeShelf>
+          ) : null}
 
-        {brands.length ? (
-          <MotionReveal>
-            <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
-              <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
-                <div>
-                  <h2 className="text-2xl font-black text-graphite sm:text-3xl">Популярные бренды</h2>
-                  <p className="mt-2 text-sm text-muted sm:text-base">Проверенные производители из каталога</p>
-                </div>
-                <Link href="/brands" className="inline-flex items-center gap-2 text-sm font-bold text-petrol transition hover:text-lime sm:text-base">
-                  Все бренды <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-              <HomeCarousel
-                itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
-                previousLabel="Предыдущие бренды"
-                nextLabel="Следующие бренды"
-                dense
-              >
-                {brands.map((brand) => (
-                  <BrandCard key={brand.id} brand={brand} mini />
-                ))}
-              </HomeCarousel>
-            </section>
-          </MotionReveal>
-        ) : null}
-
-        <MotionReveal>
-          <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10 lg:px-8">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
-              <div>
-                <h2 className="text-2xl font-black text-graphite sm:text-3xl">Популярные товары</h2>
-                <p className="mt-2 text-sm text-muted sm:text-base">Актуальные позиции из каталога</p>
-              </div>
-              <Link href="/catalog?all=1" className="inline-flex items-center gap-2 text-sm font-bold text-petrol transition hover:text-lime sm:text-base">
-                Смотреть все <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <HomeCarousel
-              itemClassName="flex-[0_0_45%] sm:flex-[0_0_31%] lg:flex-[0_0_21%] xl:flex-[0_0_13%]"
-              previousLabel="Предыдущие товары"
-              nextLabel="Следующие товары"
-              dense
-            >
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} compact mini />
-              ))}
-            </HomeCarousel>
-          </section>
-        </MotionReveal>
+          <HomeShelf title="Популярные товары" href="/catalog?all=1" linkLabel="Смотреть все" previousLabel="Предыдущие товары" nextLabel="Следующие товары">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} compact mini />
+            ))}
+          </HomeShelf>
+        </div>
 
         {services.length ? (
           <MotionReveal>
