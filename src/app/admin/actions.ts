@@ -349,6 +349,7 @@ export async function createFieldDefinition(formData: FormData) {
   const templateId = required(formData, "templateId");
   const type = required(formData, "type") as FieldType;
   const isFilterable = formData.get("isFilterable") === "on";
+  const showInBrief = formData.get("showInBrief") === "on";
   const groupId = await resolveFilterGroupId(formData);
 
   const field = await prisma.fieldDefinition.create({
@@ -360,6 +361,7 @@ export async function createFieldDefinition(formData: FormData) {
       type,
       unit: optional(formData, "unit"),
       isFilterable,
+      showInBrief,
       filterWidget: isFilterable ? ((optional(formData, "filterWidget") ?? "CHECKBOX") as FilterWidget) : undefined,
       sortOrder: Number(formData.get("sortOrder") ?? 0),
     },
@@ -384,6 +386,7 @@ export async function createFieldDefinition(formData: FormData) {
 
   revalidatePath("/admin/fields");
   revalidatePath("/catalog");
+  revalidatePath("/product", "layout");
 }
 
 export async function updateFieldDefinition(formData: FormData) {
@@ -391,6 +394,7 @@ export async function updateFieldDefinition(formData: FormData) {
   const name = required(formData, "name");
   const type = required(formData, "type") as FieldType;
   const isFilterable = formData.get("isFilterable") === "on";
+  const showInBrief = formData.get("showInBrief") === "on";
   const groupId = await resolveFilterGroupId(formData);
 
   await prisma.fieldDefinition.update({
@@ -402,6 +406,7 @@ export async function updateFieldDefinition(formData: FormData) {
       type,
       unit: optional(formData, "unit"),
       isFilterable,
+      showInBrief,
       filterWidget: isFilterable ? ((optional(formData, "filterWidget") ?? "CHECKBOX") as FilterWidget) : null,
       sortOrder: Number(formData.get("sortOrder") ?? 0),
     },
@@ -428,6 +433,7 @@ export async function updateFieldDefinition(formData: FormData) {
 
   revalidatePath("/admin/fields");
   revalidatePath("/catalog");
+  revalidatePath("/product", "layout");
 }
 
 export async function deleteFieldDefinition(formData: FormData) {
@@ -435,6 +441,7 @@ export async function deleteFieldDefinition(formData: FormData) {
   await prisma.fieldDefinition.delete({ where: { id } });
   revalidatePath("/admin/fields");
   revalidatePath("/catalog");
+  revalidatePath("/product", "layout");
 }
 
 // --- Brands ---

@@ -51,7 +51,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const analogs = product.analogSkus;
   const groups = groupValues(product);
   const allSpecs = groups.flatMap((group) => group.items);
-  const previewSpecs = allSpecs.slice(0, 4);
+  const previewSpecs = allSpecs.filter((item) => item.showInBrief).slice(0, 4);
   const breadcrumbs = [
     { name: "Главная", href: "/" },
     { name: "Каталог", href: "/catalog" },
@@ -272,7 +272,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 function groupValues(product: Awaited<ReturnType<typeof getProductBySlug>> & {}) {
   if (!product) return [];
 
-  const groups = new Map<string, Array<{ id: string; name: string; value: string }>>();
+  const groups = new Map<string, Array<{ id: string; name: string; value: string; showInBrief: boolean }>>();
 
   for (const value of product.fieldValues) {
     if (value.valueFileUrl) continue;
@@ -282,6 +282,7 @@ function groupValues(product: Awaited<ReturnType<typeof getProductBySlug>> & {})
       id: value.id,
       name: value.field.name,
       value: formatFieldValue(value),
+      showInBrief: value.field.showInBrief !== false,
     });
     groups.set(groupName, group);
   }

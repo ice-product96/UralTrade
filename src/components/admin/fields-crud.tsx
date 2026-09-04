@@ -28,6 +28,7 @@ type FieldRow = {
   type: string;
   unit: string | null;
   isFilterable: boolean;
+  showInBrief: boolean;
   filterWidget: string | null;
   sortOrder: number;
   groupId: string | null;
@@ -128,6 +129,9 @@ export function FieldsCrud({ templates, filterGroups }: { templates: TemplateRow
                       <div className="font-bold text-graphite">{field.name}</div>
                       <span className="rounded-full bg-petrol/10 px-2 py-1 text-xs font-bold text-petrol">{field.type}</span>
                       {field.isFilterable ? <span className="rounded-full bg-lime/10 px-2 py-1 text-xs font-bold text-lime">Фильтр</span> : null}
+                      {field.showInBrief === false ? (
+                        <span className="rounded-full bg-background px-2 py-1 text-xs font-bold text-muted">Скрыто из кратких</span>
+                      ) : null}
                     </div>
                     <div className="mt-2 text-sm text-muted">
                       {field.slug} {field.unit ? `• ${field.unit}` : ""} {field.group ? `• ${field.group.name}` : ""}
@@ -219,6 +223,18 @@ export function FieldsCrud({ templates, filterGroups }: { templates: TemplateRow
             <input name="isFilterable" type="checkbox" defaultChecked={fieldModal.item?.isFilterable} className="accent-lime" />
             Участвует в фильтре
           </label>
+          <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold">
+            <input
+              name="showInBrief"
+              type="checkbox"
+              defaultChecked={fieldModal.item ? fieldModal.item.showInBrief !== false : true}
+              className="accent-lime"
+            />
+            Показывать в кратких характеристиках
+          </label>
+          <p className="text-xs text-muted">
+            Если снять галочку, поле останется в полном блоке характеристик на карточке товара, но не попадёт в краткий список сверху.
+          </p>
           <p className="text-xs text-muted">
             Для фильтра каталога используйте тип SELECT или NUMBER, включите «Участвует в фильтре» и задайте опции. Характеристики из импорта также доступны как динамические фильтры.
           </p>

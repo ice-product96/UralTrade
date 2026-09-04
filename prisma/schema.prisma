@@ -116,6 +116,7 @@ model FieldDefinition {
   unit           String?
   required       Boolean             @default(false)
   isFilterable   Boolean             @default(false)
+  showInBrief    Boolean             @default(true)
   filterWidget   FilterWidget?
   sortOrder      Int                 @default(0)
   topValuesLimit Int                 @default(8)
