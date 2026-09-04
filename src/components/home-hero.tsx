@@ -26,7 +26,7 @@ function HeroFeatureCard({
   return (
     <div
       className={cn(
-        "flex h-full min-w-0 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-2.5",
+        "flex h-full min-w-0 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-1.5",
         className,
       )}
     >
@@ -61,7 +61,7 @@ export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps)
             width={1320}
             height={440}
             sizes="(min-width: 1280px) 1280px, 100vw"
-            className="aspect-[21/9] w-full object-cover sm:aspect-[4/1] lg:h-28 lg:max-h-28 lg:aspect-auto xl:h-32 xl:max-h-32"
+            className="aspect-[21/9] w-full object-cover sm:aspect-[4/1] lg:h-24 lg:max-h-24 lg:aspect-auto xl:h-28 xl:max-h-28"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-r from-petrol/90 via-petrol/60 to-petrol/25" />

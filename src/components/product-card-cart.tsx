@@ -39,7 +39,7 @@ export function ProductCardCart({
           setQuantity(getCartQuantity(productId));
         }}
         className={`inline-flex shrink-0 items-center justify-center rounded-full bg-lime text-white shadow-lg shadow-lime/20 transition hover:bg-lime-hover ${
-          compact ? (mini ? "h-7 w-7 sm:h-8 sm:w-8" : "h-8 w-8 sm:h-9 sm:w-9") : "h-8 w-8 sm:h-11 sm:w-11"
+          compact ? (mini ? "h-6 w-6 sm:h-7 sm:w-7" : "h-8 w-8 sm:h-9 sm:w-9") : "h-8 w-8 sm:h-11 sm:w-11"
         }`}
         aria-label={`Добавить ${productName} в корзину`}
       >
@@ -49,14 +49,14 @@ export function ProductCardCart({
   }
 
   return (
-    <div className={`inline-flex shrink-0 items-center overflow-hidden rounded-full border border-border bg-white shadow-sm ${compact ? (mini ? "h-7 sm:h-8" : "h-8 sm:h-9") : "h-8 sm:h-11"}`}>
+    <div className={`inline-flex shrink-0 items-center overflow-hidden rounded-full border border-border bg-white shadow-sm ${compact ? (mini ? "h-6 sm:h-7" : "h-8 sm:h-9") : "h-8 sm:h-11"}`}>
       <button
         type="button"
         onClick={() => {
           decrementCart(productId);
           setQuantity(getCartQuantity(productId));
         }}
-        className={`inline-flex w-6 items-center justify-center text-petrol transition hover:bg-background sm:w-7 ${compact ? (mini ? "h-7 sm:h-8" : "h-8 sm:h-9") : "h-8 sm:h-11 sm:w-10"}`}
+        className={`inline-flex w-6 items-center justify-center text-petrol transition hover:bg-background sm:w-7 ${compact ? (mini ? "h-6 sm:h-7" : "h-8 sm:h-9") : "h-8 sm:h-11 sm:w-10"}`}
         aria-label={`Уменьшить количество ${productName}`}
       >
         <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -68,7 +68,7 @@ export function ProductCardCart({
           incrementCart(productId);
           setQuantity(getCartQuantity(productId));
         }}
-        className={`inline-flex w-6 items-center justify-center text-petrol transition hover:bg-background sm:w-7 ${compact ? (mini ? "h-7 sm:h-8" : "h-8 sm:h-9") : "h-8 sm:h-11 sm:w-10"}`}
+        className={`inline-flex w-6 items-center justify-center text-petrol transition hover:bg-background sm:w-7 ${compact ? (mini ? "h-6 sm:h-7" : "h-8 sm:h-9") : "h-8 sm:h-11 sm:w-10"}`}
         aria-label={`Увеличить количество ${productName}`}
       >
         <Plus className="h-4 w-4" />
