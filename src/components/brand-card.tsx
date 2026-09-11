@@ -19,7 +19,7 @@ export function BrandCard({ brand, mini = false }: { brand: BrandCardItem; mini?
         mini ? "rounded-[12px] sm:rounded-[16px]" : "rounded-[18px] sm:rounded-[24px]",
       )}
     >
-      <div className={cn("flex items-center justify-center bg-background", mini ? "aspect-[2/1] p-1.5 sm:p-2" : "aspect-square p-4 sm:p-6")}>
+      <div className={cn("flex items-center justify-center bg-white", mini ? "aspect-[2/1] p-1.5 sm:p-2" : "aspect-square p-4 sm:p-6")}>
         {brand.logoUrl ? (
           <ProductImage
             src={normalizeImageSrc(brand.logoUrl)}
