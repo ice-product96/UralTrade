@@ -17,18 +17,23 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
         "group flex h-full min-w-0 flex-col overflow-hidden border border-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-petrol/10 max-sm:hover:translate-y-0 max-sm:hover:shadow-sm",
         compact
           ? mini
-            ? "rounded-[12px] sm:rounded-[16px]"
+            ? // Desktop homepage shelf: card height = 1.5 × card width.
+              "rounded-[12px] sm:rounded-[16px] lg:h-auto lg:aspect-[2/3]"
             : "rounded-[18px] sm:rounded-[24px]"
           : "rounded-[18px] sm:rounded-[28px]",
       )}
     >
-      <div className="relative">
+      <div className={cn("relative", compact && mini && "lg:min-h-0 lg:flex-1")}>
         <Link
           href={`/product/${product.slug}`}
           scroll
           className={cn(
             "relative block bg-background",
-            compact ? (mini ? "p-1.5 sm:p-2" : "p-2 sm:p-3") : "p-2 sm:p-4",
+            compact
+              ? mini
+                ? "p-1.5 sm:p-2 lg:flex lg:h-full lg:min-h-0 lg:flex-col"
+                : "p-2 sm:p-3"
+              : "p-2 sm:p-4",
           )}
         >
           <div
@@ -74,7 +79,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
               "relative overflow-hidden bg-white",
               compact
                 ? mini
-                  ? "aspect-[2/1] rounded-[8px] sm:rounded-[10px]"
+                  ? "aspect-[2/1] rounded-[8px] sm:rounded-[10px] lg:aspect-auto lg:min-h-0 lg:flex-1"
                   : "aspect-square rounded-[12px] sm:rounded-[16px]"
                 : "aspect-square rounded-[12px] sm:rounded-[22px]",
             )}
@@ -85,7 +90,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
               fill
               sizes={
                 compact
-                  ? "(min-width: 1280px) 20vw, (min-width: 640px) 47vw, 68vw"
+                  ? "(min-width: 1024px) 20vw, (min-width: 640px) 47vw, 68vw"
                   : "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 45vw"
               }
               className="object-contain transition-transform duration-500 group-hover:scale-105"
@@ -111,7 +116,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
           "flex min-w-0 flex-1 flex-col",
           compact
             ? mini
-              ? "space-y-0.5 p-1.5 sm:p-2"
+              ? "space-y-0.5 p-1.5 sm:p-2 lg:flex-none"
               : "space-y-2 p-2.5 sm:space-y-3 sm:p-4"
             : "space-y-1.5 p-2.5 sm:space-y-4 sm:p-5",
         )}
