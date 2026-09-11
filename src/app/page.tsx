@@ -17,34 +17,50 @@ import { organizationJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
+const HOME_SHELF_ITEM_CLASS =
+  "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc(100%/6.5)]";
+/** Dense gutter is sm:pl-2.5 (0.625rem); add gap/6 so six cards fill width with no 7th peek. */
+const CATALOG_SHELF_ITEM_CLASS =
+  "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc((100%+0.625rem)/6)]";
+
 function HomeShelf({
   title,
+  subtitle,
   href,
   linkLabel,
   previousLabel,
   nextLabel,
+  itemClassName = HOME_SHELF_ITEM_CLASS,
+  dragFree = false,
   children,
 }: {
   title: string;
+  subtitle?: string;
   href: string;
   linkLabel: string;
   previousLabel: string;
   nextLabel: string;
+  itemClassName?: string;
+  dragFree?: boolean;
   children: ReactNode;
 }) {
   return (
     <section className="mx-auto w-full max-w-7xl px-3 py-2 sm:px-4 lg:min-h-0 lg:flex-1 lg:px-8 lg:py-1.5">
       <div className="mb-1.5 flex items-end justify-between gap-3 lg:mb-2">
-        <h2 className="text-lg font-black text-graphite sm:text-xl">{title}</h2>
-        <Link href={href} className="inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime sm:text-sm">
+        <div className="min-w-0">
+          <h2 className="text-lg font-black text-graphite sm:text-xl">{title}</h2>
+          {subtitle ? <p className="mt-0.5 text-xs text-muted sm:text-sm">{subtitle}</p> : null}
+        </div>
+        <Link href={href} className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime sm:text-sm">
           {linkLabel} <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
       <HomeCarousel
-        itemClassName="flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc(100%/6.5)]"
+        itemClassName={itemClassName}
         previousLabel={previousLabel}
         nextLabel={nextLabel}
         dense
+        dragFree={dragFree}
       >
         {children}
       </HomeCarousel>
@@ -80,7 +96,16 @@ export default async function Home() {
             }))}
           />
 
-          <HomeShelf title="Каталог" href="/catalog" linkLabel="Весь каталог" previousLabel="Предыдущие разделы каталога" nextLabel="Следующие разделы каталога">
+          <HomeShelf
+            title="Каталог"
+            subtitle="Основные разделы магазина"
+            href="/catalog"
+            linkLabel="Весь каталог"
+            previousLabel="Предыдущие разделы каталога"
+            nextLabel="Следующие разделы каталога"
+            itemClassName={CATALOG_SHELF_ITEM_CLASS}
+            dragFree
+          >
             {categories.map((category) => (
               <CategoryCard key={category.id} category={category} compact mini showDescription={false} />
             ))}
