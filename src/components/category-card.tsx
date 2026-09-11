@@ -64,7 +64,7 @@ export function CategoryCard({
           alt={category.name}
           fill
           sizes={compact ? "(min-width: 1280px) 20vw, (min-width: 640px) 47vw, 86vw" : size === "lg" ? "(min-width: 1024px) 25vw, 50vw" : "(min-width: 1024px) 20vw, 50vw"}
-          className="object-cover transition duration-500 group-hover:scale-105"
+          className="object-contain transition duration-500 group-hover:scale-105"
         />
       </div>
       <div
