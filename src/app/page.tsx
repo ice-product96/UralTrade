@@ -122,7 +122,7 @@ export default async function Home() {
                 </Link>
               </div>
               <HomeCarousel
-                itemClassName="flex-[0_0_86%] sm:flex-[0_0_48%] lg:flex-[0_0_25%]"
+                itemClassName="flex-[0_0_86%] sm:flex-[0_0_48%] lg:flex-[0_0_calc(25%+0.25rem)]"
                 previousLabel="Предыдущие услуги"
                 nextLabel="Следующие услуги"
                 dragFree
