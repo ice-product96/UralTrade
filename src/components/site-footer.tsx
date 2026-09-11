@@ -28,7 +28,8 @@ export async function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-2 lg:grid-cols-4 lg:px-8">
         <div>
           <SiteLogo href="/" height={52} />
-          <p className="mt-4 max-w-md text-sm leading-6 text-muted">
+          <p className="mt-4 max-w-md text-sm leading-6 text-muted">©2013-2026</p>
+          <p className="max-w-md text-sm leading-6 text-muted">
             Интернет-магазин гидравлического оборудования и комплектующих с подбором по артикулам, характеристикам и брендам.
           </p>
         </div>
