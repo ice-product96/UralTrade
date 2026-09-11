@@ -71,7 +71,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
           </div>
           <div
             className={cn(
-              "relative overflow-hidden bg-background",
+              "relative overflow-hidden bg-white",
               compact
                 ? mini
                   ? "aspect-[2/1] rounded-[8px] sm:rounded-[10px]"
