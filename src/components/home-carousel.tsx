@@ -28,19 +28,23 @@ export function HomeCarousel({
   previousLabel,
   nextLabel,
   dense = false,
+  /** Free-drag scroll like category subcategory rows (гидроцилиндры). */
+  dragFree = false,
 }: {
   children: ReactNode;
   itemClassName: string;
   previousLabel: string;
   nextLabel: string;
   dense?: boolean;
+  dragFree?: boolean;
 }) {
   const slides = useMemo(() => expandForLoop(children), [children]);
   const loop = slides.length > 1;
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     loop,
-    containScroll: loop ? false : "trimSnaps",
+    dragFree,
+    containScroll: dragFree || loop ? false : "trimSnaps",
   });
   const [canScrollPrev, setCanScrollPrev] = useState(loop);
   const [canScrollNext, setCanScrollNext] = useState(loop);

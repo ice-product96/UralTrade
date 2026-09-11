@@ -122,9 +122,10 @@ export default async function Home() {
                 </Link>
               </div>
               <HomeCarousel
-                itemClassName="flex-[0_0_86%] sm:flex-[0_0_48%] lg:flex-[0_0_31%] xl:flex-[0_0_24%]"
+                itemClassName="flex-[0_0_86%] sm:flex-[0_0_48%] lg:flex-[0_0_calc(25%+0.25rem)]"
                 previousLabel="Предыдущие услуги"
                 nextLabel="Следующие услуги"
+                dragFree
               >
                 {services.map((service) => (
                   <Link
@@ -138,7 +139,7 @@ export default async function Home() {
                           src={normalizeImageSrc(service.imageUrl)}
                           alt={service.title}
                           fill
-                          sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 86vw"
+                          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 86vw"
                           className="object-cover transition duration-500 group-hover:scale-105"
                         />
                       ) : (
