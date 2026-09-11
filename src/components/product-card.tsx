@@ -71,7 +71,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
           </div>
           <div
             className={cn(
-              "relative overflow-hidden",
+              "relative overflow-hidden bg-white",
               compact
                 ? mini
                   ? "aspect-[2/1] rounded-[8px] sm:rounded-[10px]"
@@ -88,7 +88,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
                   ? "(min-width: 1280px) 20vw, (min-width: 640px) 47vw, 68vw"
                   : "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 45vw"
               }
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-contain transition-transform duration-500 group-hover:scale-105"
             />
           </div>
         </Link>
