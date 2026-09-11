@@ -22,6 +22,9 @@ const HOME_SHELF_ITEM_CLASS =
 /** Dense gutter is sm:pl-2.5 (0.625rem); add gap/6 so six cards fill width with no 7th peek. */
 const CATALOG_SHELF_ITEM_CLASS =
   "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc((100%+0.625rem)/6)]";
+/** Dense gutter is sm:pl-2.5 (0.625rem); add gap/5 so five cards fill width with no 6th peek. */
+const PRODUCTS_SHELF_ITEM_CLASS =
+  "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc((100%+0.625rem)/5)]";
 
 function HomeShelf({
   title,
@@ -119,7 +122,16 @@ export default async function Home() {
             </HomeShelf>
           ) : null}
 
-          <HomeShelf title="Популярные товары" href="/catalog?all=1" linkLabel="Смотреть все" previousLabel="Предыдущие товары" nextLabel="Следующие товары">
+          <HomeShelf
+            title="Популярные товары"
+            subtitle="Карточки с фото, SEO-данными, характеристиками и перелинковкой."
+            href="/catalog?all=1"
+            linkLabel="Смотреть все"
+            previousLabel="Предыдущие товары"
+            nextLabel="Следующие товары"
+            itemClassName={PRODUCTS_SHELF_ITEM_CLASS}
+            dragFree
+          >
             {products.map((product) => (
               <ProductCard key={product.id} product={product} compact mini />
             ))}
