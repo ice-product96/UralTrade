@@ -48,7 +48,7 @@ function HomeShelf({
   children: ReactNode;
 }) {
   return (
-    <section className="mx-auto w-full max-w-7xl px-3 py-2 sm:px-4 lg:min-h-0 lg:flex-1 lg:px-8 lg:py-1.5">
+    <section className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 lg:px-8 lg:py-4">
       <div className="mb-1.5 flex items-end justify-between gap-3 lg:mb-2">
         <div className="min-w-0">
           <h2 className="text-lg font-black text-graphite sm:text-xl">{title}</h2>
@@ -85,58 +85,55 @@ export default async function Home() {
       <SiteHeader />
       <main>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
-        <div className="lg:flex lg:max-h-[calc(100svh-7.75rem)] lg:flex-col">
-          <HomeHero
-            title={hero.title}
-            subtitle={hero.subtitle}
-            imageUrl={hero.imageUrl}
-            features={features.map((feature) => ({
-              id: feature.id,
-              title: feature.title,
-              text: feature.text,
-              icon: feature.icon,
-              sortOrder: feature.sortOrder,
-            }))}
-          />
+        <HomeHero
+          title={hero.title}
+          subtitle={hero.subtitle}
+          imageUrl={hero.imageUrl}
+          features={features.map((feature) => ({
+            id: feature.id,
+            title: feature.title,
+            text: feature.text,
+            icon: feature.icon,
+            sortOrder: feature.sortOrder,
+          }))}
+        />
 
-          <HomeShelf
-            title="Каталог"
-            subtitle="Основные разделы магазина"
-            href="/catalog"
-            linkLabel="Весь каталог"
-            previousLabel="Предыдущие разделы каталога"
-            nextLabel="Следующие разделы каталога"
-            itemClassName={CATALOG_SHELF_ITEM_CLASS}
-            dragFree
-          >
-            {categories.map((category) => (
-              <CategoryCard key={category.id} category={category} compact mini showDescription={false} />
+        <HomeShelf
+          title="Каталог"
+          subtitle="Основные разделы магазина"
+          href="/catalog"
+          linkLabel="Весь каталог"
+          previousLabel="Предыдущие разделы каталога"
+          nextLabel="Следующие разделы каталога"
+          itemClassName={CATALOG_SHELF_ITEM_CLASS}
+          dragFree
+        >
+          {categories.map((category) => (
+            <CategoryCard key={category.id} category={category} compact mini showDescription={false} />
+          ))}
+        </HomeShelf>
+
+        {brands.length ? (
+          <HomeShelf title="Популярные бренды" href="/brands" linkLabel="Все бренды" previousLabel="Предыдущие бренды" nextLabel="Следующие бренды">
+            {brands.map((brand) => (
+              <BrandCard key={brand.id} brand={brand} mini />
             ))}
           </HomeShelf>
+        ) : null}
 
-          {brands.length ? (
-            <HomeShelf title="Популярные бренды" href="/brands" linkLabel="Все бренды" previousLabel="Предыдущие бренды" nextLabel="Следующие бренды">
-              {brands.map((brand) => (
-                <BrandCard key={brand.id} brand={brand} mini />
-              ))}
-            </HomeShelf>
-          ) : null}
-
-          <HomeShelf
-            title="Популярные товары"
-            subtitle="Карточки с фото, SEO-данными, характеристиками и перелинковкой."
-            href="/catalog?all=1"
-            linkLabel="Смотреть все"
-            previousLabel="Предыдущие товары"
-            nextLabel="Следующие товары"
-            itemClassName={PRODUCTS_SHELF_ITEM_CLASS}
-            dragFree
-          >
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} compact mini />
-            ))}
-          </HomeShelf>
-        </div>
+        <HomeShelf
+          title="Популярные товары"
+          href="/catalog?all=1"
+          linkLabel="Смотреть все"
+          previousLabel="Предыдущие товары"
+          nextLabel="Следующие товары"
+          itemClassName={PRODUCTS_SHELF_ITEM_CLASS}
+          dragFree
+        >
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} compact mini />
+          ))}
+        </HomeShelf>
 
         {homePage?.textBlock?.trim() ? (
           <section className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6 lg:px-8">
