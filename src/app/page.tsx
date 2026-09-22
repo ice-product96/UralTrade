@@ -22,6 +22,7 @@ const HOME_SHELF_ITEM_CLASS =
 /** Dense gutter is sm:pl-2.5 (0.625rem); add gap/6 so six cards fill width with no 7th peek. */
 const CATALOG_SHELF_ITEM_CLASS =
   "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc((100%+0.625rem)/6)]";
+const BRANDS_SHELF_ITEM_CLASS = CATALOG_SHELF_ITEM_CLASS;
 /** Dense gutter is sm:pl-2.5 (0.625rem); add gap/5 so five cards fill width with no 6th peek. */
 const PRODUCTS_SHELF_ITEM_CLASS =
   "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc((100%+0.625rem)/5)]";
@@ -114,7 +115,15 @@ export default async function Home() {
         </HomeShelf>
 
         {brands.length ? (
-          <HomeShelf title="Популярные бренды" href="/brands" linkLabel="Все бренды" previousLabel="Предыдущие бренды" nextLabel="Следующие бренды">
+          <HomeShelf
+            title="Популярные бренды"
+            href="/brands"
+            linkLabel="Все бренды"
+            previousLabel="Предыдущие бренды"
+            nextLabel="Следующие бренды"
+            itemClassName={BRANDS_SHELF_ITEM_CLASS}
+            dragFree
+          >
             {brands.map((brand) => (
               <BrandCard key={brand.id} brand={brand} mini />
             ))}
