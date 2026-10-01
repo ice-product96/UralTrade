@@ -99,6 +99,21 @@ export async function SiteFooter() {
           </div>
         ) : null}
       </div>
+      <div className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-4 py-4 lg:px-8">
+          <p className="text-sm text-muted">
+            Разработка сайта{" "}
+            <a
+              href="https://ice-product.ru"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-petrol transition hover:text-lime"
+            >
+              Айс.Продукт
+            </a>
+          </p>
+        </div>
+      </div>
     </footer>
   );
 }
