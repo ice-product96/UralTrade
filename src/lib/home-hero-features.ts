@@ -8,6 +8,9 @@ export type HomeHeroFeature = {
   sortOrder: number;
 };
 
+/** Высота баннера: на телефоне как раньше, на компьютере — в 2 раза выше прежней (h-24/h-28 → h-48/h-56). */
+export const HERO_BANNER_SIZE_CLASS = "aspect-[21/9] w-full sm:aspect-[4/1] lg:aspect-auto lg:h-48 xl:h-56";
+
 export const HERO_TAGLINE = "Онлайн-маркет гидравлического оборудования";
 
 export const DEFAULT_HOME_HERO_FEATURES: HomeHeroFeature[] = [

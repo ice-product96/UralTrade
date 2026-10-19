@@ -1,7 +1,7 @@
-import { HERO_BANNER_SIZE_CLASS, HomeBannerSlider, type HomeBannerSlide } from "@/components/home-banner-slider";
+import { HomeBannerSlider, type HomeBannerSlide } from "@/components/home-banner-slider";
 import { ProductImage } from "@/components/product-image";
 import { HOME_FEATURE_ICONS, type HomeFeatureIcon } from "@/lib/home-features";
-import { HERO_TAGLINE, resolveHomeHeroFeatures, type HomeHeroFeature } from "@/lib/home-hero-features";
+import { HERO_BANNER_SIZE_CLASS, HERO_TAGLINE, resolveHomeHeroFeatures, type HomeHeroFeature } from "@/lib/home-hero-features";
 import { cn } from "@/lib/utils";
 
 type HomeHeroProps = {
