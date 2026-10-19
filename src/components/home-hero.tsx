@@ -83,13 +83,9 @@ export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps)
           ))}
         </div>
 
-          <div className="mt-2 hidden gap-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm lg:grid lg:grid-cols-4 [@media(max-height:850px)]:lg:hidden">
-          {heroFeatures.map((feature, index) => (
-            <HeroFeatureCard
-              key={feature.id ?? feature.title}
-              feature={feature}
-              className={cn("rounded-none border-0 py-2 sm:px-5", index > 0 && "border-l border-border")}
-            />
+        <div className="mt-3 hidden gap-3 lg:grid lg:grid-cols-4" aria-label="Преимущества">
+          {heroFeatures.map((feature) => (
+            <HeroFeatureCard key={feature.id ?? feature.title} feature={feature} className="py-2.5" />
           ))}
         </div>
       </div>

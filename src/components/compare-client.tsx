@@ -130,7 +130,7 @@ export function CompareClient() {
                         )}
                       >
                         {!row.identical ? <span className="h-2 w-2 shrink-0 rounded-full bg-lime" /> : null}
-                        <span className="min-w-0 break-words">{row.name}</span>
+                        <span className="min-w-0 hyphens-auto break-words">{row.name}</span>
                       </div>
                       {products.map((product) => (
                         <div
@@ -195,7 +195,7 @@ function CompareHeaderCell({ product }: { product: ComparePayload["products"][nu
         <div className="text-lg font-black text-petrol">{formatPrice(product.price)}</div>
         {discount ? <div className="text-xs text-sale line-through">{formatPrice(product.oldPrice!)}</div> : null}
       </div>
-      <AddToCartButton productId={product.id} className="mt-3 h-10 w-full text-sm sm:w-full" />
+      <AddToCartButton productId={product.id} className="mt-3 h-10 w-full px-2 text-xs sm:w-full sm:px-4 sm:text-sm" />
     </div>
   );
 }
