@@ -19,13 +19,13 @@ export const dynamic = "force-dynamic";
 
 const HOME_SHELF_ITEM_CLASS =
   "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc(100%/6.5)]";
-/** Dense gutter is sm:pl-2.5 (0.625rem); add gap/6 so six cards fill width with no 7th peek. */
+/** Track already includes the negative-margin gutter, so plain 100%/6 lines the 6th card up with the right edge. */
 const CATALOG_SHELF_ITEM_CLASS =
-  "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc((100%+0.625rem)/6)]";
+  "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc(100%/6)]";
 const BRANDS_SHELF_ITEM_CLASS = CATALOG_SHELF_ITEM_CLASS;
-/** Dense gutter is sm:pl-2.5 (0.625rem); add gap/5 so five cards fill width with no 6th peek. */
+/** Same for five product cards. */
 const PRODUCTS_SHELF_ITEM_CLASS =
-  "flex-[0_0_calc(100%/2.2)] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_calc((100%+0.625rem)/5)]";
+  "flex-[0_0_50%] sm:flex-[0_0_calc(100%/3.5)] lg:flex-[0_0_20%]";
 
 function HomeShelf({
   title,
@@ -165,7 +165,7 @@ export default async function Home() {
                 </Link>
               </div>
               <HomeCarousel
-                itemClassName="flex-[0_0_86%] sm:flex-[0_0_48%] lg:flex-[0_0_calc(25%+0.25rem)]"
+                itemClassName="flex-[0_0_86%] sm:flex-[0_0_48%] lg:flex-[0_0_25%]"
                 previousLabel="Предыдущие услуги"
                 nextLabel="Следующие услуги"
                 dragFree

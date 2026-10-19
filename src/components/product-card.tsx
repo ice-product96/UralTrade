@@ -147,7 +147,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
               "block w-full min-w-0 break-words font-bold leading-snug text-graphite transition-colors hover:text-petrol",
               compact
                 ? mini
-                  ? "line-clamp-1 text-[11px] sm:text-xs"
+                  ? "text-xs sm:line-clamp-1"
                   : "line-clamp-2 text-sm sm:line-clamp-none sm:text-base"
                 : "line-clamp-3 text-xs sm:line-clamp-none sm:text-base lg:text-lg",
             )}
