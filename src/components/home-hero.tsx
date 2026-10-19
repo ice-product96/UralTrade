@@ -1,3 +1,4 @@
+import { HERO_BANNER_SIZE_CLASS, HomeBannerSlider, type HomeBannerSlide } from "@/components/home-banner-slider";
 import { ProductImage } from "@/components/product-image";
 import { HOME_FEATURE_ICONS, type HomeFeatureIcon } from "@/lib/home-features";
 import { HERO_TAGLINE, resolveHomeHeroFeatures, type HomeHeroFeature } from "@/lib/home-hero-features";
@@ -8,6 +9,7 @@ type HomeHeroProps = {
   subtitle: string | null;
   imageUrl: string;
   features: HomeHeroFeature[];
+  banners?: HomeBannerSlide[];
 };
 
 function HomeFeatureIconGlyph({ icon }: { icon: string }) {
@@ -43,7 +45,7 @@ function HeroFeatureCard({
   );
 }
 
-export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps) {
+export function HomeHero({ title, subtitle, imageUrl, features, banners = [] }: HomeHeroProps) {
   const heroFeatures = resolveHomeHeroFeatures(features);
 
   return (
@@ -54,6 +56,9 @@ export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps)
           {subtitle ? <p>{subtitle}</p> : null}
         </div>
 
+        {banners.length ? (
+          <HomeBannerSlider banners={banners} />
+        ) : (
         <div className="relative overflow-hidden rounded-2xl border border-border bg-white shadow-sm sm:rounded-3xl">
           <ProductImage
             src={imageUrl}
@@ -61,7 +66,7 @@ export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps)
             width={1320}
             height={440}
             sizes="(min-width: 1280px) 1280px, 100vw"
-            className="aspect-[21/9] w-full object-cover sm:aspect-[4/1] lg:h-24 lg:max-h-24 lg:aspect-auto xl:h-28 xl:max-h-28"
+            className={cn(HERO_BANNER_SIZE_CLASS, "object-cover")}
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-r from-petrol/90 via-petrol/60 to-petrol/25" />
@@ -71,6 +76,7 @@ export function HomeHero({ title, subtitle, imageUrl, features }: HomeHeroProps)
             </p>
           </div>
         </div>
+        )}
 
         <div
           className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"

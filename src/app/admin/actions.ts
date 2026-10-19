@@ -1065,3 +1065,38 @@ export async function deleteService(formData: FormData) {
   revalidatePath("/services");
   revalidatePath("/sitemap.xml");
 }
+
+// --- Home banners ---
+
+function homeBannerData(formData: FormData) {
+  return {
+    kicker: optional(formData, "kicker") ?? "",
+    title: required(formData, "title"),
+    text: optional(formData, "text") ?? "",
+    buttonLabel: optional(formData, "buttonLabel") ?? "",
+    link: optional(formData, "link") ?? "",
+    imageUrl: required(formData, "imageUrl"),
+    sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
+    published: formData.get("published") === "on",
+  };
+}
+
+export async function createHomeBanner(formData: FormData) {
+  await prisma.homeBanner.create({ data: homeBannerData(formData) });
+  revalidatePath("/admin/banners");
+  revalidatePath("/");
+}
+
+export async function updateHomeBanner(formData: FormData) {
+  const id = required(formData, "id");
+  await prisma.homeBanner.update({ where: { id }, data: homeBannerData(formData) });
+  revalidatePath("/admin/banners");
+  revalidatePath("/");
+}
+
+export async function deleteHomeBanner(formData: FormData) {
+  const id = required(formData, "id");
+  await prisma.homeBanner.delete({ where: { id } });
+  revalidatePath("/admin/banners");
+  revalidatePath("/");
+}

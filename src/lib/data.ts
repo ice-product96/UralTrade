@@ -132,7 +132,7 @@ function resolveSortOrder(sort?: string): Prisma.ProductOrderByWithRelationInput
 }
 
 export async function getHomeData() {
-  const [homePage, features, categories, products, brands, services, newProducts] = await Promise.all([
+  const [homePage, features, categories, products, brands, services, newProducts, banners] = await Promise.all([
     safeQuery(
       "homePage",
       () => prisma.homePage.findUnique({ where: { id: "default" } }),
@@ -181,9 +181,18 @@ export async function getHomeData() {
         }),
       [],
     ),
+    safeQuery(
+      "homeBanners",
+      () =>
+        prisma.homeBanner.findMany({
+          where: { published: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        }),
+      [],
+    ),
   ]);
 
-  return { homePage, features, categories, products, brands, services, newProducts };
+  return { homePage, features, categories, products, brands, services, newProducts, banners };
 }
 
 export async function getHomePageSettings() {
@@ -1118,4 +1127,8 @@ export async function getAdminServices() {
       _count: { select: { examples: true } },
     },
   });
+}
+
+export async function getAdminHomeBanners() {
+  return prisma.homeBanner.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
 }

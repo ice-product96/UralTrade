@@ -373,3 +373,19 @@ model Redirect {
   toPath   String
   code     Int    @default(301)
 }
+
+model HomeBanner {
+  id          String   @id @default(cuid())
+  kicker      String   @default("")
+  title       String
+  text        String   @default("")
+  buttonLabel String   @default("")
+  link        String   @default("")
+  imageUrl    String
+  sortOrder   Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}

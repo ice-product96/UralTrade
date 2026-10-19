@@ -75,7 +75,7 @@ function HomeShelf({
 }
 
 export default async function Home() {
-  const { homePage, features, categories, products, brands, services, newProducts } = await getHomeData();
+  const { homePage, features, categories, products, brands, services, newProducts, banners } = await getHomeData();
 
   const hero = homePage ?? {
     title: "Инженерное оборудование с умным подбором",
@@ -92,6 +92,15 @@ export default async function Home() {
           title={hero.title}
           subtitle={hero.subtitle}
           imageUrl={hero.imageUrl}
+          banners={banners.map((banner) => ({
+            id: banner.id,
+            kicker: banner.kicker,
+            title: banner.title,
+            text: banner.text,
+            buttonLabel: banner.buttonLabel,
+            link: banner.link,
+            imageUrl: banner.imageUrl,
+          }))}
           features={features.map((feature) => ({
             id: feature.id,
             title: feature.title,
