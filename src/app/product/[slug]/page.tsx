@@ -198,7 +198,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <div id="analogs" className="mt-8 scroll-mt-28 border-t border-border pt-8">
                 <h2 className="text-2xl font-black text-graphite">Аналоги</h2>
                 <p className="mt-2 text-sm text-muted">Артикулы аналогичных товаров</p>
-                <div className="mt-5 flex flex-nowrap gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                <div className="mt-5 flex flex-wrap gap-2">
                   {analogs.map((analog) => (
                     <span key={analog} className="inline-flex shrink-0 rounded-xl bg-background px-4 py-2 text-sm font-black text-petrol">
                       {analog}

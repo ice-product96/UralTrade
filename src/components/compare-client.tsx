@@ -54,7 +54,7 @@ export function CompareClient() {
   }, [data.rows, onlyDifferences]);
 
   const differencesCount = useMemo(() => data.rows.filter((row) => !row.identical).length, [data.rows]);
-  const gridTemplateColumns = `minmax(180px, 220px) repeat(${products.length}, minmax(220px, 1fr))`;
+  const gridTemplateColumns = `minmax(var(--cmp-label), 220px) repeat(${products.length}, minmax(var(--cmp-col), 1fr))`;
 
   return (
     <>
@@ -102,10 +102,10 @@ export function CompareClient() {
         {!hydrated || (ids.length > 0 && !ready) ? (
           <div className="h-96 animate-pulse rounded-[30px] border border-border bg-white" />
         ) : products.length ? (
-          <div className="overflow-hidden rounded-[30px] border border-border bg-white">
+          <div className="min-w-0 overflow-hidden rounded-[22px] border border-border bg-white [--cmp-col:150px] [--cmp-label:104px] sm:rounded-[30px] sm:[--cmp-col:220px] sm:[--cmp-label:180px]">
             <div className="overflow-x-auto scrollbar-thin">
               <div style={{ gridTemplateColumns }} className="grid border-b border-border">
-                <div className="sticky left-0 z-10 bg-white p-4" />
+                <div className="sticky left-0 z-10 bg-white p-2.5 sm:p-4" />
                 {products.map((product) => (
                   <CompareHeaderCell key={product.id} product={product} />
                 ))}
@@ -124,19 +124,19 @@ export function CompareClient() {
                     >
                       <div
                         className={cn(
-                          "sticky left-0 z-10 flex items-center gap-2 p-4 text-sm font-semibold",
+                          "sticky left-0 z-10 flex items-center gap-2 p-2.5 text-xs font-semibold sm:p-4 sm:text-sm",
                           index % 2 === 0 ? "bg-white" : "bg-background/50",
                           row.identical ? "text-muted" : "text-graphite",
                         )}
                       >
                         {!row.identical ? <span className="h-2 w-2 shrink-0 rounded-full bg-lime" /> : null}
-                        <span className="min-w-0">{row.name}</span>
+                        <span className="min-w-0 break-words">{row.name}</span>
                       </div>
                       {products.map((product) => (
                         <div
                           key={product.id}
                           className={cn(
-                            "border-l border-border/60 p-4 text-sm",
+                            "min-w-0 break-words border-l border-border/60 p-2.5 text-xs sm:p-4 sm:text-sm",
                             row.identical ? "text-muted" : "font-bold text-graphite",
                           )}
                         >
@@ -167,7 +167,7 @@ function CompareHeaderCell({ product }: { product: ComparePayload["products"][nu
   const discount = hasDiscount(product.oldPrice, product.price);
 
   return (
-    <div className="relative border-l border-border/60 p-4">
+    <div className="relative min-w-0 border-l border-border/60 p-2.5 sm:p-4">
       <button
         type="button"
         onClick={() => removeFromProductList("compare", product.id)}

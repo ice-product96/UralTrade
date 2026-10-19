@@ -253,3 +253,10 @@ html {
   padding: 0.85rem 1rem;
   outline: none;
 }
+
+/* body — flex-колонка: без явной ширины <main> растягивается по max-content
+   (широкие таблицы, ряды без переноса) и ломает мобильную вёрстку. */
+body > main {
+  width: 100%;
+  min-width: 0;
+}
