@@ -119,22 +119,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
               ) : null}
 
-              {analogs.length ? (
-                <div className="min-h-0">
-                  <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Аналоги</div>
-                  <ProductChipCarousel ariaLabel="Аналоги" className="mt-2">
-                    {analogs.map((analog) => (
-                      <span key={analog} className="inline-flex rounded-lg bg-background px-2.5 py-1 text-xs font-bold text-petrol">
-                        {analog}
-                      </span>
-                    ))}
-                  </ProductChipCarousel>
-                </div>
-              ) : null}
-
               <SmoothScrollLink
                 targetId="description"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime"
+                className="inline-flex items-center gap-1.5 text-sm font-normal leading-6 text-muted underline-offset-4 transition hover:text-petrol hover:underline"
               >
                 Полное описание
                 <ArrowRight className="h-3.5 w-3.5" />
