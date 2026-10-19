@@ -40,8 +40,8 @@ function HomeShelf({
 }: {
   title: string;
   subtitle?: string;
-  href: string;
-  linkLabel: string;
+  href?: string;
+  linkLabel?: string;
   previousLabel: string;
   nextLabel: string;
   itemClassName?: string;
@@ -55,9 +55,11 @@ function HomeShelf({
           <h2 className="text-lg font-black text-graphite sm:text-xl">{title}</h2>
           {subtitle ? <p className="mt-0.5 text-xs text-muted sm:text-sm">{subtitle}</p> : null}
         </div>
-        <Link href={href} className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime sm:text-sm">
-          {linkLabel} <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+        {href ? (
+          <Link href={href} className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-petrol transition hover:text-lime sm:text-sm">
+            {linkLabel} <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        ) : null}
       </div>
       <HomeCarousel
         itemClassName={itemClassName}
@@ -73,7 +75,7 @@ function HomeShelf({
 }
 
 export default async function Home() {
-  const { homePage, features, categories, products, brands, services } = await getHomeData();
+  const { homePage, features, categories, products, brands, services, newProducts } = await getHomeData();
 
   const hero = homePage ?? {
     title: "Инженерное оборудование с умным подбором",
@@ -202,6 +204,20 @@ export default async function Home() {
               </HomeCarousel>
             </section>
           </MotionReveal>
+        ) : null}
+
+        {newProducts.length ? (
+          <HomeShelf
+            title="Новинки"
+            previousLabel="Предыдущие новинки"
+            nextLabel="Следующие новинки"
+            itemClassName={PRODUCTS_SHELF_ITEM_CLASS}
+            dragFree
+          >
+            {newProducts.map((product) => (
+              <ProductCard key={product.id} product={product} compact mini />
+            ))}
+          </HomeShelf>
         ) : null}
       </main>
       <SiteFooter />

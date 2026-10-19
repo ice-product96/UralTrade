@@ -32,6 +32,7 @@ type ProductRow = {
   price: string;
   oldPrice: string | null;
   inStock: boolean;
+  isNew: boolean;
   categoryId: string;
   brandId: string | null;
   templateId: string | null;
@@ -489,6 +490,10 @@ export function ProductsCrud({
             <label className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 text-sm font-semibold">
               <input name="inStock" type="checkbox" defaultChecked={current?.inStock ?? true} className="accent-lime" />
               В наличии
+            </label>
+            <label className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 text-sm font-semibold">
+              <input name="isNew" type="checkbox" defaultChecked={current?.isNew ?? false} className="accent-lime" />
+              Новинка (показывать в блоке «Новинки» на главной)
             </label>
           </Section>
 
