@@ -11,7 +11,6 @@ import { ProductImage } from "@/components/product-image";
 import { ProductPageActions } from "@/components/product-list-buttons";
 import { RichText } from "@/components/rich-text";
 import { RouteScrollReset } from "@/components/route-scroll-reset";
-import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -105,7 +104,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {previewSpecs.length ? (
                 <div className="min-h-0">
                   <div className="text-[11px] font-black uppercase tracking-[0.12em] text-graphite">Характеристики</div>
-                  <ProductChipCarousel ariaLabel="Характеристики" className="mt-2">
+                  <ProductChipCarousel ariaLabel="Характеристики" className="mt-2 sm:hidden">
                     {previewSpecs.map((item) => (
                       <span
                         key={item.id}
@@ -116,6 +115,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                       </span>
                     ))}
                   </ProductChipCarousel>
+                  <dl className="mt-2 hidden divide-y divide-border sm:block">
+                    {previewSpecs.map((item) => (
+                      <div key={item.id} className="flex items-baseline justify-between gap-4 py-1.5 text-sm">
+                        <dt className="text-muted">{item.name}</dt>
+                        <dd className="text-right font-semibold text-graphite">{item.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 </div>
               ) : null}
 
@@ -255,7 +262,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </section>
         ) : null}
       </main>
-      <ScrollToTopButton />
       <SiteFooter />
     </>
   );

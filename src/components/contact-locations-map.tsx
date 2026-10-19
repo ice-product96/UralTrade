@@ -31,7 +31,7 @@ export function ContactLocationsMap({ locations }: { locations: ContactLocationD
         <p className="mt-2 text-sm text-muted">Выберите нужный адрес — он откроется на карте.</p>
       </div>
 
-      <div className="grid overflow-hidden rounded-[30px] border border-border bg-white shadow-xl shadow-petrol/5 lg:grid-cols-[360px_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-[24px] border border-border bg-white shadow-xl shadow-petrol/5 sm:rounded-[30px] lg:grid-cols-[360px_minmax(0,1fr)]">
         <div className="border-b border-border bg-background/70 p-3 lg:max-h-[560px] lg:overflow-y-auto lg:border-b-0 lg:border-r">
           <div className="space-y-2">
             {locations.map((location, index) => {
@@ -57,14 +57,14 @@ export function ContactLocationsMap({ locations }: { locations: ContactLocationD
                     >
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="text-xs font-bold uppercase tracking-[0.16em] text-lime">
                         {kindLabels[location.kind] ?? kindLabels.OTHER}
                       </div>
-                      <h3 className="mt-1 font-black text-graphite">{location.name}</h3>
-                      <div className="mt-2 flex items-start gap-2 text-sm leading-5 text-muted">
+                      <h3 className="mt-1 break-words font-black text-graphite">{location.name}</h3>
+                      <div className="mt-2 flex min-w-0 items-start gap-2 break-words text-sm leading-5 text-muted">
                         <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>{location.address}</span>
+                        <span className="min-w-0">{location.address}</span>
                       </div>
                       {location.workingHours ? (
                         <div className="mt-2 flex items-center gap-2 text-xs text-muted">

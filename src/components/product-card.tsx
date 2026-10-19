@@ -124,7 +124,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
         <div className={cn("min-w-0", compact && mini ? "space-y-0.5" : "space-y-1 sm:space-y-2")}>
           <div
             className={cn(
-              "flex min-w-0 flex-col items-start gap-0.5 font-semibold uppercase tracking-wide text-muted sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:tracking-[0.16em] lg:tracking-[0.2em]",
+              "flex min-w-0 flex-row items-center justify-between gap-2 font-semibold uppercase tracking-wide text-muted sm:tracking-[0.16em] lg:tracking-[0.2em]",
               compact && mini ? "hidden" : "text-[9px] sm:text-xs",
             )}
           >
@@ -138,10 +138,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
             ) : (
               <span className="min-w-0 max-w-full truncate">{product.brand?.name ?? "UralTrade"}</span>
             )}
-            <span className="block max-w-full truncate text-[11px] font-bold normal-case tracking-normal text-graphite sm:shrink-0 sm:text-xs sm:font-semibold sm:uppercase sm:tracking-[0.16em] sm:text-muted">
-              <span className="font-semibold text-muted sm:hidden">Артикул: </span>
-              {product.sku}
-            </span>
+            <span className="block min-w-0 shrink truncate text-right">{product.sku}</span>
           </div>
           <Link
             href={`/product/${product.slug}`}

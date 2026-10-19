@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { CookieConsent } from "@/components/cookie-consent";
+import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { SiteThemeStyles } from "@/components/site-theme-styles";
 import "./globals.css";
 
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col">
         <SiteThemeStyles />
         {children}
+        <ScrollToTopButton />
         <CookieConsent />
       </body>
     </html>
