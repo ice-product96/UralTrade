@@ -1,5 +1,6 @@
 "use client";
 
+import { PersonalDataNote } from "@/components/cookie-consent";
 import { useState } from "react";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
@@ -28,6 +29,7 @@ export function QuickOrderButton({ productId, productName }: { productId: string
               <input name="name" required placeholder="Ваше имя" className="admin-input" />
               <input name="phone" required type="tel" placeholder="Телефон" className="admin-input" />
               <input name="email" type="email" placeholder="Email (необязательно)" className="admin-input" />
+              <PersonalDataNote />
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setOpen(false)} className="h-11 flex-1 rounded-full border border-border text-sm font-bold text-petrol">
                   Отмена

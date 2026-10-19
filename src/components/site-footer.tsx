@@ -100,7 +100,12 @@ export async function SiteFooter() {
         ) : null}
       </div>
       <div className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-4 py-4 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 sm:flex-row sm:justify-between lg:px-8">
+          <p className="text-sm text-muted">
+            <Link href="/privacy-policy" className="font-semibold text-muted transition hover:text-petrol">
+              Политика конфиденциальности
+            </Link>
+          </p>
           <p className="text-sm text-muted">
             Разработка сайта{" "}
             <a

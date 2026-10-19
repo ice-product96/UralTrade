@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { CookieConsent } from "@/components/cookie-consent";
 import { SiteThemeStyles } from "@/components/site-theme-styles";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col">
         <SiteThemeStyles />
         {children}
+        <CookieConsent />
       </body>
     </html>
   );

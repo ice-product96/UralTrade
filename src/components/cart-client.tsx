@@ -1,5 +1,6 @@
 "use client";
 
+import { PersonalDataNote } from "@/components/cookie-consent";
 import { useEffect, useMemo, useState } from "react";
 import { ProductImage } from "@/components/product-image";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,7 @@ export function CartClient() {
       <Button disabled={!products.length} className="mt-5 w-full">
         Отправить заявку
       </Button>
+      <PersonalDataNote className="mt-3 text-xs leading-5 text-muted" />
     </form>
   );
 
