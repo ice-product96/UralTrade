@@ -86,7 +86,7 @@ export function HomeCarousel({
         disabled={!canScrollPrev}
         aria-label={previousLabel}
         className={cn(
-          "absolute -left-2 top-1/2 z-10 inline-flex -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-petrol shadow-lg transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0",
+          "max-lg:hidden absolute -left-2 top-1/2 z-10 inline-flex -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-petrol shadow-lg transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0",
           dense ? "h-8 w-8 sm:-left-3 sm:h-9 sm:w-9" : "h-10 w-10 sm:-left-5",
         )}
       >
@@ -98,7 +98,7 @@ export function HomeCarousel({
         disabled={!canScrollNext}
         aria-label={nextLabel}
         className={cn(
-          "absolute -right-2 top-1/2 z-10 inline-flex -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-petrol shadow-lg transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0",
+          "max-lg:hidden absolute -right-2 top-1/2 z-10 inline-flex -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-petrol shadow-lg transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0",
           dense ? "h-8 w-8 sm:-right-3 sm:h-9 sm:w-9" : "h-10 w-10 sm:-right-5",
         )}
       >

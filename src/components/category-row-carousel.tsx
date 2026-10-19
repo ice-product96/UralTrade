@@ -75,7 +75,7 @@ export function CategoryRowCarousel({ children }: { children: ReactNode }) {
             onClick={() => emblaApi?.scrollPrev()}
             disabled={!canScrollPrev}
             aria-label="Предыдущие подкатегории"
-            className="absolute left-1 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-petrol shadow-lg backdrop-blur-sm transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0 sm:left-2 sm:h-10 sm:w-10"
+            className="absolute max-lg:hidden left-1 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-petrol shadow-lg backdrop-blur-sm transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0 sm:left-2 sm:h-10 sm:w-10"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -84,7 +84,7 @@ export function CategoryRowCarousel({ children }: { children: ReactNode }) {
             onClick={() => emblaApi?.scrollNext()}
             disabled={!canScrollNext}
             aria-label="Следующие подкатегории"
-            className="absolute right-1 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-petrol shadow-lg backdrop-blur-sm transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0 sm:right-2 sm:h-10 sm:w-10"
+            className="absolute max-lg:hidden right-1 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-petrol shadow-lg backdrop-blur-sm transition hover:border-lime hover:text-lime disabled:pointer-events-none disabled:opacity-0 sm:right-2 sm:h-10 sm:w-10"
           >
             <ChevronRight className="h-5 w-5" />
           </button>

@@ -60,7 +60,7 @@ export function ProductGallery({
           <button
             type="button"
             onClick={scrollPrev}
-            className="absolute left-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg sm:left-4 sm:h-10 sm:w-10"
+            className="absolute max-lg:hidden left-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg sm:left-4 sm:h-10 sm:w-10"
             aria-label="Предыдущее фото"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -68,7 +68,7 @@ export function ProductGallery({
           <button
             type="button"
             onClick={scrollNext}
-            className="absolute right-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg sm:right-4 sm:h-10 sm:w-10"
+            className="absolute max-lg:hidden right-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-petrol shadow-lg sm:right-4 sm:h-10 sm:w-10"
             aria-label="Следующее фото"
           >
             <ChevronRight className="h-5 w-5" />
