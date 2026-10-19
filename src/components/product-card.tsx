@@ -79,7 +79,7 @@ export function ProductCard({ product, compact = false, mini = false }: { produc
               "relative overflow-hidden bg-white",
               compact
                 ? mini
-                  ? "aspect-[2/1] rounded-[8px] sm:rounded-[10px] lg:aspect-auto lg:min-h-0 lg:flex-1"
+                  ? "aspect-square rounded-[8px] sm:aspect-[2/1] sm:rounded-[10px] lg:aspect-auto lg:min-h-0 lg:flex-1"
                   : "aspect-square rounded-[12px] sm:rounded-[16px]"
                 : "aspect-square rounded-[12px] sm:rounded-[22px]",
             )}
